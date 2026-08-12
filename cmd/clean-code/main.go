@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"clean-code/internal/architecture"
+	"clean-code/internal/approval"
 	"clean-code/internal/audit"
 	"clean-code/internal/benchmark"
 	"clean-code/internal/contracts"
@@ -290,9 +291,13 @@ func run(args []string, stdout, stderr io.Writer) int {
 		testsPath:=flags.String("test-attestations","","test attestations JSON")
 		reviewsPath:=flags.String("review-attestations","","review attestations JSON")
 		decisionsPath:=flags.String("decision-attestations","","decision attestations JSON")
+		approvalPath:=flags.String("approval-manifest","","signed approval manifest JSON")
+		signaturePath:=flags.String("approval-signature","","detached Ed25519 signature in base64")
+		publicKeyPath:=flags.String("trusted-public-key","","protected Ed25519 public key in base64")
 		if err:=flags.Parse(args[1:]);err!=nil{return 2}
-		if flags.NArg()!=0||*inputPath==""||*gatesPath==""||*requirementsPath==""||*changePath==""||*root==""||*repositoryID==""||*testsPath==""||*reviewsPath==""||*decisionsPath==""{fmt.Fprintln(stderr,"release-gate requires --input --policy-gates --requirements --change-set --root --repository --test-attestations --review-attestations --decision-attestations");return 2}
+		if flags.NArg()!=0||*inputPath==""||*gatesPath==""||*requirementsPath==""||*changePath==""||*root==""||*repositoryID==""||*testsPath==""||*reviewsPath==""||*decisionsPath==""||*approvalPath==""||*signaturePath==""||*publicKeyPath==""{fmt.Fprintln(stderr,"release-gate requires --input --policy-gates --requirements --change-set --root --repository --test-attestations --review-attestations --decision-attestations --approval-manifest --approval-signature --trusted-public-key");return 2}
 		binding,err:=releasecontract.Load(*inputPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		approvalManifest,err:=approval.Load(*approvalPath);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=approval.Verify(*approvalPath,*signaturePath,*publicKeyPath,approvalManifest);err!=nil{fmt.Fprintln(stderr,err);return 1}
 		gates,err:=releasecontract.LoadPolicyGates(*gatesPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
 		change,err:=releasecontract.LoadChangeSet(*changePath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
 		tests,err:=releasecontract.LoadAttestations(*testsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
@@ -304,7 +309,9 @@ func run(args []string, stdout, stderr io.Writer) int {
 		changeDigest,err:=releasecontract.Digest(*changePath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
 		testsDigest,_:=releasecontract.Digest(*testsPath);reviewsDigest,_:=releasecontract.Digest(*reviewsPath);decisionsDigest,_:=releasecontract.Digest(*decisionsPath)
 		if binding.PolicyRevision!=policyDigest||binding.RequirementDigest!=requirementDigest||binding.ChangeSetDigest!=changeDigest||binding.TestAttestationsDigest!=testsDigest||binding.ReviewAttestationsDigest!=reviewsDigest||binding.DecisionAttestationsDigest!=decisionsDigest{fmt.Fprintln(stderr,"trusted artifact digest does not match release binding");return 1}
-		actual:=repository.Revision(*root);if err:=binding.Validate(gates,change,attest,*repositoryID,actual,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1}
+		bindingDigest,_:=approval.Digest(*inputPath)
+		if approvalManifest.Repository!=*repositoryID||approvalManifest.FinalRevision!=binding.FinalRevision||approvalManifest.BindingDigest!=bindingDigest||approvalManifest.PolicyDigest!=policyDigest||approvalManifest.RequirementsDigest!=requirementDigest||approvalManifest.ChangeSetDigest!=changeDigest||approvalManifest.TestDigest!=testsDigest||approvalManifest.ReviewDigest!=reviewsDigest||approvalManifest.DecisionDigest!=decisionsDigest{fmt.Fprintln(stderr,"approval manifest does not match release evidence");return 1}
+		actual,err:=repository.CleanRevision(*root);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=binding.Validate(gates,change,attest,*repositoryID,actual,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1}
 		fmt.Fprintln(stdout,"PASS");return 0
 	case "slop":
 		flags := flag.NewFlagSet("slop", flag.ContinueOnError)
