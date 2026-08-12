@@ -98,3 +98,7 @@ The project will summarize and operationalize ideas in original language. Book r
 - Open before a public release: run a controlled held-out agent study; the included benchmark manifest validates scoring and makes no performance claim.
 
 See [the implementation plan](docs/plans/2026-08-12-001-feat-clean-code-system-plan.md).
+
+## Sloppiness assessment
+
+Run `clean-code slop .` for a deterministic, evidence-scored repair brief. The assessor never edits code and stops after one repair batch plus one verification pass. See [Sloppiness assessor](docs/sloppiness.md).

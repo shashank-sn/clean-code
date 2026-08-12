@@ -20,6 +20,7 @@ import (
 	"clean-code/internal/repository"
 	"clean-code/internal/review"
 	"clean-code/internal/runner"
+	"clean-code/internal/sloppiness"
 	"clean-code/internal/trace"
 	"clean-code/internal/verify"
 )
@@ -276,6 +277,42 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "slop":
+		flags := flag.NewFlagSet("slop", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		previousPath := flags.String("previous", "", "first-pass sloppiness report; supplying it makes this the final pass")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() > 1 {
+			fmt.Fprintln(stderr, "slop accepts at most one repository path")
+			return 2
+		}
+		root := "."
+		if flags.NArg() == 1 {
+			root = flags.Arg(0)
+		}
+		var previous *sloppiness.Report
+		if *previousPath != "" {
+			loaded, err := sloppiness.LoadFile(*previousPath)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			previous = &loaded
+		}
+		report, err := sloppiness.Assess(root, previous)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if code := writeJSON(stdout, stderr, report); code != 0 {
+			return code
+		}
+		if report.Cycle.Status != "DONE" {
+			return 1
+		}
+		return 0
 	case "benchmark":
 		flags := flag.NewFlagSet("benchmark", flag.ContinueOnError)
 		flags.SetOutput(stderr)
@@ -335,5 +372,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|benchmark|learn>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|slop|benchmark|learn>")
 }

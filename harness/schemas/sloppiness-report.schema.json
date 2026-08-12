@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.dev/schemas/sloppiness-report.schema.json",
+  "title": "Clean Code Sloppiness Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "root", "score", "interpretation", "source_lines", "source_files", "test_files", "dimensions", "findings", "remediation_cycle"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "root": {"type": "string", "minLength": 1},
+    "score": {"type": "integer", "minimum": 0, "maximum": 100},
+    "interpretation": {"type": "string", "minLength": 1},
+    "source_lines": {"type": "integer", "minimum": 0},
+    "source_files": {"type": "integer", "minimum": 0},
+    "test_files": {"type": "integer", "minimum": 0},
+    "dimensions": {"type": "array", "items": {"type": "object"}},
+    "findings": {"type": "array", "items": {"type": "object"}},
+    "remediation_cycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pass", "max_passes", "status", "next_action"],
+      "properties": {
+        "pass": {"type": "integer", "minimum": 1, "maximum": 2},
+        "max_passes": {"const": 2},
+        "status": {"enum": ["DONE", "REPAIR", "ESCALATE"]},
+        "persistent_findings": {"type": "array", "items": {"type": "string"}},
+        "next_action": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

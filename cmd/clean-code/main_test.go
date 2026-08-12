@@ -103,6 +103,7 @@ func TestRunRejectsExtraArguments(t *testing.T) {
 		{"trace", "extra"},
 		{"review", "extra"},
 		{"audit", "extra"},
+		{"slop", ".", "extra"},
 		{"benchmark", "extra"},
 		{"learn", "extra"},
 	}
@@ -256,5 +257,30 @@ func TestRunVerifyRejectsMissingTrustedPolicy(t *testing.T) {
 	code := run([]string{"verify", "--trusted-policy", root + "/missing.json", root}, &stdout, &stderr)
 	if code != 1 || !bytes.Contains(stderr.Bytes(), []byte("inspect trusted policy")) {
 		t.Fatalf("expected missing policy error, got %d: %s", code, stderr.String())
+	}
+}
+
+func TestRunSlopStopsAfterSecondPass(t *testing.T) {
+	root := t.TempDir()
+	for _, name := range []string{"a.go", "b.go", "c.go"} {
+		if err := os.WriteFile(filepath.Join(root, name), []byte("package sample\n// TODO unbounded\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var firstOut, firstErr bytes.Buffer
+	if code := run([]string{"slop", root}, &firstOut, &firstErr); code != 1 {
+		t.Fatalf("expected a repair result, got %d: %s", code, firstErr.String())
+	}
+	previous := filepath.Join(t.TempDir(), "first.json")
+	if err := os.WriteFile(previous, firstOut.Bytes(), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var secondOut, secondErr bytes.Buffer
+	if code := run([]string{"slop", "--previous", previous, root}, &secondOut, &secondErr); code != 1 {
+		t.Fatalf("expected escalation result, got %d: %s", code, secondErr.String())
+	}
+	if !bytes.Contains(secondOut.Bytes(), []byte(`"status": "ESCALATE"`)) ||
+		!bytes.Contains(secondOut.Bytes(), []byte("Stop rewriting")) {
+		t.Fatalf("expected bounded stop report: %s", secondOut.String())
 	}
 }
