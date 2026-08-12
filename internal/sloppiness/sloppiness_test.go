@@ -71,3 +71,61 @@ func TestLoadRejectsUnknownFieldsAndSchemas(t *testing.T) {
 		t.Fatal("expected old schema to fail")
 	}
 }
+
+func TestAssessRejectsOversizedSourceLine(t *testing.T) {
+	root := t.TempDir()
+	content := "package sample\n" + strings.Repeat("x", 1024*1024+1)
+	if err := os.WriteFile(filepath.Join(root, "large.go"), []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Assess(root, nil); err == nil {
+		t.Fatal("expected scanner failure instead of a false DONE report")
+	}
+}
+
+func TestAssessRejectsUnrelatedOrSecondPassReport(t *testing.T) {
+	firstRoot := t.TempDir()
+	for _, name := range []string{"a.go", "b.go", "c.go"} {
+		if err := os.WriteFile(filepath.Join(firstRoot, name), []byte("package sample\n// TODO remove\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first, err := Assess(firstRoot, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Assess(t.TempDir(), &first); err == nil {
+		t.Fatal("expected unrelated root to fail lineage validation")
+	}
+	second, err := Assess(firstRoot, &first)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Assess(firstRoot, &second); err == nil {
+		t.Fatal("expected pass-two input to be rejected")
+	}
+}
+
+func TestDebtMarkerInstructionConvergesOnlyByRemoval(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "a.go"), []byte("package sample\n// TODO ISSUE-123 still bounded\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	report, err := Assess(root, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Findings) != 1 || !strings.Contains(report.Findings[0].Instruction, "remove the marker") {
+		t.Fatalf("expected convergent removal instruction: %+v", report.Findings)
+	}
+	if err := os.WriteFile(filepath.Join(root, "a.go"), []byte("package sample\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	final, err := Assess(root, &report)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if final.Cycle.Status != "DONE" {
+		t.Fatalf("expected removal to converge: %+v", final.Cycle)
+	}
+}

@@ -4,9 +4,10 @@
   "title": "Clean Code Sloppiness Report",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "root", "score", "interpretation", "source_lines", "source_files", "test_files", "dimensions", "findings", "remediation_cycle"],
+  "required": ["schema_version", "assessment_id", "root", "score", "interpretation", "source_lines", "source_files", "test_files", "dimensions", "findings", "remediation_cycle"],
   "properties": {
     "schema_version": {"const": "1.0.0"},
+    "assessment_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "root": {"type": "string", "minLength": 1},
     "score": {"type": "integer", "minimum": 0, "maximum": 100},
     "interpretation": {"type": "string", "minLength": 1},
@@ -24,6 +25,7 @@
         "max_passes": {"const": 2},
         "status": {"enum": ["DONE", "REPAIR", "ESCALATE"]},
         "persistent_findings": {"type": "array", "items": {"type": "string"}},
+        "previous_assessment_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "next_action": {"type": "string", "minLength": 1}
       }
     }

@@ -36,6 +36,7 @@ var ignoredDirectories = map[string]bool{
 
 type Report struct {
 	SchemaVersion  string           `json:"schema_version"`
+	AssessmentID  string           `json:"assessment_id"`
 	Root           string           `json:"root"`
 	Score          int              `json:"score"`
 	Interpretation string           `json:"interpretation"`
@@ -64,6 +65,7 @@ type Finding struct {
 	Consequence  string `json:"consequence"`
 	Instruction  string `json:"instruction"`
 	Verification string `json:"verification"`
+	ConfirmationRequired bool `json:"confirmation_required,omitempty"`
 }
 
 type RemediationCycle struct {
@@ -72,6 +74,7 @@ type RemediationCycle struct {
 	Status             string   `json:"status"`
 	PersistentFindings []string `json:"persistent_findings,omitempty"`
 	NextAction         string   `json:"next_action"`
+	PreviousAssessmentID string `json:"previous_assessment_id,omitempty"`
 }
 
 type sourceFile struct {
@@ -88,6 +91,11 @@ func Assess(root string, previous *Report) (Report, error) {
 	absoluteRoot, err := filepath.Abs(root)
 	if err != nil {
 		return Report{}, fmt.Errorf("resolve root: %w", err)
+	}
+	if previous != nil {
+		if err := validatePrevious(absoluteRoot, *previous); err != nil {
+			return Report{}, err
+		}
 	}
 
 	files, err := collectFiles(absoluteRoot)
@@ -115,11 +123,12 @@ func Assess(root string, previous *Report) (Report, error) {
 	report.Findings = append(report.Findings, duplicateBlockFindings(files)...)
 	if report.SourceFiles >= 3 && report.TestFiles == 0 {
 		report.Findings = append(report.Findings, Finding{
-			Rule: "tests.absent", Dimension: "tests", Severity: "high", Path: ".",
+			Rule: "tests.unrecognized", Dimension: "tests", Severity: "low", Path: ".",
 			Evidence: fmt.Sprintf("%d source files and no recognized test files", report.SourceFiles),
-			Consequence: "Agents cannot prove behavior is preserved while changing the system.",
-			Instruction: "Add black-box tests for the highest-risk public behavior before restructuring production code.",
-			Verification: "Run the repository test command and rerun clean-code slop; at least one recognized test file must be present.",
+			Consequence: "The scanner found no external test files in its recognized conventions; inline or custom-harness evidence may still exist.",
+			Instruction: "Ask an independent reviewer to confirm the repository's test convention. If behavior lacks executable evidence, add a public-boundary test; otherwise record the located evidence.",
+			Verification: "Run the confirmed test procedure and rerun clean-code slop; preserve the independent confirmation with this report.",
+			ConfirmationRequired: true,
 		})
 	}
 
@@ -140,6 +149,11 @@ func Assess(root string, previous *Report) (Report, error) {
 	}
 	report.Score, report.Dimensions = score(report.Lines, report.Findings)
 	report.Cycle = cycle(previous, report.Findings)
+	previousID := ""
+	if previous != nil {
+		previousID = previous.AssessmentID
+	}
+	report.AssessmentID = assessmentID(report.Root, report.Findings, report.Cycle.Pass, previousID)
 	return report, nil
 }
 
@@ -191,7 +205,10 @@ func collectFiles(root string) ([]sourceFile, error) {
 		if err != nil {
 			return err
 		}
-		lines := scanLines(string(content))
+		lines, err := scanLines(string(content))
+		if err != nil {
+			return fmt.Errorf("scan %s: %w", path, err)
+		}
 		files = append(files, sourceFile{
 			path: path, relative: filepath.ToSlash(relative), lines: lines,
 			nonblank: countNonblank(lines), isTest: isTestPath(relative),
@@ -205,14 +222,17 @@ func collectFiles(root string) ([]sourceFile, error) {
 	return files, nil
 }
 
-func scanLines(content string) []string {
+func scanLines(content string) ([]string, error) {
 	scanner := bufio.NewScanner(strings.NewReader(content))
 	scanner.Buffer(make([]byte, 64*1024), 1024*1024)
 	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	return lines
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return lines, nil
 }
 
 func generated(content []byte) bool {
@@ -251,9 +271,10 @@ func largeFileFindings(files []sourceFile) []Finding {
 		findings = append(findings, Finding{
 			Rule: "responsibility.large-file", Dimension: "responsibility", Severity: "high", Path: file.relative, Line: 1,
 			Evidence: fmt.Sprintf("%d nonblank lines exceed the conservative 500-line review threshold", file.nonblank),
-			Consequence: "Unrelated reasons to change are likely coupled, increasing review and regression cost.",
-			Instruction: "Identify responsibilities that change for different reasons and extract one at a time without changing public behavior.",
-			Verification: "Run existing tests after each extraction, then rerun clean-code slop; document an exception if the file must remain large.",
+			Consequence: "The file exceeds the bounded review threshold; line count alone does not prove mixed responsibility.",
+			Instruction: "Ask an independent reviewer to map the file's reasons to change. Extract one responsibility only if that semantic review confirms coupling; otherwise record the confirmation.",
+			Verification: "Preserve the review decision, run affected tests after any extraction, and rerun clean-code slop.",
+			ConfirmationRequired: true,
 		})
 	}
 	return findings
@@ -273,8 +294,8 @@ func debtMarkerFindings(files []sourceFile) []Finding {
 					Rule: "intent.unbounded-debt-marker", Dimension: "intent", Severity: "low", Path: file.relative, Line: index + 1,
 					Evidence: fmt.Sprintf("%s marker: %s", marker, truncate(strings.TrimSpace(line), 120)),
 					Consequence: "The future change has no explicit owner, boundary, or completion evidence.",
-					Instruction: "Implement and remove the marker, or replace it with a tracked issue reference and a precise failure condition.",
-					Verification: "Rerun clean-code slop and confirm the marker is gone or points to a bounded tracked issue.",
+					Instruction: "Resolve the deferred work and remove the marker. Keep any tracking reference outside the source marker so this repair can converge.",
+					Verification: "Rerun clean-code slop and confirm the marker is absent.",
 				})
 				break
 			}
@@ -317,9 +338,10 @@ func duplicateBlockFindings(files []sourceFile) []Finding {
 			findings = append(findings, Finding{
 				Rule: "duplication.exact-block", Dimension: "duplication", Severity: "medium", Path: file.relative, Line: index + 1,
 				Evidence: fmt.Sprintf("6-line exact normalized block also appears at %s:%d", first.path, first.line),
-				Consequence: "A single policy change can require synchronized edits in multiple places.",
-				Instruction: "Name the shared policy and extract it behind the narrowest existing boundary; keep callers responsible for their distinct behavior.",
-				Verification: "Run focused tests for both call sites, then rerun clean-code slop and confirm the duplicate block is absent.",
+				Consequence: "The exact block has two locations; identical text alone does not prove shared policy or justify an abstraction.",
+				Instruction: "Ask an independent reviewer whether both blocks represent one policy and change for the same reason. Extract only when confirmed; otherwise record why duplication is incidental.",
+				Verification: "Preserve the review decision, run focused tests after any extraction, and rerun clean-code slop.",
+				ConfirmationRequired: true,
 			})
 		}
 	}
@@ -405,6 +427,7 @@ func cycle(previous *Report, findings []Finding) RemediationCycle {
 	}
 
 	result.Pass = MaxPasses
+	result.PreviousAssessmentID = previous.AssessmentID
 	previousFingerprints := make(map[string]bool)
 	for _, finding := range previous.Findings {
 		previousFingerprints[fingerprint(finding)] = true
@@ -417,6 +440,28 @@ func cycle(previous *Report, findings []Finding) RemediationCycle {
 	result.Status = "ESCALATE"
 	result.NextAction = "Stop rewriting. Give this report, the previous report, tests, and diff to an independent agent or human for a policy decision."
 	return result
+}
+
+func validatePrevious(root string, previous Report) error {
+	if filepath.Clean(previous.Root) != filepath.Clean(root) {
+		return fmt.Errorf("previous sloppiness report belongs to root %q, not %q", previous.Root, root)
+	}
+	if previous.Cycle.Pass != 1 || previous.Cycle.MaxPasses != MaxPasses || previous.Cycle.Status != "REPAIR" || previous.Cycle.PreviousAssessmentID != "" {
+		return fmt.Errorf("previous sloppiness report must be a first-pass REPAIR report")
+	}
+	if previous.AssessmentID == "" || previous.AssessmentID != assessmentID(previous.Root, previous.Findings, 1, "") {
+		return fmt.Errorf("previous sloppiness report has invalid assessment lineage")
+	}
+	return nil
+}
+
+func assessmentID(root string, findings []Finding, pass int, previousID string) string {
+	hash := sha256.New()
+	fmt.Fprintf(hash, "%s\n%d\n%s\n", filepath.Clean(root), pass, previousID)
+	for _, finding := range findings {
+		fmt.Fprintln(hash, fingerprint(finding))
+	}
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 func fingerprint(finding Finding) string {
