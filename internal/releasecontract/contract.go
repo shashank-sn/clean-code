@@ -35,14 +35,18 @@ type Binding struct {
 	ChangeSetDigest string `json:"change_set_digest"`
 	PolicyRevision string `json:"policy_revision"`
 	ChangedPaths []string `json:"changed_paths"`
-	Tests []Test `json:"tests"`
-	Reviews []Review `json:"reviews"`
-	Decisions []Decision `json:"decisions"`
+	TestAttestationsDigest string `json:"test_attestations_digest"`
+	ReviewAttestationsDigest string `json:"review_attestations_digest"`
+	DecisionAttestationsDigest string `json:"decision_attestations_digest"`
 	Exceptions []Exception `json:"exceptions,omitempty"`
 }
 
+type Attestations struct { Tests []Test `json:"tests,omitempty"`; Reviews []Review `json:"reviews,omitempty"`; Decisions []Decision `json:"decisions,omitempty"` }
+
 type Test struct {
 	ID string `json:"id"`
+	Repository string `json:"repository"`
+	RunID string `json:"run_id"`
 	RequirementIDs []string `json:"requirement_ids"`
 	Revision string `json:"revision"`
 	Status string `json:"status"`
@@ -54,6 +58,7 @@ type Test struct {
 
 type Review struct {
 	ID string `json:"id"`
+	Repository string `json:"repository"`
 	ReviewerRunID string `json:"reviewer_run_id"`
 	ReviewerContextID string `json:"reviewer_context_id"`
 	ChangeAuthorRunID string `json:"change_author_run_id"`
@@ -68,6 +73,11 @@ type Review struct {
 }
 
 type Decision struct {
+	Repository string `json:"repository"`
+	FinalRevision string `json:"final_revision"`
+	RequirementDigest string `json:"requirement_digest"`
+	ChangeSetDigest string `json:"change_set_digest"`
+	PolicyRevision string `json:"policy_revision"`
 	Kind string `json:"kind"`
 	Authority string `json:"authority"`
 	Subject string `json:"subject"`
@@ -84,14 +94,16 @@ type Exception struct {
 }
 
 func Load(path string) (Binding,error){var value Binding;err:=loadStrict(path,&value);return value,err}
+func LoadAttestations(path string)(Attestations,error){var value Attestations;err:=loadStrict(path,&value);return value,err}
 func LoadPolicyGates(path string)(PolicyGates,error){var value PolicyGates;err:=loadStrict(path,&value);return value,err}
 func LoadChangeSet(path string)(ChangeSet,error){var value ChangeSet;err:=loadStrict(path,&value);return value,err}
 func Digest(path string)(string,error){body,err:=os.ReadFile(path);if err!=nil{return "",err};sum:=sha256.Sum256(body);return hex.EncodeToString(sum[:]),nil}
 func loadStrict(path string,target any)error{file,err:=os.Open(path);if err!=nil{return err};defer file.Close();decoder:=json.NewDecoder(file);decoder.DisallowUnknownFields();if err:=decoder.Decode(target);err!=nil{return err};var trailing any;if err:=decoder.Decode(&trailing);!errors.Is(err,io.EOF){if err==nil{return errors.New("unexpected trailing JSON value")};return err};return nil}
 
-func (b Binding) Validate(gates PolicyGates, change ChangeSet, actualRevision string, now time.Time) error {
-	required := []string{b.SchemaVersion,b.Repository,b.BaseRevision,b.FinalRevision,b.RequirementDigest,b.ChangeSetDigest,b.PolicyRevision}
+func (b Binding) Validate(gates PolicyGates, change ChangeSet, attest Attestations, canonicalRepository, actualRevision string, now time.Time) error {
+	required := []string{b.SchemaVersion,b.Repository,b.BaseRevision,b.FinalRevision,b.RequirementDigest,b.ChangeSetDigest,b.PolicyRevision,b.TestAttestationsDigest,b.ReviewAttestationsDigest,b.DecisionAttestationsDigest}
 	for _, value := range required { if strings.TrimSpace(value)=="" { return errors.New("release binding metadata is incomplete") } }
+	if b.Repository!=canonicalRepository{return errors.New("canonical repository does not match release binding")}
 	if b.SchemaVersion!="1.0.0" { return errors.New("unsupported release binding schema") }
 	if change.SchemaVersion!="1.0.0"||change.BaseRevision!=b.BaseRevision||change.FinalRevision!=b.FinalRevision||!sameSet(change.ChangedPaths,b.ChangedPaths){return errors.New("change set does not match release binding")}
 	if actualRevision!=b.FinalRevision{return errors.New("repository revision does not match release binding")}
@@ -101,7 +113,9 @@ func (b Binding) Validate(gates PolicyGates, change ChangeSet, actualRevision st
 	if err:=uniqueRequired("decision",gates.RequiredDecisions); err!=nil{return err}
 
 	tests:=map[string]Test{}
-	for _, test:=range b.Tests {
+	for _, test:=range attest.Tests {
+		if test.Repository!=canonicalRepository{return errors.New("test attestation belongs to another repository")}
+		if test.RunID==""{return errors.New("test attestation lacks immutable run id")}
 		if test.ID=="" || tests[test.ID].ID!="" { return errors.New("test evidence has an empty or duplicate id") }
 		tests[test.ID]=test
 		if !oneOf(test.Status,"PLANNED","NOT_RUN","NOT_AVAILABLE","INAPPLICABLE","FAIL","PASS"){return fmt.Errorf("test %q has unknown status",test.ID)}
@@ -111,7 +125,8 @@ func (b Binding) Validate(gates PolicyGates, change ChangeSet, actualRevision st
 	for _, id:=range gates.RequiredTests { if tests[id].Status!="PASS"{return fmt.Errorf("required test %q is not an executed pass",id)} }
 
 	reviews:=map[string]Review{}
-	for _, review:=range b.Reviews {
+	for _, review:=range attest.Reviews {
+		if review.Repository!=canonicalRepository{return errors.New("review attestation belongs to another repository")}
 		if review.ID==""||reviews[review.ID].ID!=""{return errors.New("review evidence has an empty or duplicate id")}
 		reviews[review.ID]=review
 		if !oneOf(review.Status,"PASS","FAIL","INCOMPLETE"){return fmt.Errorf("review %q has unknown status",review.ID)}
@@ -122,7 +137,8 @@ func (b Binding) Validate(gates PolicyGates, change ChangeSet, actualRevision st
 	for _, id:=range gates.RequiredReviews { if reviews[id].Status!="PASS"{return fmt.Errorf("required review %q is incomplete",id)} }
 
 	decisions:=map[string]Decision{}
-	for _, decision:=range b.Decisions {
+	for _, decision:=range attest.Decisions {
+		if decision.Repository!=canonicalRepository||decision.FinalRevision!=b.FinalRevision||decision.RequirementDigest!=b.RequirementDigest||decision.ChangeSetDigest!=b.ChangeSetDigest||decision.PolicyRevision!=b.PolicyRevision{return errors.New("decision attestation covers another contract")}
 		if !oneOf(decision.Kind,"INTENT","POLICY","RELEASE_RISK")||decisions[decision.Kind].Kind!=""||decision.Authority==""||decision.Subject==""||!oneOf(decision.Status,"APPROVED","REJECTED"){return errors.New("human decision is invalid or duplicated")}
 		decisions[decision.Kind]=decision
 	}
