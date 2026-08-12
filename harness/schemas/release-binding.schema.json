@@ -33,7 +33,7 @@
         "artifact_digest": {"type": "string"},
         "actor_run_id": {"type": "string"},
         "started_at": {"type": "string", "format": "date-time"},
-        "finished_at": {"type": "string", "format": "date-time"},
+        "finished_at": {"type": "string", "format": "date-time"}
       }
     },
     "review": {
