@@ -102,3 +102,7 @@ See [the implementation plan](docs/plans/2026-08-12-001-feat-clean-code-system-p
 ## Sloppiness assessment
 
 Run `clean-code slop .` for a deterministic, evidence-scored repair brief. The assessor never edits code and stops after one repair batch plus one verification pass. See [Sloppiness assessor](docs/sloppiness.md).
+
+## Organization and release evidence
+
+Use `policy-pack`, `history`, `incremental`, and `study` for organization policy resolution, immutable evidence trends, conservative changed-scope selection, and preregistered held-out evaluation. See [roadmap verification](docs/roadmap-verification.md).
