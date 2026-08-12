@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"clean-code/internal/study"
 	"clean-code/internal/history"
 	"clean-code/internal/incremental"
+	"clean-code/internal/study"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
@@ -47,16 +47,33 @@ func TestHistoryReceiptSchemaRejectsMalformedNestedContent(t *testing.T){
 		`{"schema_version":"1.0.0","digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","content":{"repository":"o/r","revision":"r","created_at":"t","signals":[1]}}`,
 	}
 	for _,body:=range cases{if err:=validateJSON(t,schema,[]byte(body));err==nil{t.Fatalf("expected rejection: %s",body)}}
-	if _,err:=history.ParseReceipt([]byte(cases[0]));err!=nil{t.Fatalf("runtime parse should remain structural; Build enforces completeness: %v",err)}
+	if _,err:=history.ParseReceipt([]byte(cases[0]));err==nil{t.Fatal("runtime must reject omitted signals")}
 }
-func TestIncrementalSchemaRejectsMalformedNestedValues(t *testing.T){
-	schema:=compileSchema(t,filepath.Join("..","harness/schemas/incremental-input.schema.json"))
+func TestHistoryReceiptSchemaParseAndBuildFixture(t *testing.T){
+	content:=history.Content{Repository:"o/r",Revision:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",CreatedAt:"2026-08-12T00:00:00Z",Signals:[]history.Signal{{Name:"coverage",Value:80,Scale:"percent",Provenance:"ci"}}}
+	body,err:=json.Marshal(history.Receipt{SchemaVersion:"1.0.0",Digest:history.Digest(content),Content:content});if err!=nil{t.Fatal(err)}
+	if err:=validateJSON(t,compileSchema(t,filepath.Join("..","harness/schemas/history-receipt.schema.json")),body);err!=nil{t.Fatal(err)}
+	receipt,err:=history.ParseReceipt(body);if err!=nil{t.Fatal(err)}
+	report,err:=history.Build([]history.Receipt{receipt});if err!=nil{t.Fatal(err)}
+	if len(report.Trends)!=1||len(report.Trends[0].Points)!=1{t.Fatalf("unexpected report: %+v",report)}
+}
+func TestIncrementalSchemasRejectMalformedNestedValues(t *testing.T){
+	paths:=[]string{filepath.Join("..","harness/schemas/incremental-input.schema.json"),filepath.Join("..","harness/schemas/impact-map.schema.json")}
 	cases:=[]string{
 		`{"schema_version":"1.0.0","changed_paths":[1],"trusted_checks":["x"],"rules":[],"release":false}`,
 		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":[1],"rules":[],"release":false}`,
-		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":[""],"rules":[],"release":false}`,
+		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":["   "],"rules":[],"release":false}`,
+		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":["x"],"rules":[{"check_id":"   ","patterns":["*.go"]}],"release":false}`,
+		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":["x"],"rules":[{"check_id":"x","patterns":[" \t "]}],"release":false}`,
 		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":["x"],"rules":[{}],"release":false}`,
 	}
-	for _,body:=range cases{if err:=validateJSON(t,schema,[]byte(body));err==nil{t.Fatalf("expected rejection: %s",body)}}
-	if _,err:=incremental.Select(incremental.Input{SchemaVersion:"1.0.0",TrustedChecks:[]string{""}});err==nil{t.Fatal("runtime must reject blank trusted id")}
+	for _,path:=range paths{schema:=compileSchema(t,path);for _,body:=range cases{if err:=validateJSON(t,schema,[]byte(body));err==nil{t.Fatalf("%s expected rejection: %s",path,body)}}}
+}
+func TestIncrementalSchemasLoadAndSelectFixture(t *testing.T){
+	body:=[]byte(`{"schema_version":"1.0.0","changed_paths":["internal/a.go"],"trusted_checks":["go-test"],"rules":[{"check_id":"go-test","patterns":["internal/*.go"]}],"release":false}`)
+	for _,name:=range []string{"incremental-input.schema.json","impact-map.schema.json"}{if err:=validateJSON(t,compileSchema(t,filepath.Join("..","harness/schemas",name)),body);err!=nil{t.Fatal(err)}}
+	path:=filepath.Join(t.TempDir(),"input.json");if err:=os.WriteFile(path,body,0600);err!=nil{t.Fatal(err)}
+	input,err:=incremental.Load(path);if err!=nil{t.Fatal(err)}
+	selection,err:=incremental.Select(input);if err!=nil{t.Fatal(err)}
+	if selection.Mode!="incremental"||len(selection.Checks)!=1||selection.Checks[0]!="go-test"{t.Fatalf("unexpected selection: %+v",selection)}
 }
