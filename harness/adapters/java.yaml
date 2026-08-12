@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "id": "java",
+  "kind": "language",
+  "trust": "builtin",
+  "language": "java",
+  "markers": ["pom.xml", "build.gradle", "build.gradle.kts"],
+  "commands": [
+    {"id": "maven-test", "category": "unit-test", "executable": "mvn", "args": ["test"], "timeout_seconds": 600, "when_any": ["pom.xml"]},
+    {"id": "gradle-test", "category": "unit-test", "executable": "gradle", "args": ["test"], "timeout_seconds": 600, "when_any": ["build.gradle", "build.gradle.kts"]}
+  ]
+}

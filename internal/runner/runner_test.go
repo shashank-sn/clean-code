@@ -190,6 +190,81 @@ func TestRunRejectsStaleArtifact(t *testing.T) {
 	}
 }
 
+func TestRunKeepsOptionalStaleArtifactAdvisory(t *testing.T) {
+	runner := newTestRunner(t)
+	if err := os.WriteFile(filepath.Join(runner.Root, "result.json"), []byte(`{"old":true}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	spec := helperCommand("pass")
+	spec.Artifacts = []contracts.ArtifactSpec{{Path: "result.json", Format: "json", Fresh: true}}
+	result := runner.Run(context.Background(), spec, "abc123")
+
+	if result.Status != contracts.StatusPass || !containsSubstring(result.Evidence.Warnings, "was not refreshed") {
+		t.Fatalf("expected optional stale artifact warning, got %+v", result)
+	}
+}
+
+func TestRunRecordsPassingBaselineComparison(t *testing.T) {
+	runner := newTestRunner(t)
+	path := filepath.Join(runner.Root, "coverage.lcov")
+	spec := helperCommand("write-lcov")
+	spec.Env["CLEAN_CODE_TEST_ARTIFACT"] = path
+	spec.Artifacts = []contracts.ArtifactSpec{{Path: "coverage.lcov", Format: "lcov", Required: true, Fresh: true}}
+	spec.Baselines = []contracts.BaselineSpec{{
+		Artifact: "coverage.lcov", Metric: "lines.percent", Direction: "higher", Value: 75, Required: true,
+	}}
+	result := runner.Run(context.Background(), spec, "abc123")
+
+	if result.Status != contracts.StatusPass || len(result.Evidence.Baselines) != 1 || result.Evidence.Baselines[0].Regressed {
+		t.Fatalf("expected passing baseline, got %+v", result)
+	}
+}
+
+func TestRunFailsRequiredBaselineRegression(t *testing.T) {
+	runner := newTestRunner(t)
+	path := filepath.Join(runner.Root, "coverage.lcov")
+	spec := helperCommand("write-lcov")
+	spec.Env["CLEAN_CODE_TEST_ARTIFACT"] = path
+	spec.Artifacts = []contracts.ArtifactSpec{{Path: "coverage.lcov", Format: "lcov", Required: true}}
+	spec.Baselines = []contracts.BaselineSpec{{
+		Artifact: "coverage.lcov", Metric: "lines.percent", Direction: "higher", Value: 90, Tolerance: 5, Required: true,
+	}}
+	result := runner.Run(context.Background(), spec, "abc123")
+
+	if result.Status != contracts.StatusFail || len(result.Evidence.Baselines) != 1 || !result.Evidence.Baselines[0].Regressed {
+		t.Fatalf("expected required regression failure, got %+v", result)
+	}
+}
+
+func TestRunKeepsOptionalBaselineRegressionAdvisory(t *testing.T) {
+	runner := newTestRunner(t)
+	path := filepath.Join(runner.Root, "coverage.lcov")
+	spec := helperCommand("write-lcov")
+	spec.Env["CLEAN_CODE_TEST_ARTIFACT"] = path
+	spec.Artifacts = []contracts.ArtifactSpec{{Path: "coverage.lcov", Format: "lcov", Required: true}}
+	spec.Baselines = []contracts.BaselineSpec{{
+		Artifact: "coverage.lcov", Metric: "lines.percent", Direction: "higher", Value: 90,
+	}}
+	result := runner.Run(context.Background(), spec, "abc123")
+
+	if result.Status != contracts.StatusPass || len(result.Evidence.Warnings) == 0 {
+		t.Fatalf("expected advisory regression, got %+v", result)
+	}
+}
+
+func TestRunRejectsOversizedArtifact(t *testing.T) {
+	runner := newTestRunner(t)
+	path := filepath.Join(runner.Root, "result.json")
+	spec := helperCommand("write-json")
+	spec.Env["CLEAN_CODE_TEST_ARTIFACT"] = path
+	spec.Artifacts = []contracts.ArtifactSpec{{Path: "result.json", Format: "json", Required: true, MaxBytes: 4}}
+	result := runner.Run(context.Background(), spec, "abc123")
+
+	if result.Status != contracts.StatusFail || !containsSubstring(result.Evidence.Warnings, "exceeds 4 bytes") {
+		t.Fatalf("expected oversized artifact failure, got %+v", result)
+	}
+}
+
 func newTestRunner(t *testing.T) Runner {
 	t.Helper()
 	return Runner{Root: t.TempDir(), MaxOutputBytes: 1024}
@@ -217,6 +292,15 @@ func contains(values []string, target string) bool {
 	return false
 }
 
+func containsSubstring(values []string, target string) bool {
+	for _, value := range values {
+		if strings.Contains(value, target) {
+			return true
+		}
+	}
+	return false
+}
+
 func TestRunnerHelperProcess(t *testing.T) {
 	if os.Getenv("CLEAN_CODE_TEST_HELPER") != "1" {
 		return
@@ -235,6 +319,10 @@ func TestRunnerHelperProcess(t *testing.T) {
 		fmt.Print(strings.Repeat("x", 4096))
 	case "write-json":
 		if err := os.WriteFile(os.Getenv("CLEAN_CODE_TEST_ARTIFACT"), []byte(`{"ok":true}`), 0o600); err != nil {
+			os.Exit(4)
+		}
+	case "write-lcov":
+		if err := os.WriteFile(os.Getenv("CLEAN_CODE_TEST_ARTIFACT"), []byte("LF:10\nLH:8\n"), 0o600); err != nil {
 			os.Exit(4)
 		}
 	default:

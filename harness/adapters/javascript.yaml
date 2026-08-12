@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "id": "javascript-typescript",
+  "kind": "language",
+  "trust": "builtin",
+  "language": "javascript-typescript",
+  "markers": ["package.json", "deno.json", "bun.lock", "bun.lockb"],
+  "commands": [
+    {"id": "npm-test", "category": "unit-test", "executable": "npm", "args": ["test"], "timeout_seconds": 300, "when_any": ["package.json"]},
+    {"id": "deno-test", "category": "unit-test", "executable": "deno", "args": ["test"], "timeout_seconds": 300, "when_any": ["deno.json"]},
+    {"id": "bun-test", "category": "unit-test", "executable": "bun", "args": ["test"], "timeout_seconds": 300, "when_any": ["bun.lock", "bun.lockb"]}
+  ]
+}

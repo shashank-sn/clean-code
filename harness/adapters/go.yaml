@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "id": "go",
+  "kind": "language",
+  "trust": "builtin",
+  "language": "go",
+  "markers": ["go.mod"],
+  "commands": [
+    {"id": "go-test", "category": "unit-test", "executable": "go", "args": ["test", "./..."], "timeout_seconds": 300}
+  ]
+}

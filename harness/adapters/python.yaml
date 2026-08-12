@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "id": "python",
+  "kind": "language",
+  "trust": "builtin",
+  "language": "python",
+  "markers": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+  "commands": [
+    {"id": "python-test", "category": "unit-test", "executable": "python", "args": ["-m", "pytest"], "timeout_seconds": 300}
+  ]
+}

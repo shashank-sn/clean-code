@@ -69,6 +69,7 @@ func changedFields(a, b contracts.CommandSpec) []string {
 		{"environment", !maps.Equal(a.Env, b.Env)},
 		{"shell", a.Shell != b.Shell},
 		{"artifacts", !slices.Equal(a.Artifacts, b.Artifacts)},
+		{"baselines", !slices.Equal(a.Baselines, b.Baselines)},
 	}
 	for _, check := range checks {
 		if check.changed {

@@ -91,3 +91,18 @@ func TestCommandSpecRejectsUnsafeArtifact(t *testing.T) {
 		t.Fatal("expected escaping artifact to be rejected")
 	}
 }
+
+func TestCommandSpecValidatesBaselineReference(t *testing.T) {
+	spec := CommandSpec{
+		ID: "coverage", Executable: "tool",
+		Artifacts: []ArtifactSpec{{Path: "coverage.lcov", Format: "lcov"}},
+		Baselines: []BaselineSpec{{Artifact: "coverage.lcov", Metric: "lines.percent", Direction: "higher", Value: 80}},
+	}
+	if err := spec.Validate(); err != nil {
+		t.Fatalf("expected valid baseline, got %v", err)
+	}
+	spec.Baselines[0].Artifact = "other.lcov"
+	if err := spec.Validate(); err == nil {
+		t.Fatal("expected undeclared baseline artifact to fail")
+	}
+}

@@ -22,6 +22,24 @@
       "properties": {
         "summary": { "type": "string" },
         "artifacts": { "type": "array", "items": { "type": "string" } },
+        "baselines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["artifact", "metric", "scope", "current", "baseline", "direction", "regressed"],
+            "properties": {
+              "artifact": { "type": "string", "minLength": 1 },
+              "metric": { "type": "string", "minLength": 1 },
+              "scope": { "enum": ["repository", "changed"] },
+              "current": { "type": "number" },
+              "baseline": { "type": "number" },
+              "direction": { "enum": ["higher", "lower"] },
+              "tolerance": { "type": "number", "minimum": 0 },
+              "regressed": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
         "warnings": { "type": "array", "items": { "type": "string" } }
       },
       "additionalProperties": false

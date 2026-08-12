@@ -27,9 +27,27 @@
               "required": ["path"],
               "properties": {
                 "path": { "type": "string", "minLength": 1 },
-                "format": { "enum": ["file", "json"] },
+                "format": { "enum": ["file", "json", "xml", "sarif", "lcov", "text"] },
                 "required": { "type": "boolean" },
-                "fresh": { "type": "boolean" }
+                "fresh": { "type": "boolean" },
+                "max_bytes": { "type": "integer", "minimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "baselines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["artifact", "metric", "direction", "value"],
+              "properties": {
+                "artifact": { "type": "string", "minLength": 1 },
+                "metric": { "type": "string", "minLength": 1 },
+                "scope": { "enum": ["repository", "changed"] },
+                "direction": { "enum": ["higher", "lower"] },
+                "value": { "type": "number" },
+                "tolerance": { "type": "number", "minimum": 0 },
+                "required": { "type": "boolean" }
               },
               "additionalProperties": false
             }

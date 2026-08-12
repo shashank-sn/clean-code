@@ -17,7 +17,7 @@ go run ./cmd/clean-code verify --allow-repository-policy --output /path/to/evide
 go run ./cmd/clean-code verify --trusted-policy /path/to/approved.clean-code.json /path/to/repository
 ```
 
-Discovery reads project metadata and an optional `.clean-code.json`. It never runs the repository's commands. Verification requires a trusted policy file or an explicit repository-policy approval, then runs each executable with its argument array, timeout, output limit, working directory, exit-code rules, redaction, and optional artifact checks. It writes a normalized JSON report tied to the current commit and dirty-worktree state. See `harness/config/example.clean-code.json` for the current configuration shape.
+Discovery reads project metadata and an optional `.clean-code.json`. It never runs the repository's commands. Built-in adapters for JavaScript/TypeScript, Python, Java, Go, and Rust return read-only command proposals. Verification requires a trusted policy file or an explicit repository-policy approval, then runs each executable with its argument array, timeout, output limit, working directory, exit-code rules, redaction, and optional artifact checks. JSON, XML, SARIF, LCOV, text, and opaque artifacts can feed separate baseline comparisons. The normalized report stays tied to the current commit and dirty-worktree state. See `harness/config/example.clean-code.json` for the configuration shape and [adapter authoring](docs/adapter-authoring.md) for the extension contract.
 
 ## Skill map
 
@@ -73,6 +73,7 @@ The project will summarize and operationalize ideas in original language. Book r
 - Done: local Git repository, plugin manifest, product scope, and implementation plan.
 - Done: `clean-setup`, `clean-discover`, generic host fallback, evidence schemas, initial doctrine rules, and tested Go CLI.
 - Done: `clean-verify`, deterministic command execution, trusted-policy drift blocking, required artifact checks, and protected verification bundles.
-- Next: add language adapters and independent unit, acceptance, mutation, architecture, and UI/QA test tracks.
+- Done: maintained language discovery adapters, bounded artifact parsers, and metric-specific baseline regression gates.
+- Next: add independent unit, acceptance, mutation, architecture, and UI/QA test tracks.
 
 See [the implementation plan](docs/plans/2026-08-12-001-feat-clean-code-system-plan.md).

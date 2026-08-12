@@ -3,6 +3,7 @@ package contracts
 import (
 	"errors"
 	"fmt"
+	"math"
 	"path/filepath"
 	"strings"
 	"time"
@@ -24,10 +25,27 @@ var validStatuses = map[Status]struct{}{
 	StatusNotConfigured: {}, StatusNotRun: {}, StatusError: {},
 }
 
+var validArtifactFormats = map[string]bool{
+	"": true, "file": true, "json": true, "xml": true,
+	"sarif": true, "lcov": true, "text": true,
+}
+
 type Evidence struct {
-	Summary   string   `json:"summary,omitempty"`
-	Artifacts []string `json:"artifacts,omitempty"`
-	Warnings  []string `json:"warnings,omitempty"`
+	Summary   string               `json:"summary,omitempty"`
+	Artifacts []string             `json:"artifacts,omitempty"`
+	Baselines []BaselineComparison `json:"baselines,omitempty"`
+	Warnings  []string             `json:"warnings,omitempty"`
+}
+
+type BaselineComparison struct {
+	Artifact  string  `json:"artifact"`
+	Metric    string  `json:"metric"`
+	Scope     string  `json:"scope"`
+	Current   float64 `json:"current"`
+	Baseline  float64 `json:"baseline"`
+	Direction string  `json:"direction"`
+	Tolerance float64 `json:"tolerance,omitempty"`
+	Regressed bool    `json:"regressed"`
 }
 
 type CheckResult struct {
@@ -66,6 +84,26 @@ func (result CheckResult) Validate() error {
 	if result.DurationMS < 0 {
 		return errors.New("duration_ms cannot be negative")
 	}
+	for index, baseline := range result.Evidence.Baselines {
+		if strings.TrimSpace(baseline.Artifact) == "" {
+			return fmt.Errorf("evidence baseline %d artifact is required", index)
+		}
+		if strings.TrimSpace(baseline.Metric) == "" {
+			return fmt.Errorf("evidence baseline %d metric is required", index)
+		}
+		if baseline.Direction != "higher" && baseline.Direction != "lower" {
+			return fmt.Errorf("evidence baseline %d direction must be higher or lower", index)
+		}
+		if baseline.Scope != "repository" && baseline.Scope != "changed" {
+			return fmt.Errorf("evidence baseline %d scope must be repository or changed", index)
+		}
+		if baseline.Tolerance < 0 {
+			return fmt.Errorf("evidence baseline %d tolerance cannot be negative", index)
+		}
+		if !finite(baseline.Current) || !finite(baseline.Baseline) || !finite(baseline.Tolerance) {
+			return fmt.Errorf("evidence baseline %d values must be finite", index)
+		}
+	}
 	return nil
 }
 
@@ -82,6 +120,7 @@ type CommandSpec struct {
 	Env              map[string]string `json:"environment,omitempty"`
 	Shell            bool              `json:"shell,omitempty"`
 	Artifacts        []ArtifactSpec    `json:"artifacts,omitempty"`
+	Baselines        []BaselineSpec    `json:"baselines,omitempty"`
 }
 
 type ArtifactSpec struct {
@@ -89,6 +128,17 @@ type ArtifactSpec struct {
 	Format   string `json:"format,omitempty"`
 	Required bool   `json:"required,omitempty"`
 	Fresh    bool   `json:"fresh,omitempty"`
+	MaxBytes int64  `json:"max_bytes,omitempty"`
+}
+
+type BaselineSpec struct {
+	Artifact  string  `json:"artifact"`
+	Metric    string  `json:"metric"`
+	Scope     string  `json:"scope,omitempty"`
+	Direction string  `json:"direction"`
+	Value     float64 `json:"value"`
+	Tolerance float64 `json:"tolerance,omitempty"`
+	Required  bool    `json:"required,omitempty"`
 }
 
 func (spec CommandSpec) Validate() error {
@@ -133,15 +183,42 @@ func (spec CommandSpec) Validate() error {
 		if clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
 			return fmt.Errorf("artifact %d path escapes repository root", index)
 		}
-		if artifact.Format != "" && artifact.Format != "file" && artifact.Format != "json" {
+		if !validArtifactFormats[artifact.Format] {
 			return fmt.Errorf("artifact %d has unsupported format %q", index, artifact.Format)
+		}
+		if artifact.MaxBytes < 0 {
+			return fmt.Errorf("artifact %d max_bytes cannot be negative", index)
 		}
 		if seenArtifacts[clean] {
 			return fmt.Errorf("artifact %d duplicates path %q", index, artifact.Path)
 		}
 		seenArtifacts[clean] = true
 	}
+	for index, baseline := range spec.Baselines {
+		if !seenArtifacts[filepath.Clean(baseline.Artifact)] {
+			return fmt.Errorf("baseline %d references undeclared artifact %q", index, baseline.Artifact)
+		}
+		if strings.TrimSpace(baseline.Metric) == "" {
+			return fmt.Errorf("baseline %d metric is required", index)
+		}
+		if baseline.Scope != "" && baseline.Scope != "repository" && baseline.Scope != "changed" {
+			return fmt.Errorf("baseline %d scope must be repository or changed", index)
+		}
+		if baseline.Direction != "higher" && baseline.Direction != "lower" {
+			return fmt.Errorf("baseline %d direction must be higher or lower", index)
+		}
+		if baseline.Tolerance < 0 {
+			return fmt.Errorf("baseline %d tolerance cannot be negative", index)
+		}
+		if !finite(baseline.Value) || !finite(baseline.Tolerance) {
+			return fmt.Errorf("baseline %d values must be finite", index)
+		}
+	}
 	return nil
+}
+
+func finite(value float64) bool {
+	return !math.IsNaN(value) && !math.IsInf(value, 0)
 }
 
 func protectedEnvironmentKey(key string) bool {

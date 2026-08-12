@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -17,10 +17,12 @@ import (
 	"time"
 
 	"clean-code/internal/contracts"
+	"clean-code/internal/providers"
 )
 
 const defaultTimeout = 5 * time.Minute
 const defaultMaxOutputBytes = 1 << 20
+const defaultMaxArtifactBytes int64 = 10 << 20
 
 var redactedAssignment = regexp.MustCompile(`(?i)(token|secret|password|api[_-]?key|credential)(\s*[:=]\s*)[^\s,;]+`)
 
@@ -72,11 +74,12 @@ func (runner Runner) Run(parent context.Context, spec contracts.CommandSpec, rev
 	}
 	artifactBefore := make(map[string]artifactState, len(spec.Artifacts))
 	for _, artifact := range spec.Artifacts {
-		state, stateErr := inspectArtifact(runner.Root, artifact.Path, false)
+		state, stateErr := inspectArtifact(runner.Root, artifact.Path, artifact.MaxBytes)
 		if stateErr != nil {
 			result.Evidence.Summary = stateErr.Error()
 			return finish()
 		}
+		state.content = nil
 		artifactBefore[artifact.Path] = state
 	}
 	executable, err := exec.LookPath(spec.Executable)
@@ -135,7 +138,7 @@ func (runner Runner) Run(parent context.Context, spec contracts.CommandSpec, rev
 	}
 	if err == nil || (command.ProcessState != nil && exitAllowed(exitCode, spec.AllowedExitCodes)) {
 		result.Status = contracts.StatusPass
-		if artifactErr := validateArtifacts(runner.Root, spec.Artifacts, artifactBefore, &result); artifactErr != nil {
+		if artifactErr := validateArtifacts(runner.Root, spec.Artifacts, spec.Baselines, artifactBefore, &result); artifactErr != nil {
 			result.Status = contracts.StatusFail
 			result.Evidence.Warnings = append(result.Evidence.Warnings, artifactErr.Error())
 		}
@@ -157,13 +160,16 @@ func (runner Runner) Run(parent context.Context, spec contracts.CommandSpec, rev
 }
 
 type artifactState struct {
-	exists bool
-	hash   [sha256.Size]byte
+	exists  bool
+	hash    [sha256.Size]byte
+	content []byte
 }
 
-func validateArtifacts(root string, specs []contracts.ArtifactSpec, before map[string]artifactState, result *contracts.CheckResult) error {
+func validateArtifacts(root string, specs []contracts.ArtifactSpec, baselines []contracts.BaselineSpec, before map[string]artifactState, result *contracts.CheckResult) error {
+	afterByPath := make(map[string]artifactState, len(specs))
+	parsedByPath := make(map[string]providers.ParsedArtifact, len(specs))
 	for _, spec := range specs {
-		after, err := inspectArtifact(root, spec.Path, spec.Format == "json")
+		after, err := inspectArtifact(root, spec.Path, spec.MaxBytes)
 		if err != nil {
 			if spec.Required {
 				return err
@@ -177,18 +183,77 @@ func validateArtifacts(root string, specs []contracts.ArtifactSpec, before map[s
 			}
 			continue
 		}
+		format := spec.Format
+		if format == "" {
+			format = "file"
+		}
+		parsed, err := providers.Parse(format, after.content)
+		if err != nil {
+			parseError := fmt.Errorf("artifact %q: %w", spec.Path, err)
+			if spec.Required {
+				return parseError
+			}
+			result.Evidence.Warnings = append(result.Evidence.Warnings, parseError.Error())
+			continue
+		}
 		if spec.Fresh {
 			previous := before[spec.Path]
 			if previous.exists && previous.hash == after.hash {
-				return fmt.Errorf("artifact %q was not refreshed", spec.Path)
+				message := fmt.Sprintf("artifact %q was not refreshed", spec.Path)
+				if spec.Required {
+					return errors.New(message)
+				}
+				result.Evidence.Warnings = append(result.Evidence.Warnings, message)
 			}
 		}
+		cleanPath := filepath.Clean(spec.Path)
+		afterByPath[cleanPath] = after
+		parsedByPath[cleanPath] = parsed
 		result.Evidence.Artifacts = append(result.Evidence.Artifacts, filepath.ToSlash(spec.Path))
+	}
+	for _, baseline := range baselines {
+		path := filepath.Clean(baseline.Artifact)
+		_, ok := afterByPath[path]
+		if !ok {
+			if baseline.Required {
+				return fmt.Errorf("baseline metric %q has no valid artifact", baseline.Metric)
+			}
+			result.Evidence.Warnings = append(result.Evidence.Warnings, fmt.Sprintf("baseline metric %q was not evaluated", baseline.Metric))
+			continue
+		}
+		parsed := parsedByPath[path]
+		current, ok := parsed.Metrics[baseline.Metric]
+		if !ok {
+			message := fmt.Sprintf("baseline metric %q is missing from artifact %q", baseline.Metric, baseline.Artifact)
+			if baseline.Required {
+				return errors.New(message)
+			}
+			result.Evidence.Warnings = append(result.Evidence.Warnings, message)
+			continue
+		}
+		regressed := baseline.Direction == "higher" && current < baseline.Value-baseline.Tolerance
+		regressed = regressed || baseline.Direction == "lower" && current > baseline.Value+baseline.Tolerance
+		comparison := contracts.BaselineComparison{
+			Artifact: baseline.Artifact, Metric: baseline.Metric, Scope: baseline.Scope,
+			Current: current, Baseline: baseline.Value,
+			Direction: baseline.Direction, Tolerance: baseline.Tolerance, Regressed: regressed,
+		}
+		if comparison.Scope == "" {
+			comparison.Scope = "repository"
+		}
+		result.Evidence.Baselines = append(result.Evidence.Baselines, comparison)
+		if regressed {
+			message := fmt.Sprintf("metric %q regressed from %.4g to %.4g", baseline.Metric, baseline.Value, current)
+			if baseline.Required {
+				return errors.New(message)
+			}
+			result.Evidence.Warnings = append(result.Evidence.Warnings, message)
+		}
 	}
 	return nil
 }
 
-func inspectArtifact(root, relative string, validateJSON bool) (artifactState, error) {
+func inspectArtifact(root, relative string, maxBytes int64) (artifactState, error) {
 	absoluteRoot, err := filepath.Abs(root)
 	if err != nil {
 		return artifactState{}, fmt.Errorf("artifact %q: resolve repository root: %w", relative, err)
@@ -220,14 +285,26 @@ func inspectArtifact(root, relative string, validateJSON bool) (artifactState, e
 	if err != nil || resolvedRelative == ".." || strings.HasPrefix(resolvedRelative, ".."+string(filepath.Separator)) {
 		return artifactState{}, fmt.Errorf("artifact %q resolves outside repository root", relative)
 	}
-	content, err := os.ReadFile(resolved)
+	limit := maxBytes
+	if limit <= 0 {
+		limit = defaultMaxArtifactBytes
+	}
+	if info.Size() > limit {
+		return artifactState{}, fmt.Errorf("artifact %q exceeds %d bytes", relative, limit)
+	}
+	file, err := os.Open(resolved)
+	if err != nil {
+		return artifactState{}, fmt.Errorf("artifact %q: open: %w", relative, err)
+	}
+	defer file.Close()
+	content, err := io.ReadAll(io.LimitReader(file, limit+1))
 	if err != nil {
 		return artifactState{}, fmt.Errorf("artifact %q: read: %w", relative, err)
 	}
-	if validateJSON && !json.Valid(content) {
-		return artifactState{}, fmt.Errorf("artifact %q is not valid JSON", relative)
+	if int64(len(content)) > limit {
+		return artifactState{}, fmt.Errorf("artifact %q exceeds %d bytes", relative, limit)
 	}
-	return artifactState{exists: true, hash: sha256.Sum256(content)}, nil
+	return artifactState{exists: true, hash: sha256.Sum256(content), content: content}, nil
 }
 
 func resolveWorkingDirectory(root, configured string) (string, error) {

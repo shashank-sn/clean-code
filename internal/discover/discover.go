@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"clean-code/harness/adapters"
 	"clean-code/internal/contracts"
 )
 
@@ -20,6 +21,7 @@ type Result struct {
 	ConfigurationFound       bool                    `json:"configuration_found"`
 	GenericCommandsSupported bool                    `json:"generic_commands_supported"`
 	Commands                 []contracts.CommandSpec `json:"commands,omitempty"`
+	Adapters                 []adapters.Match        `json:"adapters,omitempty"`
 }
 
 type configuration struct {
@@ -77,6 +79,10 @@ func Inspect(root string) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
+	adapterMatches, err := adapters.Detect(projectFiles)
+	if err != nil {
+		return Result{}, fmt.Errorf("detect adapters: %w", err)
+	}
 
 	return Result{
 		Root:                     absolute,
@@ -85,6 +91,7 @@ func Inspect(root string) (Result, error) {
 		ConfigurationFound:       regularFile(configPath),
 		GenericCommandsSupported: true,
 		Commands:                 commands,
+		Adapters:                 adapterMatches,
 	}, nil
 }
 

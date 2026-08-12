@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "id": "rust",
+  "kind": "language",
+  "trust": "builtin",
+  "language": "rust",
+  "markers": ["Cargo.toml"],
+  "commands": [
+    {"id": "rust-test", "category": "unit-test", "executable": "cargo", "args": ["test"], "timeout_seconds": 600}
+  ]
+}

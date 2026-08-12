@@ -42,6 +42,25 @@ func TestInspectPolyglotRepository(t *testing.T) {
 			t.Fatalf("expected %v, got %v", want, result.Languages)
 		}
 	}
+	if len(result.Adapters) != 3 {
+		t.Fatalf("expected three adapter matches, got %+v", result.Adapters)
+	}
+}
+
+func TestInspectProposesButDoesNotConfigureAdapterCommands(t *testing.T) {
+	root := t.TempDir()
+	writeFixture(t, root, "go.mod", "module sample\n")
+
+	result, err := Inspect(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Commands) != 0 {
+		t.Fatalf("discovered commands must not gain execution authority: %+v", result.Commands)
+	}
+	if len(result.Adapters) != 1 || len(result.Adapters[0].ProposedCommands) != 1 || result.Adapters[0].ProposedCommands[0].ID != "go-test" {
+		t.Fatalf("expected a read-only Go proposal, got %+v", result.Adapters)
+	}
 }
 
 func TestInspectSkipsDependencyDirectories(t *testing.T) {
