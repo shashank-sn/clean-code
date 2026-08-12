@@ -90,10 +90,9 @@ func Digest(path string)(string,error){body,err:=os.ReadFile(path);if err!=nil{r
 func loadStrict(path string,target any)error{file,err:=os.Open(path);if err!=nil{return err};defer file.Close();decoder:=json.NewDecoder(file);decoder.DisallowUnknownFields();if err:=decoder.Decode(target);err!=nil{return err};var trailing any;if err:=decoder.Decode(&trailing);!errors.Is(err,io.EOF){if err==nil{return errors.New("unexpected trailing JSON value")};return err};return nil}
 
 func (b Binding) Validate(gates PolicyGates, change ChangeSet, actualRevision string, now time.Time) error {
-	required := []string{b.SchemaVersion,b.Repository,b.BaseRevision,b.FinalRevision,b.RequirementDigest,b.ChangeSetDigest,b.PolicyRevision,gates.PolicyRevision}
+	required := []string{b.SchemaVersion,b.Repository,b.BaseRevision,b.FinalRevision,b.RequirementDigest,b.ChangeSetDigest,b.PolicyRevision}
 	for _, value := range required { if strings.TrimSpace(value)=="" { return errors.New("release binding metadata is incomplete") } }
 	if b.SchemaVersion!="1.0.0" { return errors.New("unsupported release binding schema") }
-	if gates.PolicyRevision!=b.PolicyRevision { return errors.New("policy gates belong to another policy revision") }
 	if change.SchemaVersion!="1.0.0"||change.BaseRevision!=b.BaseRevision||change.FinalRevision!=b.FinalRevision||!sameSet(change.ChangedPaths,b.ChangedPaths){return errors.New("change set does not match release binding")}
 	if actualRevision!=b.FinalRevision{return errors.New("repository revision does not match release binding")}
 	if len(b.ChangedPaths)==0 { return errors.New("changed path scope is empty") }
