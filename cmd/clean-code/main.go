@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"clean-code/internal/architecture"
 	"clean-code/internal/audit"
@@ -18,6 +19,7 @@ import (
 	"clean-code/internal/hosts"
 	"clean-code/internal/policy"
 	"clean-code/internal/repository"
+	"clean-code/internal/releasecontract"
 	"clean-code/internal/review"
 	"clean-code/internal/runner"
 	"clean-code/internal/sloppiness"
@@ -277,6 +279,20 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "release-gate":
+		flags := flag.NewFlagSet("release-gate", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		inputPath := flags.String("input", "", "revision-bound release contract JSON file")
+		if err := flags.Parse(args[1:]); err != nil { return 2 }
+		if flags.NArg() != 0 || *inputPath == "" {
+			fmt.Fprintln(stderr, "release-gate requires --input")
+			return 2
+		}
+		binding, err := releasecontract.Load(*inputPath)
+		if err != nil { fmt.Fprintln(stderr, err); return 1 }
+		if err := binding.Validate(time.Now().UTC()); err != nil { fmt.Fprintln(stderr, err); return 1 }
+		fmt.Fprintln(stdout, "PASS")
+		return 0
 	case "slop":
 		flags := flag.NewFlagSet("slop", flag.ContinueOnError)
 		flags.SetOutput(stderr)
@@ -372,5 +388,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|slop|benchmark|learn>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|release-gate|slop|benchmark|learn>")
 }
