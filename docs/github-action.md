@@ -12,7 +12,10 @@ steps:
     with:
       repository: .
       policy: .clean-code.json
+      policy-sha256: ${{ vars.CLEAN_CODE_POLICY_SHA256 }}
       evidence: .clean-code/evidence
 ```
 
-The action builds the CLI from the pinned action revision. It requires an approved policy path and does not enable repository-policy trust implicitly. A policy mismatch, required non-`PASS` result, incomplete report, or artifact error fails the step.
+Store `CLEAN_CODE_POLICY_SHA256` as a repository, organization, or protected-environment Actions variable controlled by policy owners. Do not keep the approved digest in a pull-request-editable file.
+
+The action builds the CLI from the pinned action revision. Before any repository command runs, it computes the policy SHA-256 digest and rejects drift. Inputs cross the expression boundary through environment variables and are quoted as data. A digest mismatch, invalid input path, required non-`PASS` result, incomplete report, or artifact error fails the step.

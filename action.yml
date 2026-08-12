@@ -8,6 +8,9 @@ inputs:
   policy:
     description: Approved Clean Code policy file.
     required: true
+  policy-sha256:
+    description: SHA-256 digest approved outside the pull request.
+    required: true
   evidence:
     description: Directory for the protected verification bundle.
     required: false
@@ -22,6 +25,28 @@ runs:
       shell: bash
       run: go build -trimpath -o "${RUNNER_TEMP}/clean-code" ./cmd/clean-code
       working-directory: ${{ github.action_path }}
+    - name: Verify approved policy digest
+      shell: bash
+      env:
+        CLEAN_CODE_POLICY: ${{ inputs.policy }}
+        CLEAN_CODE_POLICY_SHA256: ${{ inputs.policy-sha256 }}
+      run: |
+        set -euo pipefail
+        if [[ ! "${CLEAN_CODE_POLICY_SHA256}" =~ ^[0-9a-fA-F]{64}$ ]]; then
+          echo "policy-sha256 must be a 64-character SHA-256 digest" >&2
+          exit 1
+        fi
+        actual_policy_sha256="$(shasum -a 256 -- "${CLEAN_CODE_POLICY}" | awk '{print $1}')"
+        if [[ "${actual_policy_sha256}" != "${CLEAN_CODE_POLICY_SHA256,,}" ]]; then
+          echo "trusted policy digest mismatch; refusing to execute repository commands" >&2
+          exit 1
+        fi
     - name: Verify repository
       shell: bash
-      run: '"${RUNNER_TEMP}/clean-code" verify --trusted-policy "${{ inputs.policy }}" --output "${{ inputs.evidence }}" "${{ inputs.repository }}"'
+      env:
+        CLEAN_CODE_REPOSITORY: ${{ inputs.repository }}
+        CLEAN_CODE_POLICY: ${{ inputs.policy }}
+        CLEAN_CODE_EVIDENCE: ${{ inputs.evidence }}
+      run: |
+        set -euo pipefail
+        "${RUNNER_TEMP}/clean-code" verify --trusted-policy "${CLEAN_CODE_POLICY}" --output "${CLEAN_CODE_EVIDENCE}" "${CLEAN_CODE_REPOSITORY}"

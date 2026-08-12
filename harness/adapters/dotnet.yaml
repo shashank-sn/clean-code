@@ -4,7 +4,7 @@
   "kind": "language",
   "trust": "builtin",
   "language": "dotnet",
-  "markers": ["global.json"],
+  "markers": ["global.json", "*.sln", "*.slnx", "*.csproj", "*.fsproj", "*.vbproj"],
   "commands": [
     {"id": "dotnet-test", "category": "unit-test", "executable": "dotnet", "args": ["test"], "timeout_seconds": 600}
   ]

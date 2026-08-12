@@ -95,6 +95,15 @@ func Inspect(root string) (Result, error) {
 	}, nil
 }
 
+func dotnetProjectExtension(extension string) bool {
+	switch strings.ToLower(extension) {
+	case ".sln", ".slnx", ".csproj", ".fsproj", ".vbproj":
+		return true
+	default:
+		return false
+	}
+}
+
 func regularFile(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && info.Mode().IsRegular()
@@ -132,6 +141,9 @@ func scanProjectFiles(root string) (map[string]bool, []string, error) {
 			return nil
 		}
 		language, ok := markers[entry.Name()]
+		if !ok && dotnetProjectExtension(filepath.Ext(entry.Name())) {
+			language, ok = "dotnet", true
+		}
 		if !ok {
 			return nil
 		}

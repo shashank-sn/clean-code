@@ -59,3 +59,16 @@ func TestDetectKeepsMonorepoProjectsSeparate(t *testing.T) {
 		t.Fatalf("monorepo command ids must be unique: %+v", matches)
 	}
 }
+
+func TestDetectMatchesDotnetProjectWithoutGlobalJSON(t *testing.T) {
+	matches, err := Detect([]string{"src/Product/Product.csproj"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(matches) != 1 || matches[0].ID != "dotnet" || matches[0].Root != "src/Product" {
+		t.Fatalf("expected wildcard .NET project match, got %+v", matches)
+	}
+	if len(matches[0].ProposedCommands) != 1 || matches[0].ProposedCommands[0].WorkingDir != "src/Product" {
+		t.Fatalf("expected scoped dotnet test proposal, got %+v", matches[0])
+	}
+}

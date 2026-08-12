@@ -30,4 +30,39 @@ jobs:
         with:
           repository: tests/fixtures/action
           policy: tests/fixtures/action/.clean-code.json
+          policy-sha256: 92e2ad03efaab8bb049cfd098fb25e5e8aa999c43047ac76d9854a63ba963fbe
           evidence: ${{ runner.temp }}/clean-code-evidence
+
+  reject-policy-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: verify
+        continue-on-error: true
+        uses: ./
+        with:
+          repository: tests/fixtures/action
+          policy: tests/fixtures/action/.clean-code.json
+          policy-sha256: 0000000000000000000000000000000000000000000000000000000000000000
+          evidence: ${{ runner.temp }}/clean-code-evidence
+      - name: Require rejection before command execution
+        shell: bash
+        run: test "${{ steps.verify.outcome }}" = "failure"
+
+  quote-hostile-input:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: verify
+        continue-on-error: true
+        uses: ./
+        with:
+          repository: 'tests/fixtures/action"; touch "$RUNNER_TEMP/clean-code-pwned"; #'
+          policy: tests/fixtures/action/.clean-code.json
+          policy-sha256: 92e2ad03efaab8bb049cfd098fb25e5e8aa999c43047ac76d9854a63ba963fbe
+          evidence: ${{ runner.temp }}/clean-code-evidence
+      - name: Require data-only handling
+        shell: bash
+        run: |
+          test "${{ steps.verify.outcome }}" = "failure"
+          test ! -e "${RUNNER_TEMP}/clean-code-pwned"
