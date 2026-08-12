@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"clean-code/internal/study"
+	"clean-code/internal/history"
+	"clean-code/internal/incremental"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
@@ -35,4 +37,26 @@ func TestCheckedStudyFixturesValidateAndParseRuntime(t *testing.T){
 	manifest,err:=study.ParseManifest(manifestBody);if err!=nil{t.Fatal(err)};results,err:=study.ParseResults(resultBody);if err!=nil{t.Fatal(err)}
 	if results.ManifestDigest!=study.Digest(manifestBody){t.Fatal("fixture manifest digest mismatch")}
 	report,err:=study.Score(manifest,results);if err!=nil{t.Fatal(err)};if report.ClaimAllowed{t.Fatal("empty raw results must remain valid but claim-blocked")}
+}
+
+func TestHistoryReceiptSchemaRejectsMalformedNestedContent(t *testing.T){
+	schema:=compileSchema(t,filepath.Join("..","harness/schemas/history-receipt.schema.json"))
+	cases:=[]string{
+		`{"schema_version":"1.0.0","digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","content":{}}`,
+		`{"schema_version":"1.0.0","digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","content":{"repository":1,"revision":"r","created_at":"t","signals":[]}}`,
+		`{"schema_version":"1.0.0","digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","content":{"repository":"o/r","revision":"r","created_at":"t","signals":[1]}}`,
+	}
+	for _,body:=range cases{if err:=validateJSON(t,schema,[]byte(body));err==nil{t.Fatalf("expected rejection: %s",body)}}
+	if _,err:=history.ParseReceipt([]byte(cases[0]));err!=nil{t.Fatalf("runtime parse should remain structural; Build enforces completeness: %v",err)}
+}
+func TestIncrementalSchemaRejectsMalformedNestedValues(t *testing.T){
+	schema:=compileSchema(t,filepath.Join("..","harness/schemas/incremental-input.schema.json"))
+	cases:=[]string{
+		`{"schema_version":"1.0.0","changed_paths":[1],"trusted_checks":["x"],"rules":[],"release":false}`,
+		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":[1],"rules":[],"release":false}`,
+		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":[""],"rules":[],"release":false}`,
+		`{"schema_version":"1.0.0","changed_paths":[],"trusted_checks":["x"],"rules":[{}],"release":false}`,
+	}
+	for _,body:=range cases{if err:=validateJSON(t,schema,[]byte(body));err==nil{t.Fatalf("expected rejection: %s",body)}}
+	if _,err:=incremental.Select(incremental.Input{SchemaVersion:"1.0.0",TrustedChecks:[]string{""}});err==nil{t.Fatal("runtime must reject blank trusted id")}
 }
