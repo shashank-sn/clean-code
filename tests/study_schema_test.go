@@ -1,7 +1,6 @@
 package tests_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -14,8 +13,9 @@ import (
 func compileSchema(t *testing.T, path string) *jsonschema.Schema {
 	t.Helper()
 	body,err:=os.ReadFile(path);if err!=nil{t.Fatal(err)}
+	var resource any;if err:=json.Unmarshal(body,&resource);err!=nil{t.Fatal(err)}
 	compiler:=jsonschema.NewCompiler()
-	if err:=compiler.AddResource("schema.json",bytes.NewReader(body));err!=nil{t.Fatal(err)}
+	if err:=compiler.AddResource("schema.json",resource);err!=nil{t.Fatal(err)}
 	schema,err:=compiler.Compile("schema.json");if err!=nil{t.Fatal(err)}
 	return schema
 }
