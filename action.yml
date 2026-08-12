@@ -1,0 +1,27 @@
+name: Clean Code Verify
+description: Build the Clean Code CLI and verify a repository against an approved policy.
+inputs:
+  repository:
+    description: Repository directory to verify.
+    required: false
+    default: .
+  policy:
+    description: Approved Clean Code policy file.
+    required: true
+  evidence:
+    description: Directory for the protected verification bundle.
+    required: false
+    default: .clean-code/evidence
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: ${{ github.action_path }}/go.mod
+    - name: Build Clean Code
+      shell: bash
+      run: go build -trimpath -o "${RUNNER_TEMP}/clean-code" ./cmd/clean-code
+      working-directory: ${{ github.action_path }}
+    - name: Verify repository
+      shell: bash
+      run: '"${RUNNER_TEMP}/clean-code" verify --trusted-policy "${{ inputs.policy }}" --output "${{ inputs.evidence }}" "${{ inputs.repository }}"'

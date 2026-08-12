@@ -1,0 +1,33 @@
+name: action-smoke
+
+on:
+  push:
+    paths:
+      - action.yml
+      - .github/workflows/action-smoke.yml
+      - tests/fixtures/action/**
+      - cmd/**
+      - internal/**
+      - go.mod
+  pull_request:
+    paths:
+      - action.yml
+      - .github/workflows/action-smoke.yml
+      - tests/fixtures/action/**
+      - cmd/**
+      - internal/**
+      - go.mod
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          repository: tests/fixtures/action
+          policy: tests/fixtures/action/.clean-code.json
+          evidence: ${{ runner.temp }}/clean-code-evidence
