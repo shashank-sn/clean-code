@@ -296,21 +296,14 @@ func run(args []string, stdout, stderr io.Writer) int {
 		publicKeyPath:=flags.String("trusted-public-key","","protected Ed25519 public key in base64")
 		if err:=flags.Parse(args[1:]);err!=nil{return 2}
 		if flags.NArg()!=0||*inputPath==""||*gatesPath==""||*requirementsPath==""||*changePath==""||*root==""||*repositoryID==""||*testsPath==""||*reviewsPath==""||*decisionsPath==""||*approvalPath==""||*signaturePath==""||*publicKeyPath==""{fmt.Fprintln(stderr,"release-gate requires --input --policy-gates --requirements --change-set --root --repository --test-attestations --review-attestations --decision-attestations --approval-manifest --approval-signature --trusted-public-key");return 2}
-		binding,err:=releasecontract.Load(*inputPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		approvalManifest,err:=approval.Load(*approvalPath);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=approval.Verify(*approvalPath,*signaturePath,*publicKeyPath,approvalManifest);err!=nil{fmt.Fprintln(stderr,err);return 1}
-		gates,err:=releasecontract.LoadPolicyGates(*gatesPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		change,err:=releasecontract.LoadChangeSet(*changePath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		tests,err:=releasecontract.LoadAttestations(*testsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		reviews,err:=releasecontract.LoadAttestations(*reviewsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		decisions,err:=releasecontract.LoadAttestations(*decisionsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		attest:=releasecontract.Attestations{Tests:tests.Tests,Reviews:reviews.Reviews,Decisions:decisions.Decisions}
-		policyDigest,err:=releasecontract.Digest(*gatesPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		requirementDigest,err:=releasecontract.Digest(*requirementsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		changeDigest,err:=releasecontract.Digest(*changePath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		testsDigest,_:=releasecontract.Digest(*testsPath);reviewsDigest,_:=releasecontract.Digest(*reviewsPath);decisionsDigest,_:=releasecontract.Digest(*decisionsPath)
+		paths:=[]string{*inputPath,*approvalPath,*signaturePath,*publicKeyPath,*gatesPath,*requirementsPath,*changePath,*testsPath,*reviewsPath,*decisionsPath};snap:=make([][]byte,len(paths));for i,p:=range paths{snap[i],err=os.ReadFile(p);if err!=nil{fmt.Fprintln(stderr,err);return 1}}
+		binding,err:=releasecontract.ParseBinding(snap[0]);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		approvalManifest,err:=approval.Parse(snap[1]);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=approval.VerifyBytes(snap[1],snap[2],snap[3]);err!=nil{fmt.Fprintln(stderr,err);return 1}
+		gates,err:=releasecontract.ParsePolicyGates(snap[4]);if err!=nil{fmt.Fprintln(stderr,err);return 1};change,err:=releasecontract.ParseChangeSet(snap[6]);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		tests,err:=releasecontract.ParseAttestations(snap[7]);if err!=nil{fmt.Fprintln(stderr,err);return 1};reviews,err:=releasecontract.ParseAttestations(snap[8]);if err!=nil{fmt.Fprintln(stderr,err);return 1};decisions,err:=releasecontract.ParseAttestations(snap[9]);if err!=nil{fmt.Fprintln(stderr,err);return 1};attest:=releasecontract.Attestations{Tests:tests.Tests,Reviews:reviews.Reviews,Decisions:decisions.Decisions}
+		policyDigest:=releasecontract.DigestBytes(snap[4]);requirementDigest:=releasecontract.DigestBytes(snap[5]);changeDigest:=releasecontract.DigestBytes(snap[6]);testsDigest:=releasecontract.DigestBytes(snap[7]);reviewsDigest:=releasecontract.DigestBytes(snap[8]);decisionsDigest:=releasecontract.DigestBytes(snap[9])
 		if binding.PolicyRevision!=policyDigest||binding.RequirementDigest!=requirementDigest||binding.ChangeSetDigest!=changeDigest||binding.TestAttestationsDigest!=testsDigest||binding.ReviewAttestationsDigest!=reviewsDigest||binding.DecisionAttestationsDigest!=decisionsDigest{fmt.Fprintln(stderr,"trusted artifact digest does not match release binding");return 1}
-		bindingDigest,_:=approval.Digest(*inputPath)
-		if approvalManifest.Repository!=*repositoryID||approvalManifest.FinalRevision!=binding.FinalRevision||approvalManifest.BindingDigest!=bindingDigest||approvalManifest.PolicyDigest!=policyDigest||approvalManifest.RequirementsDigest!=requirementDigest||approvalManifest.ChangeSetDigest!=changeDigest||approvalManifest.TestDigest!=testsDigest||approvalManifest.ReviewDigest!=reviewsDigest||approvalManifest.DecisionDigest!=decisionsDigest{fmt.Fprintln(stderr,"approval manifest does not match release evidence");return 1}
+		bindingDigest:=approval.DigestBytes(snap[0]);if approvalManifest.Repository!=*repositoryID||approvalManifest.FinalRevision!=binding.FinalRevision||approvalManifest.BindingDigest!=bindingDigest||approvalManifest.PolicyDigest!=policyDigest||approvalManifest.RequirementsDigest!=requirementDigest||approvalManifest.ChangeSetDigest!=changeDigest||approvalManifest.TestDigest!=testsDigest||approvalManifest.ReviewDigest!=reviewsDigest||approvalManifest.DecisionDigest!=decisionsDigest{fmt.Fprintln(stderr,"approval manifest does not match release evidence");return 1}
 		actual,err:=repository.CleanRevision(*root);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=binding.Validate(gates,change,attest,*repositoryID,actual,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1}
 		fmt.Fprintln(stdout,"PASS");return 0
 	case "slop":
