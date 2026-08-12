@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0.0",
+  "edges": [
+    {"from": "core/api/usecase.go", "to": "delivery/http.go"}
+  ]
+}

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"clean-code/internal/architecture"
 	"clean-code/internal/contracts"
 	"clean-code/internal/discover"
 	"clean-code/internal/evidence"
@@ -146,6 +147,36 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "architecture":
+		flags := flag.NewFlagSet("architecture", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		policyPath := flags.String("policy", "", "architecture policy JSON file")
+		graphPath := flags.String("graph", "", "dependency graph JSON file")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *policyPath == "" || *graphPath == "" {
+			fmt.Fprintln(stderr, "architecture requires --policy and --graph")
+			return 2
+		}
+		policy, err := architecture.LoadPolicy(*policyPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		graph, err := architecture.LoadGraph(*graphPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		report := architecture.Evaluate(policy, graph)
+		if code := writeJSON(stdout, stderr, report); code != 0 {
+			return code
+		}
+		if report.Status != "PASS" {
+			return 1
+		}
+		return 0
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n", args[0])
 		printUsage(stderr)
@@ -164,5 +195,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture>")
 }

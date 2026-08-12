@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Design"
+  short_description: "Define boundaries and dependency rules"
+  default_prompt: "Use $clean-design to define the use-case boundaries and architecture policy for this change."

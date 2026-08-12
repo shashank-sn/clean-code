@@ -58,12 +58,39 @@ func TestRunRejectsExtraArguments(t *testing.T) {
 		{"setup", "extra"},
 		{"discover", ".", "extra"},
 		{"verify", ".", "extra"},
+		{"architecture", "extra"},
 	}
 	for _, args := range tests {
 		var stdout, stderr bytes.Buffer
 		if code := run(args, &stdout, &stderr); code != 2 {
 			t.Errorf("expected usage error for %v, got %d", args, code)
 		}
+	}
+}
+
+func TestRunArchitectureReportsViolation(t *testing.T) {
+	root := t.TempDir()
+	policy := root + "/policy.json"
+	graph := root + "/graph.json"
+	if err := os.WriteFile(policy, []byte(`{
+  "schema_version":"1.0.0",
+  "components":[
+    {"id":"core","paths":["core/**"]},
+    {"id":"delivery","paths":["delivery/**"],"may_depend_on":["core"]}
+  ]
+}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(graph, []byte(`{
+  "schema_version":"1.0.0",
+  "edges":[{"from":"core/usecase.go","to":"delivery/http.go"}]
+}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"architecture", "--policy", policy, "--graph", graph}, &stdout, &stderr)
+	if code != 1 || !bytes.Contains(stdout.Bytes(), []byte(`"kind": "forbidden-dependency"`)) {
+		t.Fatalf("expected architecture failure, got %d: %s\n%s", code, stderr.String(), stdout.String())
 	}
 }
 

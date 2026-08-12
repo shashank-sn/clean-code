@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "components": [
+    {"id": "core", "paths": ["core/**"], "public": ["core/api/**"]},
+    {"id": "delivery", "paths": ["delivery/**"], "may_depend_on": ["core"]}
+  ]
+}

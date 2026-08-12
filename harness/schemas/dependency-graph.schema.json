@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/dependency-graph.schema.json",
+  "title": "Clean Code dependency graph",
+  "type": "object",
+  "required": ["schema_version", "edges"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": { "type": "string", "minLength": 1 },
+          "to": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
