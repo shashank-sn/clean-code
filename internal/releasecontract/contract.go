@@ -1,6 +1,8 @@
 package releasecontract
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +19,13 @@ type PolicyGates struct {
 	RequiredDecisions []string `json:"required_decisions"`
 }
 
+type ChangeSet struct {
+	SchemaVersion string `json:"schema_version"`
+	BaseRevision string `json:"base_revision"`
+	FinalRevision string `json:"final_revision"`
+	ChangedPaths []string `json:"changed_paths"`
+}
+
 type Binding struct {
 	SchemaVersion string `json:"schema_version"`
 	Repository string `json:"repository"`
@@ -25,7 +34,6 @@ type Binding struct {
 	RequirementDigest string `json:"requirement_digest"`
 	ChangeSetDigest string `json:"change_set_digest"`
 	PolicyRevision string `json:"policy_revision"`
-	PolicyGates PolicyGates `json:"policy_gates"`
 	ChangedPaths []string `json:"changed_paths"`
 	Tests []Test `json:"tests"`
 	Reviews []Review `json:"reviews"`
@@ -75,28 +83,23 @@ type Exception struct {
 	ExpiresAt time.Time `json:"expires_at"`
 }
 
-func Load(path string) (Binding, error) {
-	file, err := os.Open(path)
-	if err != nil { return Binding{}, err }
-	defer file.Close()
-	var binding Binding
-	decoder := json.NewDecoder(file)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&binding); err != nil { return Binding{}, err }
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) { if err == nil { return Binding{}, errors.New("unexpected trailing JSON value") }; return Binding{}, err }
-	return binding, nil
-}
+func Load(path string) (Binding,error){var value Binding;err:=loadStrict(path,&value);return value,err}
+func LoadPolicyGates(path string)(PolicyGates,error){var value PolicyGates;err:=loadStrict(path,&value);return value,err}
+func LoadChangeSet(path string)(ChangeSet,error){var value ChangeSet;err:=loadStrict(path,&value);return value,err}
+func Digest(path string)(string,error){body,err:=os.ReadFile(path);if err!=nil{return "",err};sum:=sha256.Sum256(body);return hex.EncodeToString(sum[:]),nil}
+func loadStrict(path string,target any)error{file,err:=os.Open(path);if err!=nil{return err};defer file.Close();decoder:=json.NewDecoder(file);decoder.DisallowUnknownFields();if err:=decoder.Decode(target);err!=nil{return err};var trailing any;if err:=decoder.Decode(&trailing);!errors.Is(err,io.EOF){if err==nil{return errors.New("unexpected trailing JSON value")};return err};return nil}
 
-func (b Binding) Validate(now time.Time) error {
-	required := []string{b.SchemaVersion,b.Repository,b.BaseRevision,b.FinalRevision,b.RequirementDigest,b.ChangeSetDigest,b.PolicyRevision,b.PolicyGates.PolicyRevision}
+func (b Binding) Validate(gates PolicyGates, change ChangeSet, actualRevision string, now time.Time) error {
+	required := []string{b.SchemaVersion,b.Repository,b.BaseRevision,b.FinalRevision,b.RequirementDigest,b.ChangeSetDigest,b.PolicyRevision,gates.PolicyRevision}
 	for _, value := range required { if strings.TrimSpace(value)=="" { return errors.New("release binding metadata is incomplete") } }
 	if b.SchemaVersion!="1.0.0" { return errors.New("unsupported release binding schema") }
-	if b.PolicyGates.PolicyRevision!=b.PolicyRevision { return errors.New("policy gates belong to another policy revision") }
+	if gates.PolicyRevision!=b.PolicyRevision { return errors.New("policy gates belong to another policy revision") }
+	if change.SchemaVersion!="1.0.0"||change.BaseRevision!=b.BaseRevision||change.FinalRevision!=b.FinalRevision||!sameSet(change.ChangedPaths,b.ChangedPaths){return errors.New("change set does not match release binding")}
+	if actualRevision!=b.FinalRevision{return errors.New("repository revision does not match release binding")}
 	if len(b.ChangedPaths)==0 { return errors.New("changed path scope is empty") }
-	if err:=uniqueRequired("test",b.PolicyGates.RequiredTests); err!=nil{return err}
-	if err:=uniqueRequired("review",b.PolicyGates.RequiredReviews); err!=nil{return err}
-	if err:=uniqueRequired("decision",b.PolicyGates.RequiredDecisions); err!=nil{return err}
+	if err:=uniqueRequired("test",gates.RequiredTests); err!=nil{return err}
+	if err:=uniqueRequired("review",gates.RequiredReviews); err!=nil{return err}
+	if err:=uniqueRequired("decision",gates.RequiredDecisions); err!=nil{return err}
 
 	tests:=map[string]Test{}
 	for _, test:=range b.Tests {
@@ -106,7 +109,7 @@ func (b Binding) Validate(now time.Time) error {
 		if test.Revision!=b.FinalRevision{return fmt.Errorf("test %q belongs to another revision",test.ID)}
 		if test.Status=="PASS"&&(len(test.RequirementIDs)==0||test.ArtifactDigest==""||test.ActorRunID==""||test.StartedAt.IsZero()||test.FinishedAt.Before(test.StartedAt)){return fmt.Errorf("test %q lacks executed evidence",test.ID)}
 	}
-	for _, id:=range b.PolicyGates.RequiredTests { if tests[id].Status!="PASS"{return fmt.Errorf("required test %q is not an executed pass",id)} }
+	for _, id:=range gates.RequiredTests { if tests[id].Status!="PASS"{return fmt.Errorf("required test %q is not an executed pass",id)} }
 
 	reviews:=map[string]Review{}
 	for _, review:=range b.Reviews {
@@ -117,14 +120,14 @@ func (b Binding) Validate(now time.Time) error {
 		if review.ReviewerRunID==""||review.ReviewerContextID==""||review.ChangeAuthorRunID==""||review.ChangeAuthorContextID==""||review.ReviewerRunID==review.ChangeAuthorRunID||review.ReviewerContextID==review.ChangeAuthorContextID{return fmt.Errorf("review %q is not independent",review.ID)}
 		if !sameSet(review.ReviewedPaths,b.ChangedPaths){return fmt.Errorf("review %q does not cover the changed scope",review.ID)}
 	}
-	for _, id:=range b.PolicyGates.RequiredReviews { if reviews[id].Status!="PASS"{return fmt.Errorf("required review %q is incomplete",id)} }
+	for _, id:=range gates.RequiredReviews { if reviews[id].Status!="PASS"{return fmt.Errorf("required review %q is incomplete",id)} }
 
 	decisions:=map[string]Decision{}
 	for _, decision:=range b.Decisions {
 		if !oneOf(decision.Kind,"INTENT","POLICY","RELEASE_RISK")||decisions[decision.Kind].Kind!=""||decision.Authority==""||decision.Subject==""||!oneOf(decision.Status,"APPROVED","REJECTED"){return errors.New("human decision is invalid or duplicated")}
 		decisions[decision.Kind]=decision
 	}
-	for _, kind:=range b.PolicyGates.RequiredDecisions { if decisions[kind].Status!="APPROVED"{return fmt.Errorf("required %s decision is not approved",kind)} }
+	for _, kind:=range gates.RequiredDecisions { if decisions[kind].Status!="APPROVED"{return fmt.Errorf("required %s decision is not approved",kind)} }
 	for _, exception:=range b.Exceptions {
 		if !oneOf(exception.Kind,"PROCESS","AVAILABILITY","TEMPORARY_POLICY"){return errors.New("exception kind is not waivable")}
 		if exception.Approver==""||exception.Subject==""||exception.Rationale==""||len(exception.Scope)==0||!exception.ExpiresAt.After(now){return errors.New("exception is invalid or expired")}
