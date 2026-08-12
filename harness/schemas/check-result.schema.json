@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/check-result.schema.json",
+  "title": "Clean Code check result",
+  "type": "object",
+  "required": ["schema_version", "check_id", "category", "provider", "status", "started_at", "duration_ms"],
+  "properties": {
+    "schema_version": { "type": "string", "minLength": 1 },
+    "check_id": { "type": "string", "minLength": 1 },
+    "category": { "type": "string", "minLength": 1 },
+    "provider": { "type": "string", "minLength": 1 },
+    "status": {
+      "enum": ["PASS", "FAIL", "NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+    },
+    "required": { "type": "boolean" },
+    "revision": { "type": "string" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "duration_ms": { "type": "integer", "minimum": 0 },
+    "exit_code": { "type": "integer" },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "artifacts": { "type": "array", "items": { "type": "string" } },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "CC-NAME-1",
+    "title": "Names reveal intent",
+    "classification": "semantic",
+    "summary": "A name should expose the role, unit, mutation behavior, or domain meaning needed to use the symbol correctly.",
+    "evidence": ["ambiguous symbol and the decisions a reader must infer"],
+    "applicability": "changed production and test symbols",
+    "default_severity": "review",
+    "source": "Clean Code, meaningful names",
+    "exceptions": ["tiny conventional loop or formula variables with local scope"],
+    "false_positives": ["project-standard domain abbreviations"]
+  },
+  {
+    "id": "CC-FUNC-1",
+    "title": "Functions express one operation",
+    "classification": "semantic",
+    "summary": "A function should perform one coherent operation at one abstraction level.",
+    "evidence": ["independent reasons the function changes or selector branches that choose separate behaviors"],
+    "applicability": "changed executable functions and methods",
+    "default_severity": "review",
+    "source": "Clean Code, functions",
+    "exceptions": ["small orchestration functions whose operation is coordinating named steps"],
+    "false_positives": ["sequential statements that belong to one transaction"]
+  },
+  {
+    "id": "CC-DUPE-1",
+    "title": "One business rule has one authority",
+    "classification": "semantic",
+    "summary": "Repeated business knowledge should have one authoritative representation even when the text differs.",
+    "evidence": ["two locations encoding the same decision and the drift consequence"],
+    "applicability": "changed policy, validation, calculation, and mapping logic",
+    "default_severity": "review",
+    "source": "Clean Code, duplication",
+    "exceptions": ["deliberate isolation across independent deployable boundaries"],
+    "false_positives": ["similar syntax implementing different domain rules"]
+  },
+  {
+    "id": "CC-BOUND-1",
+    "title": "Boundary cases are executable",
+    "classification": "deterministic",
+    "summary": "Declared boundary and error cases need executable tests in an applicable test track.",
+    "evidence": ["requirement boundary mapped to a passing or missing test result"],
+    "applicability": "requirements with ranges, emptiness, ordering, retries, or failure behavior",
+    "default_severity": "blocking",
+    "source": "Clean Code, boundaries and tests",
+    "exceptions": ["requirement explicitly marked non-executable with approved QA evidence"],
+    "false_positives": ["generated exhaustive cases already covered by property tests"]
+  },
+  {
+    "id": "CC-REFINE-1",
+    "title": "Repeated coordinated edits expose a missing concept",
+    "classification": "semantic",
+    "summary": "When one feature repeatedly requires the same coordinated edits, stop and identify the missing abstraction before expanding it again.",
+    "evidence": ["edit sites repeated across two or more feature additions"],
+    "applicability": "feature work that extends types, cases, providers, or formats",
+    "default_severity": "review",
+    "source": "Clean Code, successive refinement",
+    "exceptions": ["fixed closed sets where a central table is the chosen authority"],
+    "false_positives": ["mechanical generated files sharing one source"]
+  },
+  {
+    "id": "CC-TEST-1",
+    "title": "Tests detect behavior changes",
+    "classification": "deterministic",
+    "summary": "Tests should fail when a relevant behavior is deliberately mutated.",
+    "evidence": ["mutation result or a demonstrated failing test for the changed behavior"],
+    "applicability": "changed behavior covered by an available mutation provider or controlled test",
+    "default_severity": "review",
+    "source": "Clean Code, clean tests; mutation-testing practice",
+    "exceptions": ["generated glue code excluded by repository policy"],
+    "false_positives": ["equivalent or unreachable mutants"]
+  },
+  {
+    "id": "CC-SAFE-1",
+    "title": "Safety checks stay enabled",
+    "classification": "deterministic",
+    "summary": "A change may not disable required tests, warnings, analyzers, or policy gates without separate approval.",
+    "evidence": ["trusted-base policy compared with proposed policy"],
+    "applicability": "changes to test, build, analysis, or plugin configuration",
+    "default_severity": "blocking",
+    "source": "Clean Code, do not override safeties",
+    "exceptions": ["approved policy migration with replacement evidence"],
+    "false_positives": ["removal of a superseded duplicate check"]
+  },
+  {
+    "id": "CC-REVIEW-1",
+    "title": "Findings require evidence",
+    "classification": "semantic",
+    "summary": "A review finding needs a concrete location or behavior, consequence, and bounded correction; correct silence is valid.",
+    "evidence": ["finding fields and cited source evidence"],
+    "applicability": "automated and human-assisted review output",
+    "default_severity": "blocking",
+    "source": "Clean Code principles adapted for agent review",
+    "exceptions": [],
+    "false_positives": ["tool warnings repeated without semantic diagnosis"]
+  }
+]

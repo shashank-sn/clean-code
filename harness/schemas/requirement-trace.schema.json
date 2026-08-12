@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/requirement-trace.schema.json",
+  "title": "Requirement trace",
+  "type": "object",
+  "required": ["schema_version", "requirement_id", "summary", "acceptance_examples", "evidence"],
+  "properties": {
+    "schema_version": { "type": "string", "minLength": 1 },
+    "requirement_id": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "acceptance_examples": { "type": "array", "items": { "type": "string" } },
+    "test_tracks": { "type": "array", "items": { "type": "string" } },
+    "architecture_rules": { "type": "array", "items": { "type": "string" } },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "spot_check": { "enum": ["SPOT_CHECKED", "NOT_SPOT_CHECKED", "NOT_APPLICABLE"] }
+  },
+  "additionalProperties": false
+}

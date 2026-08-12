@@ -1,0 +1,74 @@
+[
+  {
+    "id": "CA-DEP-1",
+    "title": "Source dependencies point toward policy",
+    "classification": "architectural",
+    "summary": "Declared inner policy components may not import outer delivery, framework, or infrastructure components.",
+    "evidence": ["dependency path from inner component to forbidden outer component"],
+    "applicability": "repositories with declared components and dependency policy",
+    "default_severity": "blocking",
+    "source": "Clean Architecture, dependency rule",
+    "exceptions": ["explicit boundary adapter owned by the outer component"],
+    "false_positives": ["type-only dependency already approved as boundary data"]
+  },
+  {
+    "id": "CA-USECASE-1",
+    "title": "Use cases remain delivery-independent",
+    "classification": "semantic",
+    "summary": "Application policy should be callable without a specific UI, database, web framework, or external service.",
+    "evidence": ["use-case code coupled to a delivery mechanism and the testing or change consequence"],
+    "applicability": "application and domain policy changed by the work",
+    "default_severity": "review",
+    "source": "Clean Architecture, use cases and boundaries",
+    "exceptions": ["thin products where the repository explicitly accepts framework coupling"],
+    "false_positives": ["dependency inversion through an interface owned by the policy"]
+  },
+  {
+    "id": "CA-DATA-1",
+    "title": "Boundary data stays simple",
+    "classification": "semantic",
+    "summary": "Data crossing an inner boundary should avoid framework, transport, and persistence objects.",
+    "evidence": ["outer type crossing the boundary and the coupling it introduces"],
+    "applicability": "declared component boundaries",
+    "default_severity": "review",
+    "source": "Clean Architecture, crossing boundaries",
+    "exceptions": ["repository-approved shared primitive or generated contract type"],
+    "false_positives": ["plain data type defined in a neutral contract package"]
+  },
+  {
+    "id": "CA-CYCLE-1",
+    "title": "Components remain acyclic",
+    "classification": "architectural",
+    "summary": "The declared production component graph should not contain cycles unless policy grants a narrow exception.",
+    "evidence": ["complete cycle path"],
+    "applicability": "repositories with a dependency graph provider or path rules",
+    "default_severity": "blocking",
+    "source": "Clean Architecture, acyclic dependencies principle",
+    "exceptions": ["approved generated or test-only cycle"],
+    "false_positives": ["build graph aggregates that contain no source dependency"]
+  },
+  {
+    "id": "CA-CHANGE-1",
+    "title": "Components group one change axis",
+    "classification": "semantic",
+    "summary": "Code changed for the same actor or business reason should live behind the same coherent boundary.",
+    "evidence": ["change scattered across components or unrelated actors coupled in one component"],
+    "applicability": "component design and repeated cross-component feature edits",
+    "default_severity": "review",
+    "source": "Clean Architecture, component cohesion principles",
+    "exceptions": ["cross-cutting policy with explicit ownership"],
+    "false_positives": ["coordinated generated adapters"]
+  },
+  {
+    "id": "CA-TEST-1",
+    "title": "Policy is testable without outer systems",
+    "classification": "semantic",
+    "summary": "Core policy tests should run without a real UI, network, database, or framework container when those systems are outside the declared boundary.",
+    "evidence": ["policy test dependency on an outer runtime and its failure or speed consequence"],
+    "applicability": "inner policy components with unit tests",
+    "default_severity": "review",
+    "source": "Clean Architecture, testable architecture",
+    "exceptions": ["integration test track intentionally exercising the real boundary"],
+    "false_positives": ["fast in-memory implementation of an interface owned by policy"]
+  }
+]

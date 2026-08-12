@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/adapter.schema.json",
+  "title": "Clean Code adapter",
+  "type": "object",
+  "required": ["schema_version", "id", "kind", "trust", "commands"],
+  "properties": {
+    "schema_version": { "type": "string", "minLength": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "kind": { "enum": ["generic", "language", "tool", "host"] },
+    "trust": { "enum": ["builtin", "declarative", "executable"] },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "executable"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "executable": { "type": "string", "minLength": 1 },
+          "args": { "type": "array", "items": { "type": "string" } },
+          "timeout_seconds": { "type": "integer", "minimum": 0 },
+          "required": { "type": "boolean" },
+          "shell": { "const": false }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

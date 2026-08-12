@@ -1,0 +1,6 @@
+/bin/
+/dist/
+/.clean-code/evidence/
+/.clean-code/cache/
+*.test
+*.out

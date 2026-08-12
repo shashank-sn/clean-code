@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/config.schema.json",
+  "title": "Clean Code repository configuration",
+  "type": "object",
+  "required": ["schema_version", "commands"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "executable"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "executable": { "type": "string", "minLength": 1 },
+          "args": { "type": "array", "items": { "type": "string" } },
+          "working_directory": { "type": "string" },
+          "timeout_seconds": { "type": "integer", "minimum": 0 },
+          "required": { "type": "boolean" },
+          "environment": { "type": "object", "additionalProperties": { "type": "string" } },
+          "shell": { "const": false }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

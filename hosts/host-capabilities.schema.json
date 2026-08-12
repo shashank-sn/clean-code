@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/host-capabilities.schema.json",
+  "title": "Coding host capabilities",
+  "type": "object",
+  "required": ["id", "display_name", "native_skills", "subagents", "hooks", "blocking_approvals", "command_execution", "cli", "integration"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "display_name": { "type": "string", "minLength": 1 },
+    "native_skills": { "type": "boolean" },
+    "subagents": { "type": "boolean" },
+    "hooks": { "type": "boolean" },
+    "blocking_approvals": { "type": "boolean" },
+    "command_execution": { "type": "boolean" },
+    "cli": { "type": "boolean" },
+    "integration": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}
