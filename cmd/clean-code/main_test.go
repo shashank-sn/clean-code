@@ -2,7 +2,10 @@ package main
 
 import (
 	"bytes"
+	"crypto/ed25519"
+	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -296,10 +299,10 @@ func TestRunReleaseGateRequiresSeparateTrustedArtifacts(t *testing.T) {
 	if code:=run([]string{"release-gate","--input",path},&stdout,&stderr);code!=2||!bytes.Contains(stderr.Bytes(),[]byte("--policy-gates")){t.Fatalf("expected trusted artifact requirement, got %d: %s",code,stderr.String())}
 }
 
-type releaseFixture struct{ input,gates,requirements,change,tests,reviews,decisions,root string }
+type releaseFixture struct{ input,gates,requirements,change,tests,reviews,decisions,approval,signature,key,root string }
 
 func writeReleaseFixture(t *testing.T) releaseFixture {
-	t.Helper();root:=t.TempDir();gates:=filepath.Join(root,"gates.json");requirements:=filepath.Join(root,"requirements.md");change:=filepath.Join(root,"change.json");tests:=filepath.Join(root,"tests.json");reviews:=filepath.Join(root,"reviews.json");decisions:=filepath.Join(root,"decisions.json");input:=filepath.Join(root,"binding.json")
+	t.Helper();root:=t.TempDir();gates:=filepath.Join(root,"gates.json");requirements:=filepath.Join(root,"requirements.md");change:=filepath.Join(root,"change.json");tests:=filepath.Join(root,"tests.json");reviews:=filepath.Join(root,"reviews.json");decisions:=filepath.Join(root,"decisions.json");input:=filepath.Join(root,"binding.json");approvalPath:=filepath.Join(root,"approval.json");signature:=filepath.Join(root,"approval.sig");key:=filepath.Join(root,"approval.pub")
 	write:=func(path,body string){if err:=os.WriteFile(path,[]byte(body),0o600);err!=nil{t.Fatal(err)}};digest:=func(body string)string{sum:=sha256.Sum256([]byte(body));return hex.EncodeToString(sum[:])}
 	gatesBody:=`{"policy_revision":"policy","required_tests":["acceptance"],"required_reviews":["independent"],"required_decisions":["RELEASE_RISK"]}`;requirementsBody:="R1: release safely\n";changeBody:=`{"schema_version":"1.0.0","base_revision":"base","final_revision":"final","changed_paths":["change.go"]}`
 	reqD,changeD,policyD:=digest(requirementsBody),digest(changeBody),digest(gatesBody)
@@ -308,15 +311,17 @@ func writeReleaseFixture(t *testing.T) releaseFixture {
 	decisionsBody:=fmt.Sprintf(`{"decisions":[{"repository":"owner/repo","final_revision":"final","requirement_digest":"%s","change_set_digest":"%s","policy_revision":"%s","kind":"RELEASE_RISK","authority":"human","subject":"final","status":"APPROVED"}]}`,reqD,changeD,policyD)
 	write(gates,gatesBody);write(requirements,requirementsBody);write(change,changeBody);write(tests,testsBody);write(reviews,reviewsBody);write(decisions,decisionsBody)
 	binding:=fmt.Sprintf(`{"schema_version":"1.0.0","repository":"owner/repo","base_revision":"base","final_revision":"final","requirement_digest":"%s","change_set_digest":"%s","policy_revision":"%s","test_attestations_digest":"%s","review_attestations_digest":"%s","decision_attestations_digest":"%s","changed_paths":["change.go"]}`,reqD,changeD,policyD,digest(testsBody),digest(reviewsBody),digest(decisionsBody));write(input,binding)
-	return releaseFixture{input,gates,requirements,change,tests,reviews,decisions,root}
+	manifest:=fmt.Sprintf(`{"schema_version":"1.0.0","repository":"owner/repo","final_revision":"final","binding_digest":"%s","policy_digest":"%s","requirements_digest":"%s","change_set_digest":"%s","test_attestations_digest":"%s","review_attestations_digest":"%s","decision_attestations_digest":"%s"}`,digest(binding),policyD,reqD,changeD,digest(testsBody),digest(reviewsBody),digest(decisionsBody));write(approvalPath,manifest)
+	public,private,err:=ed25519.GenerateKey(rand.Reader);if err!=nil{t.Fatal(err)};write(signature,base64.StdEncoding.EncodeToString(ed25519.Sign(private,[]byte(manifest))));write(key,base64.StdEncoding.EncodeToString(public))
+	return releaseFixture{input,gates,requirements,change,tests,reviews,decisions,approvalPath,signature,key,root}
 }
 
-func runReleaseFixture(f releaseFixture)(int,string){var out,err bytes.Buffer;code:=run([]string{"release-gate","--input",f.input,"--policy-gates",f.gates,"--requirements",f.requirements,"--change-set",f.change,"--root",f.root,"--repository","owner/repo","--test-attestations",f.tests,"--review-attestations",f.reviews,"--decision-attestations",f.decisions},&out,&err);return code,err.String()}
+func runReleaseFixture(f releaseFixture)(int,string){var out,err bytes.Buffer;code:=run([]string{"release-gate","--input",f.input,"--policy-gates",f.gates,"--requirements",f.requirements,"--change-set",f.change,"--root",f.root,"--repository","owner/repo","--test-attestations",f.tests,"--review-attestations",f.reviews,"--decision-attestations",f.decisions,"--approval-manifest",f.approval,"--approval-signature",f.signature,"--trusted-public-key",f.key},&out,&err);return code,err.String()}
 func TestReleaseGateRejectsModifiedPolicyArtifact(t *testing.T){f:=writeReleaseFixture(t);if err:=os.WriteFile(f.gates,[]byte(`{"policy_revision":"changed","required_tests":["acceptance"],"required_reviews":["independent"],"required_decisions":["RELEASE_RISK"]}`),0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"trusted artifact digest"){t.Fatalf("got %d %s",code,msg)}}
 func TestReleaseGateRejectsModifiedRequirementsArtifact(t *testing.T){f:=writeReleaseFixture(t);if err:=os.WriteFile(f.requirements,[]byte("R2: changed\n"),0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"trusted artifact digest"){t.Fatalf("got %d %s",code,msg)}}
 func TestReleaseGateRejectsModifiedChangeSetArtifact(t *testing.T){f:=writeReleaseFixture(t);if err:=os.WriteFile(f.change,[]byte(`{"schema_version":"1.0.0","base_revision":"base","final_revision":"final","changed_paths":["other.go"]}`),0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"trusted artifact digest"){t.Fatalf("got %d %s",code,msg)}}
 func TestReleaseGateRejectsRelabeledStaleBinding(t *testing.T){f:=writeReleaseFixture(t);body,err:=os.ReadFile(f.input);if err!=nil{t.Fatal(err)};changed:=bytes.Replace(body,[]byte(`"base_revision":"base"`),[]byte(`"base_revision":"stale"`),1);if err:=os.WriteFile(f.input,changed,0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"change set does not match"){t.Fatalf("got %d %s",code,msg)}}
-func TestReleaseGateRejectsWrongActualRootRevision(t *testing.T){f:=writeReleaseFixture(t);code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"repository revision does not match"){t.Fatalf("got %d %s",code,msg)}}
+func TestReleaseGateRejectsWrongActualRootRevision(t *testing.T){f:=writeReleaseFixture(t);code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"repository is not a Git checkout"){t.Fatalf("got %d %s",code,msg)}}
 
 func TestReleaseGateRejectsAdvancedFinalRevisionWithOldAttestations(t *testing.T){f:=writeReleaseFixture(t);body,_:=os.ReadFile(f.input);body=bytes.Replace(body,[]byte(`"final_revision":"final"`),[]byte(`"final_revision":"advanced"`),1);if err:=os.WriteFile(f.input,body,0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"change set does not match"){t.Fatalf("expected stale-final rejection, got %d %s",code,msg)}}
-func TestReleaseGateRejectsCrossRepositoryReplay(t *testing.T){f:=writeReleaseFixture(t);body,_:=os.ReadFile(f.input);body=bytes.Replace(body,[]byte(`"repository":"owner/repo"`),[]byte(`"repository":"fork/repo"`),1);if err:=os.WriteFile(f.input,body,0o600);err!=nil{t.Fatal(err)};var out,errOut bytes.Buffer;code:=run([]string{"release-gate","--input",f.input,"--policy-gates",f.gates,"--requirements",f.requirements,"--change-set",f.change,"--root",f.root,"--repository","fork/repo","--test-attestations",f.tests,"--review-attestations",f.reviews,"--decision-attestations",f.decisions},&out,&errOut);if code!=1||!strings.Contains(errOut.String(),"another repository"){t.Fatalf("expected cross-repo rejection, got %d %s",code,errOut.String())}}
+func TestReleaseGateRejectsCrossRepositoryReplay(t *testing.T){f:=writeReleaseFixture(t);body,_:=os.ReadFile(f.input);body=bytes.Replace(body,[]byte(`"repository":"owner/repo"`),[]byte(`"repository":"fork/repo"`),1);if err:=os.WriteFile(f.input,body,0o600);err!=nil{t.Fatal(err)};var out,errOut bytes.Buffer;code:=run([]string{"release-gate","--input",f.input,"--policy-gates",f.gates,"--requirements",f.requirements,"--change-set",f.change,"--root",f.root,"--repository","fork/repo","--test-attestations",f.tests,"--review-attestations",f.reviews,"--decision-attestations",f.decisions,"--approval-manifest",f.approval,"--approval-signature",f.signature,"--trusted-public-key",f.key},&out,&errOut);if code!=1||!strings.Contains(errOut.String(),"another repository"){t.Fatalf("expected cross-repo rejection, got %d %s",code,errOut.String())}}
