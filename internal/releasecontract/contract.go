@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -83,7 +84,7 @@ func Load(path string) (Binding, error) {
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&binding); err != nil { return Binding{}, err }
 	var trailing any
-	if err := decoder.Decode(&trailing); err == nil { return Binding{}, errors.New("unexpected trailing JSON value") }
+	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) { if err == nil { return Binding{}, errors.New("unexpected trailing JSON value") }; return Binding{}, err }
 	return binding, nil
 }
 
