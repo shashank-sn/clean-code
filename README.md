@@ -106,3 +106,5 @@ Run `clean-code slop .` for a deterministic, evidence-scored repair brief. The a
 ## Organization and release evidence
 
 Use `policy-pack`, `history`, `incremental`, and `study` for organization policy resolution, immutable evidence trends, conservative changed-scope selection, and preregistered held-out evaluation. See [roadmap verification](docs/roadmap-verification.md).
+
+Commands: `policy-pack`, `history`, `incremental`, and `study`. History and study require detached Ed25519 signatures and an external trusted public key.
