@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "id": "swift",
+  "kind": "language",
+  "trust": "builtin",
+  "language": "swift",
+  "markers": ["Package.swift"],
+  "commands": [
+    {"id": "swift-test", "category": "unit-test", "executable": "swift", "args": ["test"], "timeout_seconds": 600}
+  ]
+}

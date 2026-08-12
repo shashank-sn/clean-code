@@ -47,3 +47,6 @@ func runGit(t *testing.T, root string, args ...string) {
 		t.Fatalf("git %v: %v: %s", args, err, output)
 	}
 }
+
+func TestCleanRevisionRejectsNonGit(t *testing.T){if _,err:=CleanRevision(t.TempDir());err==nil{t.Fatal("expected non-Git rejection")}}
+func TestCleanRevisionRejectsDirty(t *testing.T){root:=t.TempDir();runGit(t,root,"init","-q");runGit(t,root,"config","user.email","test@example.com");runGit(t,root,"config","user.name","Test");path:=filepath.Join(root,"x");if err:=os.WriteFile(path,[]byte("x"),0o600);err!=nil{t.Fatal(err)};runGit(t,root,"add","x");runGit(t,root,"commit","-qm","initial");if err:=os.WriteFile(path,[]byte("y"),0o600);err!=nil{t.Fatal(err)};if _,err:=CleanRevision(root);err==nil||!strings.Contains(err.Error(),"dirty"){t.Fatalf("got %v",err)}}

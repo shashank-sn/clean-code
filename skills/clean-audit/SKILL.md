@@ -1,27 +1,26 @@
 ---
 name: clean-audit
-description: Produce an immutable, revision-bound release receipt from deterministic verification, independent test planning, review, human spot checks, policy identity, exceptions, and evidence hashes. Use before release or merge, when handing work to another team, or when a durable record of checked and unchecked scope is required.
+description: Produce an immutable revision-bound receipt by deriving required gates from approved policy and validating provenance. Use before merge, release, handoff, or any claim that a change is complete.
 ---
 
 # Clean Audit
 
-Create a receipt that preserves both evidence and gaps.
+Preserve evidence, decisions, and gaps without letting evidence choose its own requirements.
+
+## Required bindings
+
+One receipt names the requirement contract digest, base revision, final revision, change-set digest, policy revision, evidence set, actor run identities, context lineage, and typed exceptions.
 
 ## Workflow
 
-1. Run final verification against the exact repository revision that will ship.
-2. Complete test trace and independent review for that revision.
-3. Record requirement, acceptance, UI/QA, and code-sample human checks with reviewer, scope, outcome, and reason for anything skipped.
-4. Create an audit input that names repository identity, revision, trusted policy revision, evidence files, and approved exceptions.
-5. Run `clean-code audit --input <audit-input.json> --output <new-receipt.json>`.
-6. Read `complete`, `gaps`, evidence hashes, and exceptions before making a release decision.
-7. Run `clean-code audit --input <audit-input.json> --check <receipt.json>` when receiving or reusing a receipt.
+1. Load required gates and non-waivable invariants from approved policy.
+2. Validate that requirements and changed paths have complete trace, test, and review coverage.
+3. Require executed revision-bound evidence for each applicable gate; reject planned, unrun, unavailable, stale, or foreign-revision results.
+4. Validate independent review by execution identity and controlled context, including correct-silence results.
+5. Record human decisions only for intent, policy, risk, and typed exceptions.
+6. Reject exceptions without approver, subject, rationale, expiry, and allowed scope; never waive correctness, safety, data integrity, explicit requirements, or declared architecture blockers.
+7. Create a new immutable receipt and preserve every blocking gap.
 
 ## Integrity
 
-- Create a new receipt for every run. Existing receipts remain immutable.
-- Keep evidence files local unless the user authorizes transmission.
-- Bind verification, review, and spot checks to the audit revision.
-- Require all configured human checks before completion.
-- Preserve incomplete receipts and their gaps; they document real state even when release remains blocked.
-- Rebuild the receipt after any evidence file changes because its hash will change.
+Evidence cannot mark itself required or optional. Existing receipts are never overwritten. Any change to the revision, policy, requirement contract, change set, or evidence produces a new receipt.

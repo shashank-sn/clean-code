@@ -152,7 +152,16 @@ func projectIdentifier(root string) string {
 func matchingFiles(markers []string, available map[string][]string) []string {
 	var result []string
 	for _, marker := range markers {
-		result = append(result, available[marker]...)
+		if !strings.ContainsAny(marker, "*?[") {
+			result = append(result, available[marker]...)
+			continue
+		}
+		for name, paths := range available {
+			matched, err := filepath.Match(marker, name)
+			if err == nil && matched {
+				result = append(result, paths...)
+			}
+		}
 	}
 	sort.Strings(result)
 	return result

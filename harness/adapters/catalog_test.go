@@ -10,7 +10,7 @@ func TestCatalogContainsMaintainedLanguageAdapters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"go", "java", "javascript-typescript", "python", "rust"}
+	want := []string{"dotnet", "go", "java", "javascript-typescript", "python", "ruby", "rust", "swift"}
 	if len(definitions) != len(want) {
 		t.Fatalf("expected %d adapters, got %d", len(want), len(definitions))
 	}
@@ -57,5 +57,18 @@ func TestDetectKeepsMonorepoProjectsSeparate(t *testing.T) {
 	}
 	if matches[0].ProposedCommands[0].ID == matches[1].ProposedCommands[0].ID {
 		t.Fatalf("monorepo command ids must be unique: %+v", matches)
+	}
+}
+
+func TestDetectMatchesDotnetProjectWithoutGlobalJSON(t *testing.T) {
+	matches, err := Detect([]string{"src/Product/Product.csproj"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(matches) != 1 || matches[0].ID != "dotnet" || matches[0].Root != "src/Product" {
+		t.Fatalf("expected wildcard .NET project match, got %+v", matches)
+	}
+	if len(matches[0].ProposedCommands) != 1 || matches[0].ProposedCommands[0].WorkingDir != "src/Product" {
+		t.Fatalf("expected scoped dotnet test proposal, got %+v", matches[0])
 	}
 }

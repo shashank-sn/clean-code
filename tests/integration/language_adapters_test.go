@@ -12,11 +12,14 @@ func TestMaintainedLanguageFixturesProduceReadOnlyProposals(t *testing.T) {
 		name      string
 		adapterID string
 	}{
+		{"dotnet", "dotnet"},
 		{"go", "go"},
 		{"javascript", "javascript-typescript"},
 		{"python", "python"},
 		{"java", "java"},
+		{"ruby", "ruby"},
 		{"rust", "rust"},
+		{"swift", "swift"},
 	}
 	for _, fixture := range fixtures {
 		t.Run(fixture.name, func(t *testing.T) {

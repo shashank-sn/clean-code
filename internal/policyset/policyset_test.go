@@ -1,0 +1,6 @@
+package policyset
+import("testing";"time")
+func basePolicies()(Policy,Policy){return Policy{SchemaVersion:"1.0.0",Revision:"o",Commands:[]Command{{ID:"x",Executable:"go",Args:[]string{"a b"},Required:true}}},Policy{SchemaVersion:"1.0.0",Revision:"r",Commands:[]Command{{ID:"x",Executable:"go",Args:[]string{"a b"},Required:true}}}}
+func TestArgsComparedElementWise(t *testing.T){o,r:=basePolicies();r.Commands[0].Args=[]string{"a","b"};if _,err:=Resolve(o,r,map[string]bool{});err==nil{t.Fatal("expected argv collision rejection")}}
+func TestWeakeningRequiresAndAppliesApproval(t *testing.T){o,r:=basePolicies();r.Commands[0].Required=false;if _,err:=Resolve(o,r,map[string]bool{});err==nil{t.Fatal("expected approval rejection")};got,err:=Resolve(o,r,map[string]bool{"x":true});if err!=nil||got.Commands[0].Required||got.Commands[0].Provenance!="organization+signed-exception"{t.Fatalf("%+v %v",got,err)}}
+func TestExceptionExpiryValidated(t *testing.T){a:=ExceptionApproval{SchemaVersion:"1.0.0",OrganizationDigest:"o",RepositoryDigest:"r",CommandID:"x",Scope:"required",ExpiresAt:"2020-01-01T00:00:00Z",Approver:"a"};if err:=VerifyException(nil,nil,nil,a,"o","r","x",time.Now());err==nil{t.Fatal("expected signature or expiry rejection")}}
