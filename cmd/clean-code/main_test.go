@@ -2,7 +2,10 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -291,3 +294,25 @@ func TestRunReleaseGateRequiresSeparateTrustedArtifacts(t *testing.T) {
 	var stdout,stderr bytes.Buffer
 	if code:=run([]string{"release-gate","--input",path},&stdout,&stderr);code!=2||!bytes.Contains(stderr.Bytes(),[]byte("--policy-gates")){t.Fatalf("expected trusted artifact requirement, got %d: %s",code,stderr.String())}
 }
+
+type releaseFixture struct{ input,gates,requirements,change,root string }
+
+func writeReleaseFixture(t *testing.T) releaseFixture {
+	t.Helper();root:=t.TempDir()
+	gates:=filepath.Join(root,"gates.json");requirements:=filepath.Join(root,"requirements.md");change:=filepath.Join(root,"change.json");input:=filepath.Join(root,"binding.json")
+	write:=func(path,body string){t.Helper();if err:=os.WriteFile(path,[]byte(body),0o600);err!=nil{t.Fatal(err)}}
+	gatesBody:=`{"policy_revision":"policy","required_tests":["acceptance"],"required_reviews":["independent"],"required_decisions":["RELEASE_RISK"]}`
+	requirementsBody:="R1: release safely\n"
+	changeBody:=`{"schema_version":"1.0.0","base_revision":"base","final_revision":"final","changed_paths":["change.go"]}`
+	write(gates,gatesBody);write(requirements,requirementsBody);write(change,changeBody)
+	digest:=func(body string)string{sum:=sha256.Sum256([]byte(body));return hex.EncodeToString(sum[:])}
+	binding:=fmt.Sprintf(`{"schema_version":"1.0.0","repository":"owner/repo","base_revision":"base","final_revision":"final","requirement_digest":"%s","change_set_digest":"%s","policy_revision":"%s","changed_paths":["change.go"],"tests":[{"id":"acceptance","requirement_ids":["R1"],"revision":"final","status":"PASS","artifact_digest":"artifact","actor_run_id":"test-run","started_at":"2026-08-12T00:00:00Z","finished_at":"2026-08-12T00:00:00Z"}],"reviews":[{"id":"independent","reviewer_run_id":"review-run","reviewer_context_id":"review-context","change_author_run_id":"build-run","change_author_context_id":"build-context","base_revision":"base","final_revision":"final","requirement_digest":"%s","change_set_digest":"%s","policy_revision":"%s","reviewed_paths":["change.go"],"status":"PASS"}],"decisions":[{"kind":"RELEASE_RISK","authority":"human","subject":"final","status":"APPROVED"}]}`,digest(requirementsBody),digest(changeBody),digest(gatesBody),digest(requirementsBody),digest(changeBody),digest(gatesBody))
+	write(input,binding);return releaseFixture{input,gates,requirements,change,root}
+}
+
+func runReleaseFixture(f releaseFixture)(int,string){var out,err bytes.Buffer;code:=run([]string{"release-gate","--input",f.input,"--policy-gates",f.gates,"--requirements",f.requirements,"--change-set",f.change,"--root",f.root},&out,&err);return code,err.String()}
+func TestReleaseGateRejectsModifiedPolicyArtifact(t *testing.T){f:=writeReleaseFixture(t);if err:=os.WriteFile(f.gates,[]byte(`{"policy_revision":"changed","required_tests":["acceptance"],"required_reviews":["independent"],"required_decisions":["RELEASE_RISK"]}`),0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"trusted artifact digest"){t.Fatalf("got %d %s",code,msg)}}
+func TestReleaseGateRejectsModifiedRequirementsArtifact(t *testing.T){f:=writeReleaseFixture(t);if err:=os.WriteFile(f.requirements,[]byte("R2: changed\n"),0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"trusted artifact digest"){t.Fatalf("got %d %s",code,msg)}}
+func TestReleaseGateRejectsModifiedChangeSetArtifact(t *testing.T){f:=writeReleaseFixture(t);if err:=os.WriteFile(f.change,[]byte(`{"schema_version":"1.0.0","base_revision":"base","final_revision":"final","changed_paths":["other.go"]}`),0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"trusted artifact digest"){t.Fatalf("got %d %s",code,msg)}}
+func TestReleaseGateRejectsRelabeledStaleBinding(t *testing.T){f:=writeReleaseFixture(t);body,err:=os.ReadFile(f.input);if err!=nil{t.Fatal(err)};changed:=bytes.Replace(body,[]byte(`"base_revision":"base"`),[]byte(`"base_revision":"stale"`),1);if err:=os.WriteFile(f.input,changed,0o600);err!=nil{t.Fatal(err)};code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"change set does not match"){t.Fatalf("got %d %s",code,msg)}}
+func TestReleaseGateRejectsWrongActualRootRevision(t *testing.T){f:=writeReleaseFixture(t);code,msg:=runReleaseFixture(f);if code!=1||!strings.Contains(msg,"repository revision does not match"){t.Fatalf("got %d %s",code,msg)}}
