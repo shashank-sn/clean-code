@@ -103,6 +103,7 @@ func TestRunRejectsExtraArguments(t *testing.T) {
 		{"trace", "extra"},
 		{"review", "extra"},
 		{"audit", "extra"},
+		{"release-gate", "extra"},
 		{"slop", ".", "extra"},
 		{"benchmark", "extra"},
 		{"learn", "extra"},
@@ -283,4 +284,12 @@ func TestRunSlopStopsAfterSecondPass(t *testing.T) {
 		!bytes.Contains(secondOut.Bytes(), []byte("Stop rewriting")) {
 		t.Fatalf("expected bounded stop report: %s", secondOut.String())
 	}
+}
+
+func TestRunReleaseGateFailsClosedOnEmptyEvidence(t *testing.T) {
+	path:=filepath.Join(t.TempDir(),"release.json")
+	body:=[]byte(`{"schema_version":"1.0.0","repository":"owner/repo","base_revision":"base","final_revision":"final","requirement_digest":"requirements","change_set_digest":"change","policy_revision":"policy","policy_gates":{"policy_revision":"policy","required_tests":["acceptance"],"required_reviews":["independent"],"required_decisions":["RELEASE_RISK"]},"changed_paths":["change.go"],"tests":[],"reviews":[],"decisions":[]}`)
+	if err:=os.WriteFile(path,body,0o600);err!=nil{t.Fatal(err)}
+	var stdout,stderr bytes.Buffer
+	if code:=run([]string{"release-gate","--input",path},&stdout,&stderr);code!=1||!bytes.Contains(stderr.Bytes(),[]byte("required test")){t.Fatalf("expected fail-closed gate, got %d: %s",code,stderr.String())}
 }
