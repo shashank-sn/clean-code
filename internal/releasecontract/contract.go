@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"time"
 )
@@ -93,12 +92,12 @@ type Exception struct {
 	ExpiresAt time.Time `json:"expires_at"`
 }
 
-func Load(path string) (Binding,error){var value Binding;err:=loadStrict(path,&value);return value,err}
-func LoadAttestations(path string)(Attestations,error){var value Attestations;err:=loadStrict(path,&value);return value,err}
-func LoadPolicyGates(path string)(PolicyGates,error){var value PolicyGates;err:=loadStrict(path,&value);return value,err}
-func LoadChangeSet(path string)(ChangeSet,error){var value ChangeSet;err:=loadStrict(path,&value);return value,err}
-func Digest(path string)(string,error){body,err:=os.ReadFile(path);if err!=nil{return "",err};sum:=sha256.Sum256(body);return hex.EncodeToString(sum[:]),nil}
-func loadStrict(path string,target any)error{file,err:=os.Open(path);if err!=nil{return err};defer file.Close();decoder:=json.NewDecoder(file);decoder.DisallowUnknownFields();if err:=decoder.Decode(target);err!=nil{return err};var trailing any;if err:=decoder.Decode(&trailing);!errors.Is(err,io.EOF){if err==nil{return errors.New("unexpected trailing JSON value")};return err};return nil}
+func ParseBinding(body []byte)(Binding,error){var v Binding;err:=parseStrict(body,&v);return v,err}
+func ParseAttestations(body []byte)(Attestations,error){var v Attestations;err:=parseStrict(body,&v);return v,err}
+func ParsePolicyGates(body []byte)(PolicyGates,error){var v PolicyGates;err:=parseStrict(body,&v);return v,err}
+func ParseChangeSet(body []byte)(ChangeSet,error){var v ChangeSet;err:=parseStrict(body,&v);return v,err}
+func DigestBytes(body []byte)string{sum:=sha256.Sum256(body);return hex.EncodeToString(sum[:])}
+func parseStrict(body []byte,target any)error{decoder:=json.NewDecoder(strings.NewReader(string(body)));decoder.DisallowUnknownFields();if err:=decoder.Decode(target);err!=nil{return err};var trailing any;if err:=decoder.Decode(&trailing);!errors.Is(err,io.EOF){if err==nil{return errors.New("unexpected trailing JSON value")};return err};return nil}
 
 func (b Binding) Validate(gates PolicyGates, change ChangeSet, attest Attestations, canonicalRepository, actualRevision string, now time.Time) error {
 	required := []string{b.SchemaVersion,b.Repository,b.BaseRevision,b.FinalRevision,b.RequirementDigest,b.ChangeSetDigest,b.PolicyRevision,b.TestAttestationsDigest,b.ReviewAttestationsDigest,b.DecisionAttestationsDigest}
