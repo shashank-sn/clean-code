@@ -1,0 +1,6 @@
+package history
+import("errors";"sort")
+type Signal struct{Name string `json:"name"`;Value float64 `json:"value"`;Scale string `json:"scale"`;Provenance string `json:"provenance"`}
+type Receipt struct{SchemaVersion string `json:"schema_version"`;Digest string `json:"digest"`;Repository string `json:"repository"`;Revision string `json:"revision"`;CreatedAt string `json:"created_at"`;Signals []Signal `json:"signals"`}
+type Report struct{SchemaVersion string `json:"schema_version"`;Receipts []Receipt `json:"receipts"`}
+func Build(receipts []Receipt)(Report,error){seen:=map[string]bool{};for _,r:=range receipts{if r.SchemaVersion!="1.0.0"||r.Digest==""||r.Repository==""||r.Revision==""||r.CreatedAt==""||seen[r.Digest]{return Report{},errors.New("receipt is invalid, duplicated, or tampered")};seen[r.Digest]=true;for _,s:=range r.Signals{if s.Name==""||s.Scale==""||s.Provenance==""{return Report{},errors.New("signal metadata is incomplete")}}};sort.Slice(receipts,func(i,j int)bool{if receipts[i].CreatedAt==receipts[j].CreatedAt{return receipts[i].Revision<receipts[j].Revision};return receipts[i].CreatedAt<receipts[j].CreatedAt});return Report{SchemaVersion:"1.0.0",Receipts:receipts},nil}
