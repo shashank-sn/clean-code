@@ -11,20 +11,20 @@ import (
 	"strings"
 	"time"
 
-	"clean-code/internal/architecture"
 	"clean-code/internal/approval"
+	"clean-code/internal/architecture"
 	"clean-code/internal/audit"
 	"clean-code/internal/benchmark"
 	"clean-code/internal/contracts"
 	"clean-code/internal/discover"
 	"clean-code/internal/evidence"
-	"clean-code/internal/hosts"
 	"clean-code/internal/history"
+	"clean-code/internal/hosts"
 	"clean-code/internal/incremental"
 	"clean-code/internal/policy"
 	"clean-code/internal/policyset"
-	"clean-code/internal/repository"
 	"clean-code/internal/releasecontract"
+	"clean-code/internal/repository"
 	"clean-code/internal/review"
 	"clean-code/internal/runner"
 	"clean-code/internal/sloppiness"
@@ -286,39 +286,297 @@ func run(args []string, stdout, stderr io.Writer) int {
 		}
 		return 0
 	case "release-gate":
-		flags:=flag.NewFlagSet("release-gate",flag.ContinueOnError);flags.SetOutput(stderr)
-		inputPath:=flags.String("input","","release binding JSON")
-		gatesPath:=flags.String("policy-gates","","trusted policy gates JSON")
-		requirementsPath:=flags.String("requirements","","approved requirements artifact")
-		changePath:=flags.String("change-set","","trusted change-set JSON")
-		root:=flags.String("root","","repository root")
-		repositoryID:=flags.String("repository","","canonical owner/name repository")
-		testsPath:=flags.String("test-attestations","","test attestations JSON")
-		reviewsPath:=flags.String("review-attestations","","review attestations JSON")
-		decisionsPath:=flags.String("decision-attestations","","decision attestations JSON")
-		approvalPath:=flags.String("approval-manifest","","signed approval manifest JSON")
-		signaturePath:=flags.String("approval-signature","","detached Ed25519 signature in base64")
-		publicKeyPath:=flags.String("trusted-public-key","","protected Ed25519 public key in base64")
-		if err:=flags.Parse(args[1:]);err!=nil{return 2}
-		if flags.NArg()!=0||*inputPath==""||*gatesPath==""||*requirementsPath==""||*changePath==""||*root==""||*repositoryID==""||*testsPath==""||*reviewsPath==""||*decisionsPath==""||*approvalPath==""||*signaturePath==""||*publicKeyPath==""{fmt.Fprintln(stderr,"release-gate requires --input --policy-gates --requirements --change-set --root --repository --test-attestations --review-attestations --decision-attestations --approval-manifest --approval-signature --trusted-public-key");return 2}
-		paths:=[]string{*inputPath,*approvalPath,*signaturePath,*publicKeyPath,*gatesPath,*requirementsPath,*changePath,*testsPath,*reviewsPath,*decisionsPath};snap:=make([][]byte,len(paths));for i,p:=range paths{body,readErr:=os.ReadFile(p);if readErr!=nil{fmt.Fprintln(stderr,readErr);return 1};snap[i]=body}
-		binding,err:=releasecontract.ParseBinding(snap[0]);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		approvalManifest,err:=approval.Parse(snap[1]);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=approval.VerifyBytes(snap[1],snap[2],snap[3]);err!=nil{fmt.Fprintln(stderr,err);return 1}
-		gates,err:=releasecontract.ParsePolicyGates(snap[4]);if err!=nil{fmt.Fprintln(stderr,err);return 1};change,err:=releasecontract.ParseChangeSet(snap[6]);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		tests,err:=releasecontract.ParseAttestations(snap[7]);if err!=nil{fmt.Fprintln(stderr,err);return 1};reviews,err:=releasecontract.ParseAttestations(snap[8]);if err!=nil{fmt.Fprintln(stderr,err);return 1};decisions,err:=releasecontract.ParseAttestations(snap[9]);if err!=nil{fmt.Fprintln(stderr,err);return 1};attest:=releasecontract.Attestations{Tests:tests.Tests,Reviews:reviews.Reviews,Decisions:decisions.Decisions}
-		policyDigest:=releasecontract.DigestBytes(snap[4]);requirementDigest:=releasecontract.DigestBytes(snap[5]);changeDigest:=releasecontract.DigestBytes(snap[6]);testsDigest:=releasecontract.DigestBytes(snap[7]);reviewsDigest:=releasecontract.DigestBytes(snap[8]);decisionsDigest:=releasecontract.DigestBytes(snap[9])
-		if binding.PolicyRevision!=policyDigest||binding.RequirementDigest!=requirementDigest||binding.ChangeSetDigest!=changeDigest||binding.TestAttestationsDigest!=testsDigest||binding.ReviewAttestationsDigest!=reviewsDigest||binding.DecisionAttestationsDigest!=decisionsDigest{fmt.Fprintln(stderr,"trusted artifact digest does not match release binding");return 1}
-		bindingDigest:=approval.DigestBytes(snap[0]);if approvalManifest.Repository!=*repositoryID||approvalManifest.FinalRevision!=binding.FinalRevision||approvalManifest.BindingDigest!=bindingDigest||approvalManifest.PolicyDigest!=policyDigest||approvalManifest.RequirementsDigest!=requirementDigest||approvalManifest.ChangeSetDigest!=changeDigest||approvalManifest.TestDigest!=testsDigest||approvalManifest.ReviewDigest!=reviewsDigest||approvalManifest.DecisionDigest!=decisionsDigest{fmt.Fprintln(stderr,"approval manifest does not match release evidence");return 1}
-		actual,err:=repository.CleanRevision(*root);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=binding.Validate(gates,change,attest,*repositoryID,actual,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1}
-		fmt.Fprintln(stdout,"PASS");return 0
+		flags := flag.NewFlagSet("release-gate", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		inputPath := flags.String("input", "", "release binding JSON")
+		gatesPath := flags.String("policy-gates", "", "trusted policy gates JSON")
+		requirementsPath := flags.String("requirements", "", "approved requirements artifact")
+		changePath := flags.String("change-set", "", "trusted change-set JSON")
+		root := flags.String("root", "", "repository root")
+		repositoryID := flags.String("repository", "", "canonical owner/name repository")
+		testsPath := flags.String("test-attestations", "", "test attestations JSON")
+		reviewsPath := flags.String("review-attestations", "", "review attestations JSON")
+		decisionsPath := flags.String("decision-attestations", "", "decision attestations JSON")
+		approvalPath := flags.String("approval-manifest", "", "signed approval manifest JSON")
+		signaturePath := flags.String("approval-signature", "", "detached Ed25519 signature in base64")
+		publicKeyPath := flags.String("trusted-public-key", "", "protected Ed25519 public key in base64")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *inputPath == "" || *gatesPath == "" || *requirementsPath == "" || *changePath == "" || *root == "" || *repositoryID == "" || *testsPath == "" || *reviewsPath == "" || *decisionsPath == "" || *approvalPath == "" || *signaturePath == "" || *publicKeyPath == "" {
+			fmt.Fprintln(stderr, "release-gate requires --input --policy-gates --requirements --change-set --root --repository --test-attestations --review-attestations --decision-attestations --approval-manifest --approval-signature --trusted-public-key")
+			return 2
+		}
+		paths := []string{*inputPath, *approvalPath, *signaturePath, *publicKeyPath, *gatesPath, *requirementsPath, *changePath, *testsPath, *reviewsPath, *decisionsPath}
+		snap := make([][]byte, len(paths))
+		for i, p := range paths {
+			body, readErr := os.ReadFile(p)
+			if readErr != nil {
+				fmt.Fprintln(stderr, readErr)
+				return 1
+			}
+			snap[i] = body
+		}
+		binding, err := releasecontract.ParseBinding(snap[0])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		approvalManifest, err := approval.Parse(snap[1])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if err := approval.VerifyBytes(snap[1], snap[2], snap[3]); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		gates, err := releasecontract.ParsePolicyGates(snap[4])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		change, err := releasecontract.ParseChangeSet(snap[6])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		tests, err := releasecontract.ParseAttestations(snap[7])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		reviews, err := releasecontract.ParseAttestations(snap[8])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		decisions, err := releasecontract.ParseAttestations(snap[9])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		attest := releasecontract.Attestations{Tests: tests.Tests, Reviews: reviews.Reviews, Decisions: decisions.Decisions}
+		policyDigest := releasecontract.DigestBytes(snap[4])
+		requirementDigest := releasecontract.DigestBytes(snap[5])
+		changeDigest := releasecontract.DigestBytes(snap[6])
+		testsDigest := releasecontract.DigestBytes(snap[7])
+		reviewsDigest := releasecontract.DigestBytes(snap[8])
+		decisionsDigest := releasecontract.DigestBytes(snap[9])
+		if binding.PolicyRevision != policyDigest || binding.RequirementDigest != requirementDigest || binding.ChangeSetDigest != changeDigest || binding.TestAttestationsDigest != testsDigest || binding.ReviewAttestationsDigest != reviewsDigest || binding.DecisionAttestationsDigest != decisionsDigest {
+			fmt.Fprintln(stderr, "trusted artifact digest does not match release binding")
+			return 1
+		}
+		bindingDigest := approval.DigestBytes(snap[0])
+		if approvalManifest.Repository != *repositoryID || approvalManifest.FinalRevision != binding.FinalRevision || approvalManifest.BindingDigest != bindingDigest || approvalManifest.PolicyDigest != policyDigest || approvalManifest.RequirementsDigest != requirementDigest || approvalManifest.ChangeSetDigest != changeDigest || approvalManifest.TestDigest != testsDigest || approvalManifest.ReviewDigest != reviewsDigest || approvalManifest.DecisionDigest != decisionsDigest {
+			fmt.Fprintln(stderr, "approval manifest does not match release evidence")
+			return 1
+		}
+		actual, err := repository.CleanRevision(*root)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if err := binding.Validate(gates, change, attest, *repositoryID, actual, time.Now().UTC()); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		fmt.Fprintln(stdout, "PASS")
+		return 0
 	case "policy-pack":
-		flags:=flag.NewFlagSet("policy-pack",flag.ContinueOnError);flags.SetOutput(stderr);orgPath:=flags.String("organization","","organization policy JSON");repoPath:=flags.String("repository","","repository policy JSON");exceptionPath:=flags.String("exception-approval","","signed weakening approval JSON");signaturePath:=flags.String("exception-signature","","detached approval signature");keyPath:=flags.String("trusted-public-key","","external trusted public key");if err:=flags.Parse(args[1:]);err!=nil{return 2};if flags.NArg()!=0||*orgPath==""||*repoPath==""{fmt.Fprintln(stderr,"policy-pack requires --organization and --repository");return 2};orgBody,err:=os.ReadFile(*orgPath);if err!=nil{fmt.Fprintln(stderr,err);return 1};repoBody,err:=os.ReadFile(*repoPath);if err!=nil{fmt.Fprintln(stderr,err);return 1};o,err:=policyset.ParsePolicy(orgBody);if err!=nil{fmt.Fprintln(stderr,err);return 1};p,err:=policyset.ParsePolicy(repoBody);if err!=nil{fmt.Fprintln(stderr,err);return 1};approved:=map[string]bool{};if *exceptionPath!=""||*signaturePath!=""||*keyPath!=""{if *exceptionPath==""||*signaturePath==""||*keyPath==""{fmt.Fprintln(stderr,"policy exception requires approval, signature, and trusted public key");return 2};body,_:=os.ReadFile(*exceptionPath);sig,_:=os.ReadFile(*signaturePath);key,_:=os.ReadFile(*keyPath);ex,err:=policyset.ParseApproval(body);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=policyset.VerifyException(body,sig,key,ex,approval.DigestBytes(orgBody),approval.DigestBytes(repoBody),ex.CommandID,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1};approved[ex.CommandID]=true};resolved,err:=policyset.Resolve(o,p,approved);if err!=nil{fmt.Fprintln(stderr,err);return 1};return writeJSON(stdout,stderr,resolved)
+		flags := flag.NewFlagSet("policy-pack", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		orgPath := flags.String("organization", "", "organization policy JSON")
+		repoPath := flags.String("repository", "", "repository policy JSON")
+		exceptionPath := flags.String("exception-approval", "", "signed weakening approval JSON")
+		signaturePath := flags.String("exception-signature", "", "detached approval signature")
+		keyPath := flags.String("trusted-public-key", "", "external trusted public key")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *orgPath == "" || *repoPath == "" {
+			fmt.Fprintln(stderr, "policy-pack requires --organization and --repository")
+			return 2
+		}
+		orgBody, err := os.ReadFile(*orgPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		repoBody, err := os.ReadFile(*repoPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		o, err := policyset.ParsePolicy(orgBody)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		p, err := policyset.ParsePolicy(repoBody)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		approved := map[string]bool{}
+		if *exceptionPath != "" || *signaturePath != "" || *keyPath != "" {
+			if *exceptionPath == "" || *signaturePath == "" || *keyPath == "" {
+				fmt.Fprintln(stderr, "policy exception requires approval, signature, and trusted public key")
+				return 2
+			}
+			body, _ := os.ReadFile(*exceptionPath)
+			sig, _ := os.ReadFile(*signaturePath)
+			key, _ := os.ReadFile(*keyPath)
+			ex, err := policyset.ParseApproval(body)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			if err := policyset.VerifyException(body, sig, key, ex, approval.DigestBytes(orgBody), approval.DigestBytes(repoBody), ex.CommandID, time.Now().UTC()); err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			approved[ex.CommandID] = true
+		}
+		resolved, err := policyset.Resolve(o, p, approved)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		return writeJSON(stdout, stderr, resolved)
 	case "history":
-		flags:=flag.NewFlagSet("history",flag.ContinueOnError);flags.SetOutput(stderr);paths:=flags.String("receipts","","comma-separated receipt JSON paths");manifestPath:=flags.String("approval-manifest","","signed history approval");signaturePath:=flags.String("approval-signature","","detached signature");keyPath:=flags.String("trusted-public-key","","external trusted public key");if err:=flags.Parse(args[1:]);err!=nil{return 2};if flags.NArg()!=0||*paths==""||*manifestPath==""||*signaturePath==""||*keyPath==""{fmt.Fprintln(stderr,"history requires --receipts --approval-manifest --approval-signature --trusted-public-key");return 2};receipts:=[]history.Receipt{};for _,p:=range strings.Split(*paths,","){body,err:=os.ReadFile(p);if err!=nil{fmt.Fprintln(stderr,err);return 1};r,err:=history.ParseReceipt(body);if err!=nil{fmt.Fprintln(stderr,err);return 1};receipts=append(receipts,r)};manifestBody,err:=os.ReadFile(*manifestPath);if err!=nil{fmt.Fprintln(stderr,err);return 1};sig,_:=os.ReadFile(*signaturePath);key,_:=os.ReadFile(*keyPath);m,err:=history.ParseApproval(manifestBody);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=history.VerifyApproval(manifestBody,sig,key,m,receipts);err!=nil{fmt.Fprintln(stderr,err);return 1};report,err:=history.Build(receipts);if err!=nil{fmt.Fprintln(stderr,err);return 1};return writeJSON(stdout,stderr,report)
+		flags := flag.NewFlagSet("history", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		paths := flags.String("receipts", "", "comma-separated receipt JSON paths")
+		manifestPath := flags.String("approval-manifest", "", "signed history approval")
+		signaturePath := flags.String("approval-signature", "", "detached signature")
+		keyPath := flags.String("trusted-public-key", "", "external trusted public key")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *paths == "" || *manifestPath == "" || *signaturePath == "" || *keyPath == "" {
+			fmt.Fprintln(stderr, "history requires --receipts --approval-manifest --approval-signature --trusted-public-key")
+			return 2
+		}
+		receipts := []history.Receipt{}
+		for _, p := range strings.Split(*paths, ",") {
+			body, err := os.ReadFile(p)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			r, err := history.ParseReceipt(body)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			receipts = append(receipts, r)
+		}
+		manifestBody, err := os.ReadFile(*manifestPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		sig, _ := os.ReadFile(*signaturePath)
+		key, _ := os.ReadFile(*keyPath)
+		m, err := history.ParseApproval(manifestBody)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if err := history.VerifyApproval(manifestBody, sig, key, m, receipts); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		report, err := history.Build(receipts)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		return writeJSON(stdout, stderr, report)
 	case "incremental":
-		flags:=flag.NewFlagSet("incremental",flag.ContinueOnError);flags.SetOutput(stderr);input:=flags.String("input","","trusted incremental mapping JSON");if err:=flags.Parse(args[1:]);err!=nil{return 2};if flags.NArg()!=0||*input==""{fmt.Fprintln(stderr,"incremental requires --input");return 2};in,err:=incremental.Load(*input);if err!=nil{fmt.Fprintln(stderr,err);return 1};selection,err:=incremental.Select(in);if err!=nil{fmt.Fprintln(stderr,err);return 1};return writeJSON(stdout,stderr,selection)
+		flags := flag.NewFlagSet("incremental", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		input := flags.String("input", "", "trusted incremental mapping JSON")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *input == "" {
+			fmt.Fprintln(stderr, "incremental requires --input")
+			return 2
+		}
+		in, err := incremental.Load(*input)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		selection, err := incremental.Select(in)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		return writeJSON(stdout, stderr, selection)
 	case "study":
-		flags:=flag.NewFlagSet("study",flag.ContinueOnError);flags.SetOutput(stderr);manifest:=flags.String("manifest","","preregistered study manifest");results:=flags.String("results","","signed raw paired results");signature:=flags.String("results-signature","","detached Ed25519 result signature");key:=flags.String("trusted-public-key","","external trusted public key");if err:=flags.Parse(args[1:]);err!=nil{return 2};if flags.NArg()!=0||*manifest==""||*results==""||*signature==""||*key==""{fmt.Fprintln(stderr,"study requires --manifest --results --results-signature --trusted-public-key");return 2};manifestBody,err:=os.ReadFile(*manifest);if err!=nil{fmt.Fprintln(stderr,err);return 1};m,err:=study.ParseManifest(manifestBody);if err!=nil{fmt.Fprintln(stderr,err);return 1};body,err:=os.ReadFile(*results);if err!=nil{fmt.Fprintln(stderr,err);return 1};sig,_:=os.ReadFile(*signature);pub,_:=os.ReadFile(*key);if err:=approval.VerifyBytes(body,sig,pub);err!=nil{fmt.Fprintln(stderr,err);return 1};raw,err:=study.ParseResults(body);if err!=nil{fmt.Fprintln(stderr,err);return 1};if raw.ManifestDigest!=study.Digest(manifestBody){fmt.Fprintln(stderr,"signed study results do not match manifest");return 1};report,err:=study.Score(m,raw);if err!=nil{fmt.Fprintln(stderr,err);return 1};if code:=writeJSON(stdout,stderr,report);code!=0{return code};if !report.ClaimAllowed{return 1};return 0
+		flags := flag.NewFlagSet("study", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		manifest := flags.String("manifest", "", "preregistered study manifest")
+		cases := flags.String("case-corpus", "", "exact preregistered case corpus")
+		oracle := flags.String("oracle-corpus", "", "exact committed oracle and scoring corpus")
+		config := flags.String("model-config", "", "exact preregistered model and harness configuration")
+		results := flags.String("results", "", "signed raw paired results")
+		signature := flags.String("results-signature", "", "detached Ed25519 result signature")
+		key := flags.String("trusted-public-key", "", "external trusted public key")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *manifest == "" || *cases == "" || *oracle == "" || *config == "" || *results == "" || *signature == "" || *key == "" {
+			fmt.Fprintln(stderr, "study requires --manifest --case-corpus --oracle-corpus --model-config --results --results-signature --trusted-public-key")
+			return 2
+		}
+		paths := []string{*manifest, *cases, *oracle, *config, *results, *signature, *key}
+		snap := make([][]byte, len(paths))
+		for i, p := range paths {
+			body, readErr := os.ReadFile(p)
+			if readErr != nil {
+				fmt.Fprintln(stderr, readErr)
+				return 1
+			}
+			snap[i] = body
+		}
+		m, err := study.ParseManifest(snap[0])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if err := study.VerifyInputs(m, snap[1], snap[2], snap[3]); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if err := approval.VerifyBytes(snap[4], snap[5], snap[6]); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		raw, err := study.ParseResults(snap[4])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if raw.ManifestDigest != study.Digest(snap[0]) {
+			fmt.Fprintln(stderr, "signed study results do not match manifest")
+			return 1
+		}
+		report, err := study.Score(m, raw)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if code := writeJSON(stdout, stderr, report); code != 0 {
+			return code
+		}
+		if !report.ClaimAllowed {
+			return 1
+		}
+		return 0
 	case "slop":
 		flags := flag.NewFlagSet("slop", flag.ContinueOnError)
 		flags.SetOutput(stderr)

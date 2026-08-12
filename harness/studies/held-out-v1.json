@@ -2,12 +2,15 @@
   "schema_version": "1.0.0",
   "study_id": "held-out-v1",
   "repository": "shashank-sn/clean-code",
-  "revision": "2d68025fa8decaa46067544711dce184be069425",
+  "revision": "80c18421cfd2a8f7389c2974ad799d94e2e07f60",
+  "case_corpus_digest": "7454271f1d4faae87990ec4b976a67bb027c8df75ea974a08d1ef76f90b433d3",
+  "oracle_corpus_digest": "8776fae8534eb3c5f123bf959adcf1a1bd18984ae125a856fb92e848040acdce",
+  "model_config_digest": "604afb78dd156a9a871b11741999ddead696437ffdfbc01706d28525bc908d28",
   "minimum_pairs": 10,
   "tasks": [
     {
       "id": "held-out-review-01",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -16,7 +19,7 @@
     },
     {
       "id": "held-out-review-02",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -25,7 +28,7 @@
     },
     {
       "id": "held-out-review-03",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -34,7 +37,7 @@
     },
     {
       "id": "held-out-review-04",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -43,7 +46,7 @@
     },
     {
       "id": "held-out-review-05",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -52,7 +55,7 @@
     },
     {
       "id": "held-out-review-06",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -61,7 +64,7 @@
     },
     {
       "id": "held-out-review-07",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -70,7 +73,7 @@
     },
     {
       "id": "held-out-review-08",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -79,7 +82,7 @@
     },
     {
       "id": "held-out-review-09",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],
@@ -88,7 +91,7 @@
     },
     {
       "id": "held-out-review-10",
-      "model": "gpt-5",
+      "model": "gpt-5-2025-08-07",
       "tools": [
         "none"
       ],

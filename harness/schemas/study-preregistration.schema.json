@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "study_id", "repository", "target_revision", "corpus", "scoring", "canonicalization", "commitments", "exclusions"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "study_id": {"type": "string", "minLength": 1},
+    "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+    "target_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "corpus": {"type": "object"},
+    "scoring": {"type": "object"},
+    "canonicalization": {"type": "object"},
+    "commitments": {"type": "object", "additionalProperties": false, "required": ["case_corpus_sha256", "oracle_scoring_sha256"], "properties": {"case_corpus_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "oracle_scoring_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}},
+    "exclusions": {"type": "object"}
+  }
+}
