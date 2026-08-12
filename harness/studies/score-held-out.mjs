@@ -14,6 +14,7 @@ const manifestPath = join(repositoryRoot, "harness", "studies", "held-out-v1.jso
 const casesPath = join(studyRoot, "cases.json");
 const preregistrationPath = join(studyRoot, "preregistration.json");
 const configPath = join(studyRoot, "model-config.json");
+const attemptManifestPath = join(studyRoot, "execution-attempt.json");
 const journalPath = join(studyRoot, "execution-journal.ndjson");
 const rawRoot = join(studyRoot, "raw");
 const resultsPath = join(studyRoot, "results.json");
@@ -44,6 +45,7 @@ const normalizedTokens = description => new Set(
 );
 const sumBy = (items, key) => items.reduce((total, item) => total + item[key], 0);
 const pairsEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const armsFor = index => index % 2 === 0 ? ["control", "workflow"] : ["workflow", "control"];
 const safeArtifactPath = async value => {
   requireValue(typeof value === "string" && value !== "" && !isAbsolute(value), "artifact_path must be a nonempty relative path");
   const candidate = resolve(studyRoot, value);
@@ -57,12 +59,13 @@ const safeArtifactPath = async value => {
   return resolved;
 };
 
-const [manifestBody, casesBody, preregistrationBody, configBody, oracleBody, journalBody] = await Promise.all([
+const [manifestBody, casesBody, preregistrationBody, configBody, oracleBody, attemptManifestBody, journalBody] = await Promise.all([
   readFile(manifestPath),
   readFile(casesPath),
   readFile(preregistrationPath),
   readFile(configPath),
   readFile(oraclePath),
+  readFile(attemptManifestPath),
   readFile(journalPath),
 ]);
 const manifest = parseJSON(manifestBody, "study manifest");
@@ -70,6 +73,7 @@ const corpus = parseJSON(casesBody, "case corpus");
 const preregistration = parseJSON(preregistrationBody, "preregistration");
 const config = parseJSON(configBody, "model config");
 const oracle = parseJSON(oracleBody, "oracle");
+const attempt = parseJSON(attemptManifestBody, "execution attempt");
 
 requireValue(manifest.schema_version === "1.0.0" && manifest.study_id === "held-out-v1", "unexpected study manifest identity");
 requireValue(manifest.repository === preregistration.repository, "repository mismatch between manifest and preregistration");
@@ -101,6 +105,19 @@ for (let number = 1; number <= 10; number += 1) {
   requireValue(pairsEqual(task.tools, ["none"]) && task.oracle === oracle.oracle_id, `task tools/oracle mismatch for ${taskID}`);
 }
 
+const manifestDigest = sha256(manifestBody);
+exactKeys(attempt, ["schema_version", "study_id", "attempt_id", "manifest_digest", "created_at", "schedule"], "execution attempt");
+requireValue(attempt.schema_version === "1.0.0" && attempt.study_id === manifest.study_id, "execution attempt identity mismatch");
+requireValue(typeof attempt.attempt_id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(attempt.attempt_id), "execution attempt ID is invalid");
+requireValue(attempt.manifest_digest === manifestDigest && validDate(attempt.created_at), "execution attempt commitment is invalid");
+const expectedSchedule = corpus.cases.flatMap((item, index) => armsFor(index).map(arm => ({ task_id: item.task_id, arm })));
+requireValue(Array.isArray(attempt.schedule) && attempt.schedule.length === expectedSchedule.length, "execution attempt must reserve all 20 ordered slots");
+for (const [index, slot] of attempt.schedule.entries()) {
+  exactKeys(slot, ["ordinal", "task_id", "arm"], `execution attempt slot ${index + 1}`);
+  const expected = expectedSchedule[index];
+  requireValue(slot.ordinal === index + 1 && slot.task_id === expected.task_id && slot.arm === expected.arm, `execution attempt schedule mismatch at ordinal ${index + 1}`);
+}
+
 const journalText = journalBody.toString("utf8");
 requireValue(journalText.endsWith("\n"), "execution journal must end with LF");
 const journalLines = journalText.slice(0, -1).split("\n");
@@ -114,7 +131,9 @@ const outcomes = [];
 const privateScores = [];
 
 for (const [index, run] of journalRuns.entries()) {
-  exactKeys(run, ["task_id", "arm", "started_at", "finished_at", "http_status", "response_id", "response_model", "response_status", "execution_status", "output_words", "artifact_path", "artifact_digest"], `journal line ${index + 1}`);
+  exactKeys(run, ["attempt_id", "ordinal", "task_id", "arm", "started_at", "finished_at", "http_status", "response_id", "response_model", "response_status", "execution_status", "output_words", "artifact_path", "artifact_digest"], `journal line ${index + 1}`);
+  const slot = attempt.schedule[index];
+  requireValue(run.attempt_id === attempt.attempt_id && run.ordinal === slot.ordinal && run.task_id === slot.task_id && run.arm === slot.arm, `journal order or attempt mismatch on line ${index + 1}`);
   requireValue(tasks.has(run.task_id) && (run.arm === "control" || run.arm === "workflow"), `invalid run identity on journal line ${index + 1}`);
   const runKey = `${run.task_id}|${run.arm}`;
   requireValue(!seenRunKeys.has(runKey), `duplicate terminal run for ${runKey}`);
@@ -138,8 +157,9 @@ for (const [index, run] of journalRuns.entries()) {
   requireValue(response.error == null && response.incomplete_details == null, `raw response is incomplete or errored for ${runKey}`);
   requireValue(Array.isArray(response.tools) && response.tools.length === 0, `raw response used tools for ${runKey}`);
   const metadata = response.metadata;
-  exactKeys(metadata, ["study_id", "task_id", "arm", "case_corpus_digest", "model_config_digest"], `raw response metadata for ${runKey}`);
-  requireValue(metadata.study_id === manifest.study_id && metadata.task_id === run.task_id && metadata.arm === run.arm, `raw response metadata identity mismatch for ${runKey}`);
+  exactKeys(metadata, ["study_id", "attempt_id", "ordinal", "task_id", "arm", "case_corpus_digest", "model_config_digest"], `raw response metadata for ${runKey}`);
+  requireValue(metadata.study_id === manifest.study_id && metadata.attempt_id === attempt.attempt_id && metadata.ordinal === String(run.ordinal), `raw response metadata attempt mismatch for ${runKey}`);
+  requireValue(metadata.task_id === run.task_id && metadata.arm === run.arm, `raw response metadata identity mismatch for ${runKey}`);
   requireValue(metadata.case_corpus_digest === manifest.case_corpus_digest && metadata.model_config_digest === manifest.model_config_digest, `raw response metadata digest mismatch for ${runKey}`);
 
   const textBlocks = (Array.isArray(response.output) ? response.output : [])
@@ -229,7 +249,6 @@ for (const taskID of tasks.keys()) {
 }
 outcomes.sort((a, b) => a.task_id.localeCompare(b.task_id) || a.arm.localeCompare(b.arm));
 
-const manifestDigest = sha256(manifestBody);
 const results = { schema_version: "1.0.0", study_id: manifest.study_id, manifest_digest: manifestDigest, outcomes };
 const aggregateForArm = arm => {
   const selected = privateScores.filter(score => score.run_key.endsWith(`|${arm}`));
@@ -257,7 +276,7 @@ const report = {
     oracle_corpus_digest: manifest.oracle_corpus_digest,
     model_config_digest: manifest.model_config_digest,
   },
-  execution: { terminal_runs: outcomes.length, unique_response_ids: seenRunIDs.size, unique_artifacts: seenArtifacts.size, complete_pairs: tasks.size },
+  execution: { attempt_id: attempt.attempt_id, terminal_runs: outcomes.length, unique_response_ids: seenRunIDs.size, unique_artifacts: seenArtifacts.size, complete_pairs: tasks.size },
   arms: { control, workflow },
   claim_allowed: claimAllowed,
   limitations: claimAllowed ? [] : ["One or more raw-artifact-derived outcomes failed; performance claims remain blocked."],
@@ -266,4 +285,3 @@ const report = {
 await writeFile(resultsPath, `${JSON.stringify(results, null, 2)}\n`, { flag: "wx", mode: 0o600 });
 await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, { flag: "wx", mode: 0o600 });
 process.stdout.write(`${JSON.stringify({ status: "PASS", results_path: resultsPath, report_path: reportPath, terminal_runs: outcomes.length, claim_allowed: claimAllowed })}\n`);
-
