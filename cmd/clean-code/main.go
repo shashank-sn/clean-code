@@ -286,16 +286,25 @@ func run(args []string, stdout, stderr io.Writer) int {
 		requirementsPath:=flags.String("requirements","","approved requirements artifact")
 		changePath:=flags.String("change-set","","trusted change-set JSON")
 		root:=flags.String("root","","repository root")
+		repositoryID:=flags.String("repository","","canonical owner/name repository")
+		testsPath:=flags.String("test-attestations","","test attestations JSON")
+		reviewsPath:=flags.String("review-attestations","","review attestations JSON")
+		decisionsPath:=flags.String("decision-attestations","","decision attestations JSON")
 		if err:=flags.Parse(args[1:]);err!=nil{return 2}
-		if flags.NArg()!=0||*inputPath==""||*gatesPath==""||*requirementsPath==""||*changePath==""||*root==""{fmt.Fprintln(stderr,"release-gate requires --input --policy-gates --requirements --change-set --root");return 2}
+		if flags.NArg()!=0||*inputPath==""||*gatesPath==""||*requirementsPath==""||*changePath==""||*root==""||*repositoryID==""||*testsPath==""||*reviewsPath==""||*decisionsPath==""{fmt.Fprintln(stderr,"release-gate requires --input --policy-gates --requirements --change-set --root --repository --test-attestations --review-attestations --decision-attestations");return 2}
 		binding,err:=releasecontract.Load(*inputPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
 		gates,err:=releasecontract.LoadPolicyGates(*gatesPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
 		change,err:=releasecontract.LoadChangeSet(*changePath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		tests,err:=releasecontract.LoadAttestations(*testsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		reviews,err:=releasecontract.LoadAttestations(*reviewsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		decisions,err:=releasecontract.LoadAttestations(*decisionsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		attest:=releasecontract.Attestations{Tests:tests.Tests,Reviews:reviews.Reviews,Decisions:decisions.Decisions}
 		policyDigest,err:=releasecontract.Digest(*gatesPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
 		requirementDigest,err:=releasecontract.Digest(*requirementsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
 		changeDigest,err:=releasecontract.Digest(*changePath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
-		if binding.PolicyRevision!=policyDigest||binding.RequirementDigest!=requirementDigest||binding.ChangeSetDigest!=changeDigest{fmt.Fprintln(stderr,"trusted artifact digest does not match release binding");return 1}
-		actual:=repository.Revision(*root);if err:=binding.Validate(gates,change,actual,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1}
+		testsDigest,_:=releasecontract.Digest(*testsPath);reviewsDigest,_:=releasecontract.Digest(*reviewsPath);decisionsDigest,_:=releasecontract.Digest(*decisionsPath)
+		if binding.PolicyRevision!=policyDigest||binding.RequirementDigest!=requirementDigest||binding.ChangeSetDigest!=changeDigest||binding.TestAttestationsDigest!=testsDigest||binding.ReviewAttestationsDigest!=reviewsDigest||binding.DecisionAttestationsDigest!=decisionsDigest{fmt.Fprintln(stderr,"trusted artifact digest does not match release binding");return 1}
+		actual:=repository.Revision(*root);if err:=binding.Validate(gates,change,attest,*repositoryID,actual,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1}
 		fmt.Fprintln(stdout,"PASS");return 0
 	case "slop":
 		flags := flag.NewFlagSet("slop", flag.ContinueOnError)
