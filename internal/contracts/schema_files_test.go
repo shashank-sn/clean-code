@@ -29,6 +29,18 @@ func TestRepositoryJSONArtifactsAreValid(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	err = filepath.WalkDir(filepath.Join(root, "harness", "policies"), func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".json") {
+			paths = append(paths, path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	for _, path := range paths {
 		body, err := os.ReadFile(path)

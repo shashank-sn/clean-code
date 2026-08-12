@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Setup"
+  short_description: "Connect this workflow to any coding host"
+  default_prompt: "Use $clean-setup to configure this repository for my coding environment."

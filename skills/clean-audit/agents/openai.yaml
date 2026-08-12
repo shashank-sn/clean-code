@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Audit"
+  short_description: "Create an immutable revision-bound receipt"
+  default_prompt: "Use $clean-audit to produce a release receipt from the final evidence."

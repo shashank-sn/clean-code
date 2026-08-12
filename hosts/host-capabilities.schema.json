@@ -3,7 +3,7 @@
   "$id": "https://clean-code.local/schemas/host-capabilities.schema.json",
   "title": "Coding host capabilities",
   "type": "object",
-  "required": ["id", "display_name", "native_skills", "subagents", "hooks", "blocking_approvals", "command_execution", "cli", "integration"],
+  "required": ["id", "display_name", "native_skills", "subagents", "hooks", "blocking_approvals", "file_edits", "command_execution", "browser_automation", "background_tasks", "cli", "integration"],
   "properties": {
     "id": { "type": "string", "minLength": 1 },
     "display_name": { "type": "string", "minLength": 1 },
@@ -11,7 +11,10 @@
     "subagents": { "type": "boolean" },
     "hooks": { "type": "boolean" },
     "blocking_approvals": { "type": "boolean" },
+    "file_edits": { "type": "boolean" },
     "command_execution": { "type": "boolean" },
+    "browser_automation": { "type": "boolean" },
+    "background_tasks": { "type": "boolean" },
     "cli": { "type": "boolean" },
     "integration": { "type": "string", "minLength": 1 }
   },

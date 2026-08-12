@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/audit-input.schema.json",
+  "title": "Clean Code audit input",
+  "type": "object",
+  "required": ["schema_version", "repository", "revision", "policy_revision", "verification", "test_plan", "review", "spot_check", "supporting_evidence"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "repository": { "type": "string", "minLength": 1 },
+    "revision": { "type": "string", "minLength": 1 },
+    "policy_revision": { "type": "string", "minLength": 1 },
+    "verification": { "type": "string", "minLength": 1 },
+    "test_plan": { "type": "string", "minLength": 1 },
+    "review": { "type": "string", "minLength": 1 },
+    "spot_check": { "type": "string", "minLength": 1 },
+    "supporting_evidence": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "max_evidence_age_seconds": { "type": "integer", "minimum": 1 },
+    "exceptions": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  },
+  "additionalProperties": false
+}

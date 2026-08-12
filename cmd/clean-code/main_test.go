@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"clean-code/internal/discover"
@@ -22,6 +23,46 @@ func TestRunSetupUsesGenericFallback(t *testing.T) {
 	}
 	if result.ID != "generic" || !result.CLI {
 		t.Fatalf("unexpected fallback: %+v", result)
+	}
+}
+
+func TestRunSetupWritesHostInstructionsWithoutOverwrite(t *testing.T) {
+	root := t.TempDir()
+	var stdout, stderr bytes.Buffer
+	args := []string{"setup", "--host", "cursor", "--output", root}
+	if code := run(args, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected setup success, got %d: %s", code, stderr.String())
+	}
+	path := filepath.Join(root, ".cursor", "rules", "clean-code.mdc")
+	if _, err := os.Stat(path); err != nil {
+		t.Fatalf("expected generated host instructions: %v", err)
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := run(args, &stdout, &stderr); code != 1 {
+		t.Fatalf("expected overwrite rejection, got %d", code)
+	}
+}
+
+func TestRunBenchmarkScoresManifest(t *testing.T) {
+	manifest := filepath.Join("..", "..", "harness", "calibration", "benchmark-manifest.yaml")
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"benchmark", "--manifest", manifest}, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected benchmark success, got %d: %s", code, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"correct_silence": 2`)) {
+		t.Fatalf("unexpected benchmark report: %s", stdout.String())
+	}
+}
+
+func TestRunLearnAcceptsReversibleProposal(t *testing.T) {
+	proposal := filepath.Join("..", "..", "harness", "policies", "example-change-proposal.json")
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"learn", "--proposal", proposal}, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected proposal success, got %d: %s", code, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"status": "PASS"`)) {
+		t.Fatalf("unexpected proposal report: %s", stdout.String())
 	}
 }
 
@@ -60,12 +101,36 @@ func TestRunRejectsExtraArguments(t *testing.T) {
 		{"verify", ".", "extra"},
 		{"architecture", "extra"},
 		{"trace", "extra"},
+		{"review", "extra"},
+		{"audit", "extra"},
+		{"benchmark", "extra"},
+		{"learn", "extra"},
 	}
 	for _, args := range tests {
 		var stdout, stderr bytes.Buffer
 		if code := run(args, &stdout, &stderr); code != 2 {
 			t.Errorf("expected usage error for %v, got %d", args, code)
 		}
+	}
+}
+
+func TestRunReviewAcceptsIndependentZeroFindings(t *testing.T) {
+	root := t.TempDir()
+	input := root + "/review.json"
+	if err := os.WriteFile(input, []byte(`{
+  "schema_version":"1.0.0",
+  "revision":"abc",
+  "change_author":"author",
+  "reviewer":"reviewer",
+  "scope":["change.go"],
+  "findings":[]
+}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"review", "--input", input}, &stdout, &stderr)
+	if code != 0 || !bytes.Contains(stdout.Bytes(), []byte(`"findings": []`)) {
+		t.Fatalf("expected correct silence, got %d: %s\n%s", code, stderr.String(), stdout.String())
 	}
 }
 

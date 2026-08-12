@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/review-input.schema.json",
+  "title": "Clean Code review input",
+  "type": "object",
+  "required": ["schema_version", "revision", "change_author", "reviewer", "scope", "findings"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "revision": { "type": "string", "minLength": 1 },
+    "change_author": { "type": "string", "minLength": 1 },
+    "reviewer": { "type": "string", "minLength": 1 },
+    "scope": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "findings": { "type": "array", "items": { "$ref": "review-finding.schema.json" } }
+  },
+  "additionalProperties": false
+}

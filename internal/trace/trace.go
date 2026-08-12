@@ -94,6 +94,9 @@ func Evaluate(plan Plan) Report {
 	}
 	requirements := map[string]bool{}
 	coverage := map[string]map[string]bool{}
+	if plan.SchemaVersion != "1.0.0" {
+		report.Issues = append(report.Issues, Issue{Kind: "schema-version", Summary: "unsupported test plan schema version"})
+	}
 	if len(plan.Requirements) == 0 {
 		report.Issues = append(report.Issues, Issue{Kind: "missing-requirement", Summary: "test plan has no requirements"})
 	}

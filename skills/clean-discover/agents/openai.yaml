@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Discover"
+  short_description: "Inspect repository checks without running them"
+  default_prompt: "Use $clean-discover to inventory this repository and propose safe checks."

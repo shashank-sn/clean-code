@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Review"
+  short_description: "Review requirements, code, tests, and evidence"
+  default_prompt: "Use $clean-review to review this change and return only supported findings."

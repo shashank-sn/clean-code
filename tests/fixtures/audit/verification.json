@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "/repo",
+  "revision": "abc",
+  "policy_source": "approved.json",
+  "started_at": "2026-08-12T00:00:00Z",
+  "finished_at": "2026-08-12T00:01:00Z",
+  "complete": true,
+  "results": [
+    {
+      "schema_version": "1.0.0",
+      "check_id": "test",
+      "category": "unit-test",
+      "provider": "fixture",
+      "status": "PASS",
+      "required": true,
+      "revision": "abc",
+      "started_at": "2026-08-12T00:00:00Z",
+      "duration_ms": 100
+    }
+  ]
+}

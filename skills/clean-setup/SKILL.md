@@ -18,6 +18,6 @@ Connect the Clean Code workflow to the current coding platform, IDE, terminal ag
 
 ## Safety
 
-- Do not install tools, enable hooks, edit repository policy, or write outside the approved integration path without permission.
-- Do not claim subagent independence when the host only supports one context. Use separate sessions and record the limitation.
+- Get permission before installing tools, enabling hooks, editing repository policy, or writing outside the approved integration path.
+- When the host supports one context, use separate sessions and record that independence is procedural.
 - Keep doctrine, status meanings, and evidence contracts identical across hosts.

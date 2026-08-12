@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "requirements": [
+    {"id": "R1", "acceptance_examples": ["returns the requested result"]}
+  ],
+  "tracks": [
+    {"kind": "unit", "requirement_ids": ["R1"], "status": "PASS", "owner": "unit", "evidence": "unit.json"},
+    {"kind": "acceptance", "requirement_ids": ["R1"], "status": "PASS", "owner": "acceptance", "evidence": "acceptance.json", "context_source": "requirements"},
+    {"kind": "integration", "requirement_ids": ["R1"], "status": "PASS", "owner": "integration", "evidence": "integration.json"},
+    {"kind": "ui-qa", "requirement_ids": ["R1"], "status": "INAPPLICABLE", "reason": "no user interface", "context_source": "requirements"}
+  ]
+}

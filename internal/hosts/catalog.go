@@ -9,7 +9,10 @@ type Capabilities struct {
 	Subagents         bool   `json:"subagents"`
 	Hooks             bool   `json:"hooks"`
 	BlockingApprovals bool   `json:"blocking_approvals"`
+	FileEdits         bool   `json:"file_edits"`
 	CommandExecution  bool   `json:"command_execution"`
+	BrowserAutomation bool   `json:"browser_automation"`
+	BackgroundTasks   bool   `json:"background_tasks"`
 	CLI               bool   `json:"cli"`
 	Integration       string `json:"integration"`
 }
@@ -21,29 +24,42 @@ var catalog = map[string]Capabilities{
 	},
 	"codex": {
 		ID: "codex", DisplayName: "Codex", NativeSkills: true, Subagents: true,
-		Hooks: true, BlockingApprovals: true, CommandExecution: true, CLI: true,
+		BlockingApprovals: true, FileEdits: true, CommandExecution: true, CLI: true,
 		Integration: "native skills with AGENTS.md fallback",
 	},
 	"claude-code": {
 		ID: "claude-code", DisplayName: "Claude Code", NativeSkills: true, Subagents: true,
-		Hooks: true, BlockingApprovals: true, CommandExecution: true, CLI: true,
+		Hooks: true, BlockingApprovals: true, FileEdits: true, CommandExecution: true, CLI: true,
 		Integration: "native skills and agent instructions",
 	},
 	"cursor": {
-		ID: "cursor", DisplayName: "Cursor", CommandExecution: true, CLI: true,
+		ID: "cursor", DisplayName: "Cursor", FileEdits: true, CommandExecution: true, CLI: true,
 		Integration: "generated rules and portable instructions",
 	},
 	"copilot": {
-		ID: "copilot", DisplayName: "GitHub Copilot", CLI: true,
+		ID: "copilot", DisplayName: "GitHub Copilot", FileEdits: true, CLI: true,
 		Integration: "repository instructions and custom agent definitions",
 	},
 	"gemini-cli": {
-		ID: "gemini-cli", DisplayName: "Gemini CLI", CommandExecution: true, CLI: true,
+		ID: "gemini-cli", DisplayName: "Gemini CLI", BlockingApprovals: true, FileEdits: true,
+		CommandExecution: true, BackgroundTasks: true, CLI: true,
 		Integration: "terminal-agent instructions and standalone CLI",
 	},
 	"ide-agent": {
-		ID: "ide-agent", DisplayName: "IDE coding agent", CLI: true,
+		ID: "ide-agent", DisplayName: "IDE coding agent", FileEdits: true, CLI: true,
 		Integration: "generated rules or portable instructions",
+	},
+	"windsurf": {
+		ID: "windsurf", DisplayName: "Windsurf", FileEdits: true, CommandExecution: true, CLI: true,
+		Integration: "generated workspace rules and standalone CLI",
+	},
+	"cline": {
+		ID: "cline", DisplayName: "Cline", FileEdits: true, CommandExecution: true, CLI: true,
+		Integration: "generated workspace rules and standalone CLI",
+	},
+	"roo-code": {
+		ID: "roo-code", DisplayName: "Roo Code", FileEdits: true, CommandExecution: true, CLI: true,
+		Integration: "generated workspace rules and standalone CLI",
 	},
 }
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "Clean Build"
-  short_description: "Build one bounded behavior at a time"
-  default_prompt: "Use $clean-build to implement this behavior in small verified steps."
+  short_description: "Implement one bounded behavior with evidence"
+  default_prompt: "Use $clean-build to implement this change in small verified steps."

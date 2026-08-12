@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "/repo",
+  "revision": "abc",
+  "policy_revision": "policy-1",
+  "verification": "verification.json",
+  "test_plan": "test-plan.json",
+  "review": "review.json",
+  "spot_check": "spot-check.json",
+  "supporting_evidence": ["unit.json", "acceptance.json", "integration.json"],
+  "exceptions": []
+}

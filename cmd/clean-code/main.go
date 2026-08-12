@@ -10,17 +10,21 @@ import (
 	"path/filepath"
 
 	"clean-code/internal/architecture"
+	"clean-code/internal/audit"
+	"clean-code/internal/benchmark"
 	"clean-code/internal/contracts"
 	"clean-code/internal/discover"
 	"clean-code/internal/evidence"
 	"clean-code/internal/hosts"
+	"clean-code/internal/policy"
 	"clean-code/internal/repository"
+	"clean-code/internal/review"
 	"clean-code/internal/runner"
 	"clean-code/internal/trace"
 	"clean-code/internal/verify"
 )
 
-const version = "0.1.0-dev"
+var version = "0.1.0-dev"
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
@@ -50,12 +54,21 @@ func run(args []string, stdout, stderr io.Writer) int {
 		flags := flag.NewFlagSet("setup", flag.ContinueOnError)
 		flags.SetOutput(stderr)
 		host := flags.String("host", "generic", "coding host identifier")
+		output := flags.String("output", "", "optional directory for portable host instructions")
 		if err := flags.Parse(args[1:]); err != nil {
 			return 2
 		}
 		if flags.NArg() != 0 {
 			fmt.Fprintln(stderr, "setup accepts flags only")
 			return 2
+		}
+		if *output != "" {
+			path, err := hosts.WritePackage(*output, *host)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			fmt.Fprintln(stderr, "host package:", path)
 		}
 		return writeJSON(stdout, stderr, hosts.Resolve(*host))
 	case "discover":
@@ -202,6 +215,108 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "review":
+		flags := flag.NewFlagSet("review", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		inputPath := flags.String("input", "", "review input JSON file")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *inputPath == "" {
+			fmt.Fprintln(stderr, "review requires --input")
+			return 2
+		}
+		input, err := review.Load(*inputPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		report := review.Evaluate(input)
+		if code := writeJSON(stdout, stderr, report); code != 0 {
+			return code
+		}
+		if report.Status != "PASS" {
+			return 1
+		}
+		return 0
+	case "audit":
+		flags := flag.NewFlagSet("audit", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		inputPath := flags.String("input", "", "audit input JSON file")
+		outputPath := flags.String("output", "", "immutable audit receipt JSON file")
+		checkPath := flags.String("check", "", "existing receipt to verify against current evidence")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *inputPath == "" || (*outputPath == "") == (*checkPath == "") {
+			fmt.Fprintln(stderr, "audit requires --input and exactly one of --output or --check")
+			return 2
+		}
+		if *checkPath != "" {
+			receipt, err := audit.Check(*inputPath, *checkPath)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			return writeJSON(stdout, stderr, receipt)
+		}
+		receipt, err := audit.Build(*inputPath, nil)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if err := audit.Write(*outputPath, receipt); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if code := writeJSON(stdout, stderr, receipt); code != 0 {
+			return code
+		}
+		if !receipt.Complete {
+			return 1
+		}
+		return 0
+	case "benchmark":
+		flags := flag.NewFlagSet("benchmark", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		manifestPath := flags.String("manifest", "", "benchmark manifest JSON or JSON-compatible YAML")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *manifestPath == "" {
+			fmt.Fprintln(stderr, "benchmark requires --manifest")
+			return 2
+		}
+		manifest, err := benchmark.Load(*manifestPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		return writeJSON(stdout, stderr, benchmark.Score(manifest))
+	case "learn":
+		flags := flag.NewFlagSet("learn", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		proposalPath := flags.String("proposal", "", "policy change proposal JSON file")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *proposalPath == "" {
+			fmt.Fprintln(stderr, "learn requires --proposal")
+			return 2
+		}
+		proposal, err := policy.LoadChangeProposal(*proposalPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		report := policy.EvaluateChangeProposal(proposal)
+		if code := writeJSON(stdout, stderr, report); code != 0 {
+			return code
+		}
+		if report.Status != "PASS" {
+			return 1
+		}
+		return 0
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n", args[0])
 		printUsage(stderr)
@@ -220,5 +335,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|benchmark|learn>")
 }

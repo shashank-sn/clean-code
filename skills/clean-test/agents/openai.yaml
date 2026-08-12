@@ -1,4 +1,4 @@
 interface:
   display_name: "Clean Test"
-  short_description: "Build independent behavioral evidence"
-  default_prompt: "Use $clean-test to derive independent tests and UI QA procedures from these requirements."
+  short_description: "Build independent behavior test tracks"
+  default_prompt: "Use $clean-test to create independent unit, acceptance, integration, and UI evidence."

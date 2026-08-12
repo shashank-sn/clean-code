@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/spot-check.schema.json",
+  "title": "Clean Code human spot check",
+  "type": "object",
+  "required": ["schema_version", "revision", "reviewer", "checks"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "revision": { "type": "string", "minLength": 1 },
+    "reviewer": { "type": "string", "minLength": 1 },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "required", "status"],
+        "properties": {
+          "kind": { "enum": ["requirements", "acceptance", "ui-qa", "code-sample"] },
+          "required": { "type": "boolean" },
+          "status": { "enum": ["CHECKED", "NOT_CHECKED", "INAPPLICABLE"] },
+          "scope": { "type": "string" },
+          "outcome": { "type": "string" },
+          "reason": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

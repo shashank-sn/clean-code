@@ -1,10 +1,20 @@
 # Clean Code
 
-Clean Code is a planned, language-neutral and host-neutral plugin for designing, building, testing, and reviewing maintainable software with coding agents. The same system will work through coding platforms, IDE agents, terminal agents, automated pipelines, and a standalone CLI.
+Clean Code is a language-neutral and host-neutral plugin for designing, building, testing, and reviewing maintainable software with coding agents. The same system works through coding platforms, IDE agents, terminal agents, automated pipelines, and a standalone CLI.
 
 Written rules alone are weak enforcement. An agent can forget instructions, misunderstand a requirement, write tests that repeat the same mistake, or report that its own work is clean. This project pairs guidance with deterministic checks, independent test tracks, architecture constraints, evidence-based review, and recorded human spot checks.
 
-The repository contains a working foundation and the complete implementation plan. Setup, discovery, and verification are implemented with shared contracts, a doctrine catalog, a host capability model, protected command execution, policy comparison, artifact validation, and revision-bound evidence. Architecture enforcement, orchestration, audit, and the remaining skills are still planned.
+The repository contains eleven skills, a standalone Go CLI, declarative language adapters, generated host instructions, architecture and trace checks, protected command execution, revision-bound evidence, independent review, immutable audit receipts, and a calibration scorer.
+
+## Install
+
+Build locally with `go build -o clean-code ./cmd/clean-code`, or download a checksummed release binary for macOS, Linux, or Windows. No runtime is needed after the binary is built. Generate host instructions into a repository with:
+
+```bash
+clean-code setup --host cursor --output /path/to/repository
+```
+
+Existing instruction files are never overwritten. Unknown hosts receive the portable `AGENTS.md` fallback. See the [compatibility matrix](docs/host-compatibility.md).
 
 ## Current commands
 
@@ -12,11 +22,16 @@ The repository contains a working foundation and the complete implementation pla
 go run ./cmd/clean-code version
 go run ./cmd/clean-code hosts
 go run ./cmd/clean-code setup --host codex
+go run ./cmd/clean-code setup --host cursor --output /path/to/repository
 go run ./cmd/clean-code discover /path/to/repository
 go run ./cmd/clean-code verify --allow-repository-policy --output /path/to/evidence /path/to/repository
 go run ./cmd/clean-code verify --trusted-policy /path/to/approved.clean-code.json /path/to/repository
 go run ./cmd/clean-code architecture --policy /path/to/policy.json --graph /path/to/graph.json
 go run ./cmd/clean-code trace --plan /path/to/test-plan.json
+go run ./cmd/clean-code review --input /path/to/review.json
+go run ./cmd/clean-code audit --input /path/to/audit-input.json --output /path/to/new-receipt.json
+go run ./cmd/clean-code benchmark --manifest harness/calibration/benchmark-manifest.yaml
+go run ./cmd/clean-code learn --proposal /path/to/change-proposal.json
 ```
 
 Discovery reads project metadata and an optional `.clean-code.json`. It never runs the repository's commands. Built-in adapters for JavaScript/TypeScript, Python, Java, Go, and Rust return read-only command proposals. Verification requires a trusted policy file or an explicit repository-policy approval, then runs each executable with its argument array, timeout, output limit, working directory, exit-code rules, redaction, and optional artifact checks. JSON, XML, SARIF, LCOV, text, and opaque artifacts can feed separate baseline comparisons. The normalized report stays tied to the current commit and dirty-worktree state. See `harness/config/example.clean-code.json` for the configuration shape and [adapter authoring](docs/adapter-authoring.md) for the extension contract.
@@ -41,11 +56,11 @@ Discovery reads project metadata and an optional `.clean-code.json`. It never ru
 
 The core works with any repository that can declare commands and expected artifacts. The target project may use any programming language. Universal support guarantees orchestration, declared commands, normalized evidence, path-based architecture rules, review, and audit. Parser-level analysis remains limited to installed tools and available adapters.
 
-Maintained adapters will add richer discovery and result parsing for common toolchains. Missing tools remain visible as `NOT_AVAILABLE` or `NOT_CONFIGURED`; they are never reported as passing. Repository owners decide which checks are mandatory, advisory, or inapplicable.
+Maintained adapters add richer discovery and result parsing for Go, Java, JavaScript/TypeScript, Python, and Rust. Missing tools remain visible as `NOT_AVAILABLE` or `NOT_CONFIGURED`; they are never reported as passing. Repository owners decide which checks are mandatory, advisory, or inapplicable.
 
 ## Platform and IDE support
 
-Skills will have one canonical source and generated host adapters. Maintained integrations will cover major coding-agent hosts and IDEs, while `AGENTS.md`, portable Markdown instructions, and a self-contained `clean-code` CLI provide the fallback for any environment that can read instructions or run a supported executable.
+Skills have one canonical source and generated host instructions. Maintained mappings cover Codex, Claude Code, Cursor, GitHub Copilot, Gemini CLI, Windsurf, Cline, Roo Code, and generic IDE agents. `AGENTS.md`, portable Markdown instructions, and a self-contained CLI cover unknown environments.
 
 Host adapters may change invocation and packaging, but they cannot change doctrine, evidence schemas, gate semantics, or result status. A platform that cannot support agents can still run discovery, verification, architecture checks, and audit generation through the CLI or an automated pipeline.
 
@@ -78,6 +93,8 @@ The project will summarize and operationalize ideas in original language. Book r
 - Done: maintained language discovery adapters, bounded artifact parsers, and metric-specific baseline regression gates.
 - Done: `clean-design` and generic architecture enforcement for declared component dependencies, public surfaces, exceptions, exclusions, and cycles.
 - Done: `clean-build`, `clean-refactor`, and `clean-test`, plus contracts and trace validation for independent unit, acceptance, integration, and UI/QA tracks.
-- Next: add evidence-based review, orchestration, human spot checks, and audit receipts.
+- Done: `clean-review`, `clean-orchestrate`, `clean-audit`, and `clean-learn`, with independent review checks, human spot-check gates, hashed immutable receipts, and proposal-only learning.
+- Done: generated host packages, configuration and authoring docs, release automation, and a benchmark scorer with seeded defects and clean controls.
+- Open before a public release: run a controlled held-out agent study; the included benchmark manifest validates scoring and makes no performance claim.
 
 See [the implementation plan](docs/plans/2026-08-12-001-feat-clean-code-system-plan.md).

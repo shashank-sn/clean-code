@@ -1,20 +1,31 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://clean-code.local/schemas/audit-receipt.schema.json",
-  "title": "Audit receipt",
+  "title": "Clean Code audit receipt",
   "type": "object",
-  "required": ["schema_version", "repository", "revision", "policy_revision", "created_at", "results", "requirements"],
+  "required": ["schema_version", "repository", "revision", "policy_revision", "created_at", "complete", "artifacts", "gaps", "exceptions"],
   "properties": {
-    "schema_version": { "type": "string", "minLength": 1 },
+    "schema_version": { "const": "1.0.0" },
     "repository": { "type": "string", "minLength": 1 },
     "revision": { "type": "string", "minLength": 1 },
     "policy_revision": { "type": "string", "minLength": 1 },
     "created_at": { "type": "string", "format": "date-time" },
-    "results": { "type": "array", "items": { "type": "string" } },
-    "requirements": { "type": "array", "items": { "type": "string" } },
-    "exceptions": { "type": "array", "items": { "type": "string" } },
-    "spot_checks": { "type": "array", "items": { "type": "string" } },
-    "signature": { "type": "string" }
+    "complete": { "type": "boolean" },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "path", "sha256"],
+        "properties": {
+          "kind": { "enum": ["verification", "test-plan", "review", "spot-check", "supporting"] },
+          "path": { "type": "string", "minLength": 1 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "gaps": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "exceptions": { "type": "array", "items": { "type": "string", "minLength": 1 } }
   },
   "additionalProperties": false
 }

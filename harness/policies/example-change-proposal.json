@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "id": "proposal-001",
+  "source_receipt": ".clean-code/receipts/revision.json",
+  "evidence_hashes": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+  "kind": "threshold",
+  "target_class": "quality",
+  "effect": "WEAKEN",
+  "scope": "complexity.changed",
+  "change": "raise the advisory threshold by one",
+  "benefit": "remove a confirmed false positive at the boundary",
+  "risks": ["a small regression may receive less attention"],
+  "rollback": "restore the previous threshold",
+  "calibration_fixture": "harness/calibration/clean-controls/complexity-boundary",
+  "proposer": "agent-a",
+  "status": "PROPOSED"
+}

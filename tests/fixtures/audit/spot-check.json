@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "revision": "abc",
+  "reviewer": "human",
+  "checks": [
+    {"kind": "requirements", "required": true, "status": "CHECKED", "scope": "R1", "outcome": "matches"},
+    {"kind": "acceptance", "required": true, "status": "CHECKED", "scope": "R1 example", "outcome": "matches"},
+    {"kind": "ui-qa", "required": false, "status": "INAPPLICABLE", "reason": "no user interface"},
+    {"kind": "code-sample", "required": true, "status": "CHECKED", "scope": "change.go", "outcome": "clear"}
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Learn"
+  short_description: "Propose reversible policy improvements"
+  default_prompt: "Use $clean-learn to turn this confirmed outcome into a reviewable policy proposal."

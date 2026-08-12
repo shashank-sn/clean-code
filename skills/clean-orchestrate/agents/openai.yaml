@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Orchestrate"
+  short_description: "Coordinate independent delivery roles and gates"
+  default_prompt: "Use $clean-orchestrate to coordinate implementation, tests, verification, and review."
