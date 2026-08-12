@@ -280,19 +280,23 @@ func run(args []string, stdout, stderr io.Writer) int {
 		}
 		return 0
 	case "release-gate":
-		flags := flag.NewFlagSet("release-gate", flag.ContinueOnError)
-		flags.SetOutput(stderr)
-		inputPath := flags.String("input", "", "revision-bound release contract JSON file")
-		if err := flags.Parse(args[1:]); err != nil { return 2 }
-		if flags.NArg() != 0 || *inputPath == "" {
-			fmt.Fprintln(stderr, "release-gate requires --input")
-			return 2
-		}
-		binding, err := releasecontract.Load(*inputPath)
-		if err != nil { fmt.Fprintln(stderr, err); return 1 }
-		if err := binding.Validate(time.Now().UTC()); err != nil { fmt.Fprintln(stderr, err); return 1 }
-		fmt.Fprintln(stdout, "PASS")
-		return 0
+		flags:=flag.NewFlagSet("release-gate",flag.ContinueOnError);flags.SetOutput(stderr)
+		inputPath:=flags.String("input","","release binding JSON")
+		gatesPath:=flags.String("policy-gates","","trusted policy gates JSON")
+		requirementsPath:=flags.String("requirements","","approved requirements artifact")
+		changePath:=flags.String("change-set","","trusted change-set JSON")
+		root:=flags.String("root","","repository root")
+		if err:=flags.Parse(args[1:]);err!=nil{return 2}
+		if flags.NArg()!=0||*inputPath==""||*gatesPath==""||*requirementsPath==""||*changePath==""||*root==""{fmt.Fprintln(stderr,"release-gate requires --input --policy-gates --requirements --change-set --root");return 2}
+		binding,err:=releasecontract.Load(*inputPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		gates,err:=releasecontract.LoadPolicyGates(*gatesPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		change,err:=releasecontract.LoadChangeSet(*changePath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		policyDigest,err:=releasecontract.Digest(*gatesPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		requirementDigest,err:=releasecontract.Digest(*requirementsPath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		changeDigest,err:=releasecontract.Digest(*changePath);if err!=nil{fmt.Fprintln(stderr,err);return 1}
+		if binding.PolicyRevision!=policyDigest||binding.RequirementDigest!=requirementDigest||binding.ChangeSetDigest!=changeDigest{fmt.Fprintln(stderr,"trusted artifact digest does not match release binding");return 1}
+		actual:=repository.Revision(*root);if err:=binding.Validate(gates,change,actual,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1}
+		fmt.Fprintln(stdout,"PASS");return 0
 	case "slop":
 		flags := flag.NewFlagSet("slop", flag.ContinueOnError)
 		flags.SetOutput(stderr)
