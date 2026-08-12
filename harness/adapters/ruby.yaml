@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "id": "ruby",
+  "kind": "language",
+  "trust": "builtin",
+  "language": "ruby",
+  "markers": ["Gemfile"],
+  "commands": [
+    {"id": "ruby-test", "category": "unit-test", "executable": "bundle", "args": ["exec", "rake", "test"], "timeout_seconds": 300}
+  ]
+}

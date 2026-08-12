@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "id": "dotnet",
+  "kind": "language",
+  "trust": "builtin",
+  "language": "dotnet",
+  "markers": ["global.json"],
+  "commands": [
+    {"id": "dotnet-test", "category": "unit-test", "executable": "dotnet", "args": ["test"], "timeout_seconds": 600}
+  ]
+}

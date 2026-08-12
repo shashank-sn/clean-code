@@ -10,7 +10,7 @@ func TestCatalogContainsMaintainedLanguageAdapters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"go", "java", "javascript-typescript", "python", "rust"}
+	want := []string{"dotnet", "go", "java", "javascript-typescript", "python", "ruby", "rust", "swift"}
 	if len(definitions) != len(want) {
 		t.Fatalf("expected %d adapters, got %d", len(want), len(definitions))
 	}
