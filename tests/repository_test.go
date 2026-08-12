@@ -115,6 +115,6 @@ func TestRoadmapSchemasMatchRuntimeRequiredFields(t *testing.T) {
 }
 func TestRoadmapFixturesParseRuntimeShapes(t *testing.T) {
 	root:=filepath.Join("..")
-	var result struct{SchemaVersion,StudyID,ManifestDigest string;Outcomes []any};body,err:=os.ReadFile(filepath.Join(root,"harness/studies/valid-study-result.json"));if err!=nil{t.Fatal(err)};if err:=json.Unmarshal(body,&result);err!=nil||result.SchemaVersion!="1.0.0"||len(result.ManifestDigest)!=64{t.Fatalf("invalid study fixture: %v",err)}
-	var approval struct{SchemaVersion,OrganizationDigest,RepositoryDigest,CommandID,Scope,ExpiresAt,Approver string};body,err=os.ReadFile(filepath.Join(root,"harness/policies/valid-policy-exception-approval.json"));if err!=nil{t.Fatal(err)};if err:=json.Unmarshal(body,&approval);err!=nil||approval.Scope!="required"||approval.Approver==""{t.Fatalf("invalid approval fixture: %v",err)}
+	var result map[string]any;body,err:=os.ReadFile(filepath.Join(root,"harness/studies/valid-study-result.json"));if err!=nil{t.Fatal(err)};if err:=json.Unmarshal(body,&result);err!=nil||result["schema_version"]!="1.0.0"||len(result["manifest_digest"].(string))!=64{t.Fatalf("invalid study fixture: %v",err)}
+	var approval map[string]any;body,err=os.ReadFile(filepath.Join(root,"harness/policies/valid-policy-exception-approval.json"));if err!=nil{t.Fatal(err)};if err:=json.Unmarshal(body,&approval);err!=nil||approval["scope"]!="required"||approval["approver"]==""{t.Fatalf("invalid approval fixture: %v",err)}
 }
