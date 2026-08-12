@@ -29,8 +29,8 @@ func TestPluginManifestPointsToAllSkills(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(entries) != 11 {
-		t.Fatalf("expected eleven skills, got %d", len(entries))
+	if len(entries) != 16 {
+		t.Fatalf("expected sixteen skills, got %d", len(entries))
 	}
 	for _, entry := range entries {
 		if entry.IsDir() {

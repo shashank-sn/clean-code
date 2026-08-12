@@ -67,6 +67,8 @@ The current plugin covers design through audit but leaves gaps around product fr
 
 - R20. The repository establishes `main`, merges only a final verified revision, tags `v0.1.0`, and confirms checksummed release artifacts for supported platforms.
 - R21. Delivery adapters can commit, open changes, watch automation, and handle feedback, but the portable core describes outcomes rather than provider commands.
+- R22. A deterministic sloppiness assessor reports evidence, consequence, bounded repair instructions, and verification without editing code or authorizing its own result.
+- R23. Automated remediation is limited to one repair batch and one verification pass; remaining or conflicting findings escalate with both reports and the tested diff.
 
 ### Acceptance Examples
 
@@ -78,6 +80,7 @@ The current plugin covers design through audit but leaves gaps around product fr
 - AE6. Given changed-file impact cannot be mapped safely, when incremental verification is requested, then the system records the fallback and runs the full trusted command set.
 - AE7. Given a held-out study has insufficient or unbalanced cases, when results are produced, then raw outcomes are available but improvement claims remain blocked.
 - AE8. Given a host has no native subagents, when orchestration runs, then separate sessions or procedural independence are recorded and self-approval remains forbidden.
+- AE9. Given findings remain after the second sloppiness assessment, when an agent requests another rewrite, then the system returns `ESCALATE` and explicitly stops automated rewriting.
 
 ### Scope Boundaries
 
@@ -101,6 +104,7 @@ The current plugin covers design through audit but leaves gaps around product fr
 - KTD6. **Treat incremental verification as a feedback optimization.** Unknown impact and releases force the full trusted policy.
 - KTD7. **Treat experiments as evidence, not marketing.** Study manifests pre-register tasks and oracles; results preserve failures and limitations.
 - KTD8. **Keep humans at decision boundaries.** A human may inspect code, but release completeness depends on authorized decisions and independent agent evidence rather than mandatory manual code reading.
+- KTD9. **Score observable evidence, not aesthetic taste.** Sloppiness is a transparent triage signal with per-finding instructions; it is neither a cleanliness certificate nor a merge verdict.
 
 ### High-Level Technical Design
 
@@ -271,6 +275,19 @@ docs/
   - Release artifacts and checksums exist for every declared platform.
 - **Verification:** Final CI passes on `main`; the release workflow succeeds for `v0.1.0`.
 
+### U9. Add bounded sloppiness assessment
+
+- **Goal:** Give agents a deterministic repair brief without creating a rewrite loop.
+- **Requirements:** R22, R23
+- **Dependencies:** U1
+- **Files:** `internal/sloppiness/sloppiness.go`, `internal/sloppiness/sloppiness_test.go`, `harness/schemas/sloppiness-report.schema.json`, `cmd/clean-code/main.go`, `docs/sloppiness.md`
+- **Test scenarios:**
+  - Every finding includes location, observed evidence, consequence, one instruction, and verification.
+  - Generated and dependency code do not affect the report.
+  - Clean evidence returns `DONE`; first-pass findings return `REPAIR`.
+  - Covers AE9. Any second-pass finding returns `ESCALATE` with an explicit stop instruction.
+- **Verification:** Unit and CLI tests prove deterministic scoring and the two-pass ceiling.
+
 ---
 
 ## Verification Contract
@@ -291,7 +308,7 @@ docs/
 
 ## Definition of Done
 
-- All R1-R21 requirements map to implementation, tests, or an explicit non-code release check.
+- All R1-R23 requirements map to implementation, tests, or an explicit non-code release check.
 - No role can approve its own authored work.
 - The portable skill suite covers the complete lifecycle without named-host dependencies.
 - Policy packs, history, incremental verification, and study commands have deterministic tests.

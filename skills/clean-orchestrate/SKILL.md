@@ -1,31 +1,30 @@
 ---
 name: clean-orchestrate
-description: Coordinate specification, implementation, independent testing, deterministic verification, review, human spot checks, and audit without treating agent narration as proof. Use for multi-part coding work, release qualification, agent collaboration, or any change where correlated mistakes and stale evidence need explicit controls.
+description: Coordinate specification, implementation, acceptance, verification, review, decision, and delivery through explicit role identities and capability negotiation. Use for multi-part work, agent collaboration, and release qualification where correlated mistakes or stale evidence must be controlled.
 ---
 
 # Clean Orchestrate
 
-Assign clear ownership and make every completion claim traceable to evidence.
+Build a role graph whose claims can be audited independently.
+
+## Role graph
+
+1. Product authority owns intent, policy, risk, and exceptions.
+2. Specification owns stable requirements and acceptance examples.
+3. Implementation owns the bounded code change.
+4. Acceptance owns public-behavior evidence without implementation-shaped context.
+5. Verification owns deterministic execution on the final revision.
+6. Review owns risk-driven inspection and blocker disposition.
+7. Delivery owns integration and destination evidence, never approval.
+
+## Capability negotiation
+
+Ask the host adapter which capabilities exist: isolated agents, separate sessions, deterministic commands, filesystem access, source control, automation watching, and approval capture. Record each as native, procedural, or unavailable. Missing capability changes the procedure, never the meaning of PASS or independence.
 
 ## Workflow
 
-1. Give specification ownership to the requirement source and record stable requirement IDs.
-2. Give implementation a bounded requirement, architecture policy, and repository context.
-3. Give acceptance and UI/QA authors requirements and public contracts while withholding implementation details where feasible.
-4. Run deterministic verification through the final integrating session against the final revision.
-5. Give review the diff, requirements, and evidence. Keep the change author separate from approval.
-6. Request human spot checks for configured requirement, acceptance, UI/QA, and code-sample boundaries.
-7. Reconcile contradictions from source evidence, rerun stale checks, and hand the complete evidence set to audit.
-
-## Host differences
-
-- With subagents, assign explicit file and responsibility ownership and keep independent contexts narrow.
-- Without subagents, use separate sessions or invocations for implementation, acceptance, and review, then record that independence was procedural.
-- Across IDEs, coding platforms, terminals, and CI, route deterministic work through the same CLI contracts.
+Create a handoff for every edge with requirement IDs, allowed scope, revision, evidence, context lineage, and stop conditions. Reconcile contradictions from source evidence. Re-run invalidated checks after any revision change. A same-identity or implementation-biased fallback may contribute evidence but cannot be labeled independent.
 
 ## Stop conditions
 
-- Stop when mandatory evidence is missing, stale, or belongs to another revision.
-- Stop when an independent role received implementation context that could bias its oracle; record the correlation and replace or supplement that evidence.
-- Stop when required human checks remain unperformed.
-- Stop when reviewers disagree on a blocking issue until the evidence resolves it.
+Stop on missing authority, self-approval, stale revision identity, incomplete required evidence, unapproved policy weakening, or unresolved blockers.
