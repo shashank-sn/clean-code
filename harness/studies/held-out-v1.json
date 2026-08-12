@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","study_id":"held-out-v1","minimum_pairs":10,"tasks":[{"id":"replace-with-held-out-task","model":"pin-model-version","tools":["pin-tool-version"],"limit":1000,"oracle":"pin-oracle-version"}]}
