@@ -1,1 +1,99 @@
-{"schema_version":"1.0.0","study_id":"held-out-v1","repository":"owner/repository","revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","minimum_pairs":10,"tasks":[{"id":"replace-with-held-out-task","model":"pin-model-version","tools":["pin-tool-version"],"limit":1000,"oracle":"pin-oracle-version"}]}
+{
+  "schema_version": "1.0.0",
+  "study_id": "held-out-v1",
+  "repository": "shashank-sn/clean-code",
+  "revision": "2d68025fa8decaa46067544711dce184be069425",
+  "minimum_pairs": 10,
+  "tasks": [
+    {
+      "id": "held-out-review-01",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-02",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-03",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-04",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-05",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-06",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-07",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-08",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-09",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    },
+    {
+      "id": "held-out-review-10",
+      "model": "gpt-5",
+      "tools": [
+        "none"
+      ],
+      "limit": 120,
+      "oracle": "review-oracle-v1"
+    }
+  ]
+}
