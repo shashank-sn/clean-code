@@ -29,7 +29,7 @@
   },
   "commitments": {
     "case_corpus_sha256": "7454271f1d4faae87990ec4b976a67bb027c8df75ea974a08d1ef76f90b433d3",
-    "oracle_scoring_sha256": "8776fae8534eb3c5f123bf959adcf1a1bd18984ae125a856fb92e848040acdce"
+    "oracle_scoring_sha256": "2c3a1ec370597084f5fe959e07369c0d70384d1b01d404127b95753dc28d45c3"
   },
   "exclusions": {
     "dry_run_case_ids": "H01-H10",

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,6 +10,8 @@ const casePath = join(studyRoot, "cases.json");
 const commitmentPath = join(studyRoot, "preregistration.json");
 const configPath = join(studyRoot, "model-config.json");
 const rawRoot = join(studyRoot, "raw");
+const attemptsRoot = join(studyRoot, "attempts");
+const journalPath = join(studyRoot, "execution-journal.ndjson");
 const validateOnly = process.argv.includes("--validate-only");
 
 const digest = body => createHash("sha256").update(body).digest("hex");
@@ -65,12 +67,15 @@ if (validateOnly) {
 
 requireValue(typeof process.env.OPENAI_API_KEY === "string" && process.env.OPENAI_API_KEY !== "", "OPENAI_API_KEY is required");
 await mkdir(rawRoot, { recursive: true });
+await mkdir(attemptsRoot, { recursive: true });
 const runs = [];
 
 for (let index = 0; index < corpus.cases.length; index++) {
   const item = corpus.cases[index];
   for (const arm of armsFor(index)) {
+    const attemptPath = join(attemptsRoot, `${item.task_id}-${arm}.attempt.json`);
     const startedAt = new Date().toISOString();
+    await writeFile(attemptPath, `${JSON.stringify({schema_version:"1.0.0",task_id:item.task_id,arm,started_at:startedAt,state:"reserved"})}\n`, { flag: "wx", mode: 0o600 });
     const armInstruction = arm === "control" ? config.control_instruction : config.workflow_instruction;
     const input = `${config.shared_instruction}\n\n${armInstruction}\n\nRequirement:\n${item.requirement}\n\nCode:\n${item.code}\n\nResponse format:\n${item.response_format}`;
     const request = {
@@ -79,7 +84,14 @@ for (let index = 0; index < corpus.cases.length; index++) {
       reasoning: { effort: config.reasoning_effort },
       max_output_tokens: config.max_output_tokens,
       store: config.store,
-      tools: config.tools
+      tools: config.tools,
+      metadata: {
+        study_id: manifest.study_id,
+        task_id: item.task_id,
+        arm,
+        case_corpus_digest: manifest.case_corpus_digest,
+        model_config_digest: manifest.model_config_digest
+      }
     };
     let responseBody;
     let httpStatus;
@@ -103,7 +115,7 @@ for (let index = 0; index < corpus.cases.length; index++) {
     try { response = JSON.parse(responseBody); } catch {}
     const text = outputText(response);
     const status = httpStatus === 200 && response.status === "completed" && response.model === config.model && wordCount(text) <= config.max_output_words ? "completed" : httpStatus === 0 ? "timeout" : "failed";
-    runs.push({
+    const run = {
       task_id: item.task_id,
       arm,
       started_at: startedAt,
@@ -116,7 +128,10 @@ for (let index = 0; index < corpus.cases.length; index++) {
       output_words: wordCount(text),
       artifact_path: `raw/${rawName}`,
       artifact_digest: digest(responseBody)
-    });
+    };
+    runs.push(run);
+    await appendFile(journalPath, `${JSON.stringify(run)}\n`, { flag: "a", mode: 0o600 });
+    await writeFile(attemptPath, `${JSON.stringify({schema_version:"1.0.0",task_id:item.task_id,arm,started_at:startedAt,finished_at:finishedAt,state:"terminal",execution_status:status,artifact_digest:run.artifact_digest})}\n`, { flag: "w", mode: 0o600 });
     if (status !== "completed") throw new Error(`${item.task_id}/${arm} failed; partial raw evidence is preserved`);
   }
 }

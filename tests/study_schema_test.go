@@ -143,6 +143,14 @@ func TestCheckedStudyCorpusAndPreregistrationValidate(t *testing.T) {
 	}
 }
 
+func TestStudyPreregistrationSchemaRejectsEmptyContracts(t *testing.T) {
+	schema := compileSchema(t, filepath.Join("..", "harness/schemas/study-preregistration.schema.json"))
+	body := []byte(`{"schema_version":"1.0.0","study_id":"s","repository":"o/r","target_revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","corpus":{},"scoring":{},"canonicalization":{},"commitments":{"case_corpus_sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","oracle_scoring_sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},"exclusions":{}}`)
+	if err := validateJSON(t, schema, body); err == nil {
+		t.Fatal("empty preregistration contracts must fail")
+	}
+}
+
 func TestHistoryReceiptSchemaRejectsMalformedNestedContent(t *testing.T) {
 	schema := compileSchema(t, filepath.Join("..", "harness/schemas/history-receipt.schema.json"))
 	cases := []string{
