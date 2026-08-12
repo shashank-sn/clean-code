@@ -102,3 +102,19 @@ func TestCheckedInJSONExamplesParse(t *testing.T) {
 		}
 	}
 }
+
+func TestRoadmapSchemasMatchRuntimeRequiredFields(t *testing.T) {
+	root:=filepath.Join("..")
+	checks:=map[string][]string{
+		"harness/schemas/study-manifest.schema.json":{"repository","revision"},
+		"harness/schemas/study-result.schema.json":{"manifest_digest"},
+		"harness/schemas/policy-exception-approval.schema.json":{"organization_digest","repository_digest","command_id","scope","expires_at","approver"},
+	}
+	for path,required:=range checks{body,err:=os.ReadFile(filepath.Join(root,path));if err!=nil{t.Fatal(err)};var schema struct{Required []string `json:"required"`};if err:=json.Unmarshal(body,&schema);err!=nil{t.Fatal(err)};seen:=map[string]bool{};for _,v:=range schema.Required{seen[v]=true};for _,v:=range required{if !seen[v]{t.Errorf("%s missing required %s",path,v)}}}
+	body,err:=os.ReadFile(filepath.Join(root,"harness/schemas/policy-pack.schema.json"));if err!=nil{t.Fatal(err)};if strings.Contains(string(body),`"exceptions"`){t.Fatal("policy pack schema still permits unsigned exceptions")}
+}
+func TestRoadmapFixturesParseRuntimeShapes(t *testing.T) {
+	root:=filepath.Join("..")
+	var result struct{SchemaVersion,StudyID,ManifestDigest string;Outcomes []any};body,err:=os.ReadFile(filepath.Join(root,"harness/studies/valid-study-result.json"));if err!=nil{t.Fatal(err)};if err:=json.Unmarshal(body,&result);err!=nil||result.SchemaVersion!="1.0.0"||len(result.ManifestDigest)!=64{t.Fatalf("invalid study fixture: %v",err)}
+	var approval struct{SchemaVersion,OrganizationDigest,RepositoryDigest,CommandID,Scope,ExpiresAt,Approver string};body,err=os.ReadFile(filepath.Join(root,"harness/policies/valid-policy-exception-approval.json"));if err!=nil{t.Fatal(err)};if err:=json.Unmarshal(body,&approval);err!=nil||approval.Scope!="required"||approval.Approver==""{t.Fatalf("invalid approval fixture: %v",err)}
+}
