@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "requirements": [
+    {"id": "R1", "acceptance_examples": []}
+  ],
+  "tracks": [
+    {"kind": "unit", "requirement_ids": ["R1"], "status": "PLANNED", "owner": "unit-author"}
+  ]
+}

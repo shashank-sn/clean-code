@@ -16,6 +16,7 @@ import (
 	"clean-code/internal/hosts"
 	"clean-code/internal/repository"
 	"clean-code/internal/runner"
+	"clean-code/internal/trace"
 	"clean-code/internal/verify"
 )
 
@@ -177,6 +178,30 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "trace":
+		flags := flag.NewFlagSet("trace", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		planPath := flags.String("plan", "", "test plan JSON file")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *planPath == "" {
+			fmt.Fprintln(stderr, "trace requires --plan")
+			return 2
+		}
+		plan, err := trace.Load(*planPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		report := trace.Evaluate(plan)
+		if code := writeJSON(stdout, stderr, report); code != 0 {
+			return code
+		}
+		if report.Status != "PASS" {
+			return 1
+		}
+		return 0
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n", args[0])
 		printUsage(stderr)
@@ -195,5 +220,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace>")
 }

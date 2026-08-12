@@ -16,6 +16,7 @@ go run ./cmd/clean-code discover /path/to/repository
 go run ./cmd/clean-code verify --allow-repository-policy --output /path/to/evidence /path/to/repository
 go run ./cmd/clean-code verify --trusted-policy /path/to/approved.clean-code.json /path/to/repository
 go run ./cmd/clean-code architecture --policy /path/to/policy.json --graph /path/to/graph.json
+go run ./cmd/clean-code trace --plan /path/to/test-plan.json
 ```
 
 Discovery reads project metadata and an optional `.clean-code.json`. It never runs the repository's commands. Built-in adapters for JavaScript/TypeScript, Python, Java, Go, and Rust return read-only command proposals. Verification requires a trusted policy file or an explicit repository-policy approval, then runs each executable with its argument array, timeout, output limit, working directory, exit-code rules, redaction, and optional artifact checks. JSON, XML, SARIF, LCOV, text, and opaque artifacts can feed separate baseline comparisons. The normalized report stays tied to the current commit and dirty-worktree state. See `harness/config/example.clean-code.json` for the configuration shape and [adapter authoring](docs/adapter-authoring.md) for the extension contract.
@@ -76,6 +77,7 @@ The project will summarize and operationalize ideas in original language. Book r
 - Done: `clean-verify`, deterministic command execution, trusted-policy drift blocking, required artifact checks, and protected verification bundles.
 - Done: maintained language discovery adapters, bounded artifact parsers, and metric-specific baseline regression gates.
 - Done: `clean-design` and generic architecture enforcement for declared component dependencies, public surfaces, exceptions, exclusions, and cycles.
-- Next: add independent unit, acceptance, mutation, and UI/QA test tracks.
+- Done: `clean-build`, `clean-refactor`, and `clean-test`, plus contracts and trace validation for independent unit, acceptance, integration, and UI/QA tracks.
+- Next: add evidence-based review, orchestration, human spot checks, and audit receipts.
 
 See [the implementation plan](docs/plans/2026-08-12-001-feat-clean-code-system-plan.md).

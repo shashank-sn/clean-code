@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Refactor"
+  short_description: "Improve structure without behavior drift"
+  default_prompt: "Use $clean-refactor to improve this code while preserving its behavior."

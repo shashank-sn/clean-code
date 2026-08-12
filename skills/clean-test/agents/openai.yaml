@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Test"
+  short_description: "Build independent behavioral evidence"
+  default_prompt: "Use $clean-test to derive independent tests and UI QA procedures from these requirements."

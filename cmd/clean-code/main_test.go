@@ -59,12 +59,30 @@ func TestRunRejectsExtraArguments(t *testing.T) {
 		{"discover", ".", "extra"},
 		{"verify", ".", "extra"},
 		{"architecture", "extra"},
+		{"trace", "extra"},
 	}
 	for _, args := range tests {
 		var stdout, stderr bytes.Buffer
 		if code := run(args, &stdout, &stderr); code != 2 {
 			t.Errorf("expected usage error for %v, got %d", args, code)
 		}
+	}
+}
+
+func TestRunTraceReportsMissingTrack(t *testing.T) {
+	root := t.TempDir()
+	plan := root + "/test-plan.json"
+	if err := os.WriteFile(plan, []byte(`{
+  "schema_version":"1.0.0",
+  "requirements":[{"id":"R1","acceptance_examples":["returns the result"]}],
+  "tracks":[{"kind":"unit","requirement_ids":["R1"],"status":"PLANNED","owner":"unit"}]
+}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"trace", "--plan", plan}, &stdout, &stderr)
+	if code != 1 || !bytes.Contains(stdout.Bytes(), []byte(`"kind": "missing-track"`)) {
+		t.Fatalf("expected trace failure, got %d: %s\n%s", code, stderr.String(), stdout.String())
 	}
 }
 

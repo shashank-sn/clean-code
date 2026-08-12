@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/work-handoff.schema.json",
+  "title": "Clean Code work handoff",
+  "type": "object",
+  "required": ["schema_version", "revision", "requirements", "changed_files", "checks", "remaining_risks"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "revision": { "type": "string", "minLength": 1 },
+    "requirements": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "changed_files": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["PASS", "FAIL", "NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"] },
+          "evidence": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "exceptions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "remaining_risks": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  },
+  "additionalProperties": false
+}

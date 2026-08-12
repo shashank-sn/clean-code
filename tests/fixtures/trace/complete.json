@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "requirements": [
+    {"id": "R1", "acceptance_examples": ["given a valid request, the requested result is visible"]}
+  ],
+  "tracks": [
+    {"kind": "unit", "requirement_ids": ["R1"], "status": "PLANNED", "owner": "unit-author"},
+    {"kind": "acceptance", "requirement_ids": ["R1"], "status": "PLANNED", "owner": "acceptance-author", "context_source": "requirements"},
+    {"kind": "integration", "requirement_ids": ["R1"], "status": "PLANNED", "owner": "integration-author"},
+    {"kind": "ui-qa", "requirement_ids": ["R1"], "status": "INAPPLICABLE", "reason": "the capability has no user interface", "context_source": "requirements"}
+  ]
+}

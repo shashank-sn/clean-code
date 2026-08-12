@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/test-plan.schema.json",
+  "title": "Clean Code test plan",
+  "type": "object",
+  "required": ["schema_version", "requirements", "tracks"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "acceptance_examples"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "acceptance_examples": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "requirement_ids", "status"],
+        "properties": {
+          "kind": { "enum": ["unit", "acceptance", "integration", "ui-qa"] },
+          "requirement_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "status": { "enum": ["PLANNED", "PASS", "FAIL", "NOT_AVAILABLE", "NOT_RUN", "INAPPLICABLE"] },
+          "owner": { "type": "string" },
+          "evidence": { "type": "string" },
+          "reason": { "type": "string" },
+          "context_source": { "enum": ["requirements", "implementation", "mixed"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
