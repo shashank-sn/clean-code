@@ -4,7 +4,7 @@
   "title": "Revision-bound release contract",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "repository", "base_revision", "final_revision", "requirement_digest", "change_set_digest", "policy_revision", "changed_paths", "tests", "reviews", "decisions"],
+  "required": ["schema_version", "repository", "base_revision", "final_revision", "requirement_digest", "change_set_digest", "policy_revision", "changed_paths", "test_attestations_digest", "review_attestations_digest", "decision_attestations_digest"],
   "properties": {
     "schema_version": {"const": "1.0.0"},
     "repository": {"type": "string", "minLength": 1},
@@ -14,9 +14,9 @@
     "change_set_digest": {"type": "string", "minLength": 1},
     "policy_revision": {"type": "string", "minLength": 1},
     "changed_paths": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}},
-    "reviews": {"type": "array", "items": {"$ref": "#/$defs/review"}},
-    "decisions": {"type": "array", "items": {"$ref": "#/$defs/decision"}},
+    "test_attestations_digest": {"type":"string","minLength":1},
+    "review_attestations_digest": {"type":"string","minLength":1},
+    "decision_attestations_digest": {"type":"string","minLength":1},
     "exceptions": {"type": "array", "items": {"$ref": "#/$defs/exception"}}
   },
   "$defs": {
