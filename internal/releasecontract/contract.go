@@ -106,7 +106,6 @@ func (b Binding) Validate(gates PolicyGates, change ChangeSet, attest Attestatio
 	if b.Repository!=canonicalRepository{return errors.New("canonical repository does not match release binding")}
 	if b.SchemaVersion!="1.0.0" { return errors.New("unsupported release binding schema") }
 	if change.SchemaVersion!="1.0.0"||change.BaseRevision!=b.BaseRevision||change.FinalRevision!=b.FinalRevision||!sameSet(change.ChangedPaths,b.ChangedPaths){return errors.New("change set does not match release binding")}
-	if actualRevision!=b.FinalRevision{return errors.New("repository revision does not match release binding")}
 	if len(b.ChangedPaths)==0 { return errors.New("changed path scope is empty") }
 	if err:=uniqueRequired("test",gates.RequiredTests); err!=nil{return err}
 	if err:=uniqueRequired("review",gates.RequiredReviews); err!=nil{return err}
@@ -143,6 +142,7 @@ func (b Binding) Validate(gates PolicyGates, change ChangeSet, attest Attestatio
 		decisions[decision.Kind]=decision
 	}
 	for _, kind:=range gates.RequiredDecisions { if decisions[kind].Status!="APPROVED"{return fmt.Errorf("required %s decision is not approved",kind)} }
+	if actualRevision!=b.FinalRevision{return errors.New("repository revision does not match release binding")}
 	for _, exception:=range b.Exceptions {
 		if !oneOf(exception.Kind,"PROCESS","AVAILABILITY","TEMPORARY_POLICY"){return errors.New("exception kind is not waivable")}
 		if exception.Approver==""||exception.Subject==""||exception.Rationale==""||len(exception.Scope)==0||!exception.ExpiresAt.After(now){return errors.New("exception is invalid or expired")}
