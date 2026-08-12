@@ -1,0 +1,3 @@
+package history
+import"testing"
+func TestBuildVerifiesDigestAndPreservesMissingSignals(t *testing.T){c:=Content{Repository:"o/r",Revision:"a",CreatedAt:"2026",Signals:[]Signal{{Name:"coverage",Value:80,Scale:"percent",Provenance:"ci"}}};r:=Receipt{SchemaVersion:"1.0.0",Digest:Digest(c),Content:c};report,err:=Build([]Receipt{r});if err!=nil||len(report.Receipts[0].Content.Signals)!=1{t.Fatal(err)};r.Content.Revision="b";if _,err:=Build([]Receipt{r});err==nil{t.Fatal("expected tamper rejection")}}
