@@ -4,7 +4,7 @@
   "title": "Revision-bound release contract",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "repository", "base_revision", "final_revision", "requirement_digest", "change_set_digest", "policy_revision", "tests", "reviews", "decisions"],
+  "required": ["schema_version", "repository", "base_revision", "final_revision", "requirement_digest", "change_set_digest", "policy_revision", "policy_gates", "changed_paths", "tests", "reviews", "decisions"],
   "properties": {
     "schema_version": {"const": "1.0.0"},
     "repository": {"type": "string", "minLength": 1},
@@ -13,15 +13,18 @@
     "requirement_digest": {"type": "string", "minLength": 1},
     "change_set_digest": {"type": "string", "minLength": 1},
     "policy_revision": {"type": "string", "minLength": 1},
+    "policy_gates": {"$ref": "#/$defs/policy_gates"},
+    "changed_paths": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
     "tests": {"type": "array", "items": {"$ref": "#/$defs/test"}},
     "reviews": {"type": "array", "items": {"$ref": "#/$defs/review"}},
     "decisions": {"type": "array", "items": {"$ref": "#/$defs/decision"}},
     "exceptions": {"type": "array", "items": {"$ref": "#/$defs/exception"}}
   },
   "$defs": {
+    "policy_gates": {"type":"object","additionalProperties":false,"required":["policy_revision","required_tests","required_reviews","required_decisions"],"properties":{"policy_revision":{"type":"string","minLength":1},"required_tests":{"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","minLength":1}},"required_reviews":{"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","minLength":1}},"required_decisions":{"type":"array","minItems":1,"uniqueItems":true,"items":{"enum":["INTENT","POLICY","RELEASE_RISK"]}}}},
     "test": {
       "type": "object", "additionalProperties": false,
-      "required": ["id", "requirement_ids", "revision", "status", "required"],
+      "required": ["id", "requirement_ids", "revision", "status"],
       "properties": {
         "id": {"type": "string", "minLength": 1},
         "requirement_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
@@ -31,17 +34,23 @@
         "actor_run_id": {"type": "string"},
         "started_at": {"type": "string", "format": "date-time"},
         "finished_at": {"type": "string", "format": "date-time"},
-        "required": {"type": "boolean"}
       }
     },
     "review": {
       "type": "object", "additionalProperties": false,
-      "required": ["reviewer_run_id", "change_author_run_id", "revision", "change_set_digest", "status"],
+      "required": ["id", "reviewer_run_id", "reviewer_context_id", "change_author_run_id", "change_author_context_id", "base_revision", "final_revision", "requirement_digest", "change_set_digest", "policy_revision", "reviewed_paths", "status"],
       "properties": {
+        "id": {"type": "string", "minLength": 1},
         "reviewer_run_id": {"type": "string", "minLength": 1},
+        "reviewer_context_id": {"type": "string", "minLength": 1},
         "change_author_run_id": {"type": "string", "minLength": 1},
-        "revision": {"type": "string", "minLength": 1},
+        "change_author_context_id": {"type": "string", "minLength": 1},
+        "base_revision": {"type": "string", "minLength": 1},
+        "final_revision": {"type": "string", "minLength": 1},
+        "requirement_digest": {"type": "string", "minLength": 1},
         "change_set_digest": {"type": "string", "minLength": 1},
+        "policy_revision": {"type": "string", "minLength": 1},
+        "reviewed_paths": {"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","minLength":1}},
         "status": {"enum": ["PASS", "FAIL", "INCOMPLETE"]}
       }
     },
