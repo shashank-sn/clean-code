@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"clean-code/internal/architecture"
@@ -18,12 +19,16 @@ import (
 	"clean-code/internal/discover"
 	"clean-code/internal/evidence"
 	"clean-code/internal/hosts"
+	"clean-code/internal/history"
+	"clean-code/internal/incremental"
 	"clean-code/internal/policy"
+	"clean-code/internal/policyset"
 	"clean-code/internal/repository"
 	"clean-code/internal/releasecontract"
 	"clean-code/internal/review"
 	"clean-code/internal/runner"
 	"clean-code/internal/sloppiness"
+	"clean-code/internal/study"
 	"clean-code/internal/trace"
 	"clean-code/internal/verify"
 )
@@ -306,6 +311,14 @@ func run(args []string, stdout, stderr io.Writer) int {
 		bindingDigest:=approval.DigestBytes(snap[0]);if approvalManifest.Repository!=*repositoryID||approvalManifest.FinalRevision!=binding.FinalRevision||approvalManifest.BindingDigest!=bindingDigest||approvalManifest.PolicyDigest!=policyDigest||approvalManifest.RequirementsDigest!=requirementDigest||approvalManifest.ChangeSetDigest!=changeDigest||approvalManifest.TestDigest!=testsDigest||approvalManifest.ReviewDigest!=reviewsDigest||approvalManifest.DecisionDigest!=decisionsDigest{fmt.Fprintln(stderr,"approval manifest does not match release evidence");return 1}
 		actual,err:=repository.CleanRevision(*root);if err!=nil{fmt.Fprintln(stderr,err);return 1};if err:=binding.Validate(gates,change,attest,*repositoryID,actual,time.Now().UTC());err!=nil{fmt.Fprintln(stderr,err);return 1}
 		fmt.Fprintln(stdout,"PASS");return 0
+	case "policy-pack":
+		flags:=flag.NewFlagSet("policy-pack",flag.ContinueOnError);flags.SetOutput(stderr);org:=flags.String("organization","","organization policy JSON");repo:=flags.String("repository","","repository policy JSON");if err:=flags.Parse(args[1:]);err!=nil{return 2};if flags.NArg()!=0||*org==""||*repo==""{fmt.Fprintln(stderr,"policy-pack requires --organization and --repository");return 2};o,err:=policyset.Load(*org);if err!=nil{fmt.Fprintln(stderr,err);return 1};p,err:=policyset.Load(*repo);if err!=nil{fmt.Fprintln(stderr,err);return 1};resolved,err:=policyset.Resolve(o,p);if err!=nil{fmt.Fprintln(stderr,err);return 1};return writeJSON(stdout,stderr,resolved)
+	case "history":
+		flags:=flag.NewFlagSet("history",flag.ContinueOnError);flags.SetOutput(stderr);paths:=flags.String("receipts","","comma-separated receipt JSON paths");if err:=flags.Parse(args[1:]);err!=nil{return 2};if flags.NArg()!=0||*paths==""{fmt.Fprintln(stderr,"history requires --receipts");return 2};receipts:=[]history.Receipt{};for _,p:=range strings.Split(*paths,","){r,err:=history.Load(p);if err!=nil{fmt.Fprintln(stderr,err);return 1};receipts=append(receipts,r)};report,err:=history.Build(receipts);if err!=nil{fmt.Fprintln(stderr,err);return 1};return writeJSON(stdout,stderr,report)
+	case "incremental":
+		flags:=flag.NewFlagSet("incremental",flag.ContinueOnError);flags.SetOutput(stderr);input:=flags.String("input","","trusted incremental mapping JSON");if err:=flags.Parse(args[1:]);err!=nil{return 2};if flags.NArg()!=0||*input==""{fmt.Fprintln(stderr,"incremental requires --input");return 2};in,err:=incremental.Load(*input);if err!=nil{fmt.Fprintln(stderr,err);return 1};selection,err:=incremental.Select(in);if err!=nil{fmt.Fprintln(stderr,err);return 1};return writeJSON(stdout,stderr,selection)
+	case "study":
+		flags:=flag.NewFlagSet("study",flag.ContinueOnError);flags.SetOutput(stderr);manifest:=flags.String("manifest","","preregistered study manifest");results:=flags.String("results","","raw paired results");if err:=flags.Parse(args[1:]);err!=nil{return 2};if flags.NArg()!=0||*manifest==""||*results==""{fmt.Fprintln(stderr,"study requires --manifest and --results");return 2};m,err:=study.LoadManifest(*manifest);if err!=nil{fmt.Fprintln(stderr,err);return 1};raw,err:=study.LoadResults(*results);if err!=nil{fmt.Fprintln(stderr,err);return 1};report,err:=study.Score(m,raw);if err!=nil{fmt.Fprintln(stderr,err);return 1};if code:=writeJSON(stdout,stderr,report);code!=0{return code};if !report.ClaimAllowed{return 1};return 0
 	case "slop":
 		flags := flag.NewFlagSet("slop", flag.ContinueOnError)
 		flags.SetOutput(stderr)
@@ -401,5 +414,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|release-gate|slop|benchmark|learn>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|release-gate|policy-pack|history|incremental|study|slop|benchmark|learn>")
 }
