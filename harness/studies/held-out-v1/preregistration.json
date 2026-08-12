@@ -23,6 +23,12 @@
     "wrong_finding_rule": "A syntactically valid finding that misses the hidden line range or semantic groups records one false positive; on an actionable case it also records one false negative.",
     "aggregate_rule": "Sum true positives, false positives, false negatives, correct silences, and invalid responses across all ten task IDs."
   },
+  "claims": {
+    "study_type": "descriptive_pilot",
+    "execution_rule": "All ten independently identified pairs must complete and pass the committed oracle.",
+    "comparative_claim_allowed": false,
+    "superiority_threshold": null
+  },
   "canonicalization": {
     "digest_algorithm": "SHA-256",
     "byte_definition": "Exact file bytes as stored, UTF-8, LF line endings, including the final LF. No JSON reserialization or whitespace normalization."

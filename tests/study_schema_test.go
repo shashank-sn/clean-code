@@ -43,10 +43,10 @@ func validateJSON(t *testing.T, schema *jsonschema.Schema, body []byte) error {
 func TestStudySchemasRejectAdversarialNestedValues(t *testing.T) {
 	root := filepath.Join("..")
 	manifest := compileSchema(t, filepath.Join(root, "harness/schemas/study-manifest.schema.json"))
-	if err := validateJSON(t, manifest, []byte(`{"schema_version":"1.0.0","study_id":"s","repository":"o/r","revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","case_corpus_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","oracle_corpus_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","model_config_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","minimum_pairs":1,"tasks":[{}]}`)); err == nil {
+	if err := validateJSON(t, manifest, []byte(`{"schema_version":"1.0.0","study_id":"s","repository":"o/r","revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","case_corpus_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","oracle_corpus_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","model_config_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","preregistration_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","minimum_pairs":1,"tasks":[{}]}`)); err == nil {
 		t.Fatal("tasks:[{}] must fail")
 	}
-	if err := validateJSON(t, manifest, []byte(`{"schema_version":"1.0.0","study_id":"s","repository":"o/r","revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","case_corpus_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","oracle_corpus_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","model_config_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","minimum_pairs":1,"tasks":[{"id":"t","model":"m","tools":[1],"limit":1,"oracle":"o"}]}`)); err == nil {
+	if err := validateJSON(t, manifest, []byte(`{"schema_version":"1.0.0","study_id":"s","repository":"o/r","revision":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","case_corpus_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","oracle_corpus_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","model_config_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","preregistration_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","minimum_pairs":1,"tasks":[{"id":"t","model":"m","tools":[1],"limit":1,"oracle":"o"}]}`)); err == nil {
 		t.Fatal("tools:[1] must fail")
 	}
 	result := compileSchema(t, filepath.Join(root, "harness/schemas/study-result.schema.json"))
@@ -127,6 +127,10 @@ func TestCheckedStudyCorpusAndPreregistrationValidate(t *testing.T) {
 		t.Fatal(err)
 	}
 	var prereg struct {
+		Claims struct {
+			StudyType               string `json:"study_type"`
+			ComparativeClaimAllowed bool   `json:"comparative_claim_allowed"`
+		} `json:"claims"`
 		Commitments struct {
 			Cases  string `json:"case_corpus_sha256"`
 			Oracle string `json:"oracle_scoring_sha256"`
@@ -140,6 +144,9 @@ func TestCheckedStudyCorpusAndPreregistrationValidate(t *testing.T) {
 	}
 	if len(prereg.Commitments.Oracle) != 64 {
 		t.Fatal("oracle commitment is not SHA-256")
+	}
+	if prereg.Claims.StudyType != "descriptive_pilot" || prereg.Claims.ComparativeClaimAllowed {
+		t.Fatal("descriptive pilot must block comparative claims")
 	}
 }
 

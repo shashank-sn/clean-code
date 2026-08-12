@@ -16,9 +16,11 @@ The earlier H01-H10 session was a harness dry run. It was not preregistered, is 
 
 ## Scoring
 
-Preserve every raw response and bind its SHA-256 digest to the outcome. Reveal the committed oracle only after model execution. Record PASS, FAIL, or TIMEOUT, false positives, and correct silence. A pair counts only when both arms are present, independently identified, corpus/config-matched, and signed. Any failure, timeout, missing pair, config drift, replay, or invalid signature blocks performance claims.
+Preserve every exact request envelope and raw response, and bind each SHA-256 digest to the run evidence. Reveal the committed oracle only after model execution. Record PASS, FAIL, or TIMEOUT, false positives, and correct silence. A pair counts only when both arms are present, independently identified, corpus/config-matched, and signed. Any failure, timeout, missing pair, config drift, replay, or invalid signature blocks execution qualification.
 
-Run `node harness/studies/run-held-out.mjs --validate-only` before the preregistration commit and again immediately before execution. Final scoring must pass the exact case, revealed oracle, and model configuration bytes to `clean-code study`; labels alone are not accepted.
+This first study is a descriptive pilot. It did not preregister a paired superiority threshold, so `claim_allowed` is always false. A complete, passing run may set `execution_valid` true; it cannot authorize a comparative improvement claim.
+
+Run `node harness/studies/run-held-out.mjs --validate-only` before the preregistration commit and again immediately before execution. Final scoring must pass the exact case, revealed oracle, model configuration, and preregistration bytes to `clean-code study`; labels alone are not accepted.
 
 ## Authority
 
@@ -26,4 +28,4 @@ A protected Ed25519 public key must be supplied from outside the change checkout
 
 ## Publication
 
-Publish the preregistration, raw outcomes, scoring report, limitations, model/tool metadata, and excluded runs. Do not claim improvement unless `claim_allowed` is true. A tie or negative result is published as measured.
+Publish the preregistration, exact request envelopes, raw outcomes, scoring report, limitations, model/tool metadata, and excluded runs. Do not claim improvement from this descriptive pilot. A tie or negative result is published as measured.

@@ -10,6 +10,7 @@ const casePath = join(studyRoot, "cases.json");
 const commitmentPath = join(studyRoot, "preregistration.json");
 const configPath = join(studyRoot, "model-config.json");
 const rawRoot = join(studyRoot, "raw");
+const requestsRoot = join(studyRoot, "requests");
 const attemptsRoot = join(studyRoot, "attempts");
 const attemptManifestPath = join(studyRoot, "execution-attempt.json");
 const journalPath = join(studyRoot, "execution-journal.ndjson");
@@ -46,6 +47,7 @@ const config = parse(configBody, "model config");
 requireValue(digest(caseBody) === manifest.case_corpus_digest, "case corpus digest mismatch");
 requireValue(commitment.commitments?.oracle_scoring_sha256 === manifest.oracle_corpus_digest, "oracle commitment mismatch");
 requireValue(digest(configBody) === manifest.model_config_digest, "model config digest mismatch");
+requireValue(digest(commitmentBody) === manifest.preregistration_digest, "preregistration digest mismatch");
 requireValue(config.model === "gpt-5-2025-08-07", "model must be the fixed GPT-5 snapshot");
 requireValue(config.execution_order === "alternating", "execution order is not preregistered");
 requireValue(config.store === false && Array.isArray(config.tools) && config.tools.length === 0, "study must disable storage and tools");
@@ -68,6 +70,7 @@ if (validateOnly) {
 
 requireValue(typeof process.env.OPENAI_API_KEY === "string" && process.env.OPENAI_API_KEY !== "", "OPENAI_API_KEY is required");
 await mkdir(rawRoot, { recursive: true });
+await mkdir(requestsRoot, { recursive: true });
 await mkdir(attemptsRoot, { recursive: true });
 const attemptID = randomUUID();
 const manifestDigest = digest(manifestBody);
@@ -118,13 +121,16 @@ for (const slot of schedule) {
         model_config_digest: manifest.model_config_digest
       }
     };
+    const requestBody = Buffer.from(JSON.stringify(request));
+    const requestName = `${item.task_id}-${arm}.json`;
+    await writeFile(join(requestsRoot, requestName), requestBody, { flag: "wx", mode: 0o600 });
     let responseBody;
     let httpStatus;
     try {
       const response = await fetch(config.endpoint, {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-        body: JSON.stringify(request),
+        body: requestBody,
         signal: AbortSignal.timeout(120_000)
       });
       httpStatus = response.status;
@@ -153,6 +159,8 @@ for (const slot of schedule) {
       response_status: response.status ?? "",
       execution_status: status,
       output_words: wordCount(text),
+      request_path: `requests/${requestName}`,
+      request_digest: digest(requestBody),
       artifact_path: `raw/${rawName}`,
       artifact_digest: digest(responseBody)
     };

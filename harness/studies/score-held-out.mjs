@@ -16,6 +16,7 @@ const preregistrationPath = join(studyRoot, "preregistration.json");
 const configPath = join(studyRoot, "model-config.json");
 const attemptManifestPath = join(studyRoot, "execution-attempt.json");
 const journalPath = join(studyRoot, "execution-journal.ndjson");
+const requestsRoot = join(studyRoot, "requests");
 const rawRoot = join(studyRoot, "raw");
 const resultsPath = join(studyRoot, "results.json");
 const reportPath = join(studyRoot, "scoring-report.json");
@@ -81,6 +82,8 @@ requireValue(manifest.revision === preregistration.target_revision, "revision mi
 requireValue(sha256(casesBody) === manifest.case_corpus_digest, "case corpus digest does not match manifest");
 requireValue(manifest.case_corpus_digest === preregistration.commitments?.case_corpus_sha256, "case corpus commitment mismatch");
 requireValue(sha256(configBody) === manifest.model_config_digest, "model config digest does not match manifest");
+requireValue(sha256(preregistrationBody) === manifest.preregistration_digest, "preregistration digest does not match manifest");
+requireValue(preregistration.claims?.study_type === "descriptive_pilot" && preregistration.claims?.comparative_claim_allowed === false && preregistration.claims?.superiority_threshold === null, "descriptive claim policy mismatch");
 requireValue(validDigest(manifest.oracle_corpus_digest), "manifest oracle digest is invalid");
 requireValue(sha256(oracleBody) === manifest.oracle_corpus_digest, "oracle digest does not match manifest");
 requireValue(manifest.oracle_corpus_digest === preregistration.commitments?.oracle_scoring_sha256, "oracle digest does not match preregistration");
@@ -127,11 +130,12 @@ const seenRunKeys = new Set();
 const seenRunIDs = new Set();
 const seenArtifacts = new Set();
 const referencedArtifactPaths = new Set();
+const referencedRequestPaths = new Set();
 const outcomes = [];
 const privateScores = [];
 
 for (const [index, run] of journalRuns.entries()) {
-  exactKeys(run, ["attempt_id", "ordinal", "task_id", "arm", "started_at", "finished_at", "http_status", "response_id", "response_model", "response_status", "execution_status", "output_words", "artifact_path", "artifact_digest"], `journal line ${index + 1}`);
+  exactKeys(run, ["attempt_id", "ordinal", "task_id", "arm", "started_at", "finished_at", "http_status", "response_id", "response_model", "response_status", "execution_status", "output_words", "request_path", "request_digest", "artifact_path", "artifact_digest"], `journal line ${index + 1}`);
   const slot = attempt.schedule[index];
   requireValue(run.attempt_id === attempt.attempt_id && run.ordinal === slot.ordinal && run.task_id === slot.task_id && run.arm === slot.arm, `journal order or attempt mismatch on line ${index + 1}`);
   requireValue(tasks.has(run.task_id) && (run.arm === "control" || run.arm === "workflow"), `invalid run identity on journal line ${index + 1}`);
@@ -147,6 +151,25 @@ for (const [index, run] of journalRuns.entries()) {
   seenArtifacts.add(run.artifact_digest);
   requireValue(Number.isInteger(run.output_words) && run.output_words >= 0 && run.output_words <= config.max_output_words, `output word limit mismatch for ${runKey}`);
 
+  requireValue(validDigest(run.request_digest), `invalid request digest for ${runKey}`);
+  const requestPath = await safeArtifactPath(run.request_path);
+  requireValue(!referencedRequestPaths.has(requestPath), `duplicate request path for ${runKey}`);
+  referencedRequestPaths.add(requestPath);
+  const requestBody = await readFile(requestPath);
+  requireValue(sha256(requestBody) === run.request_digest, `request digest mismatch for ${runKey}`);
+  const request = parseJSON(requestBody, `request envelope for ${runKey}`);
+  const caseItem = cases.get(run.task_id);
+  const armInstruction = run.arm === "control" ? config.control_instruction : config.workflow_instruction;
+  const expectedInput = `${config.shared_instruction}\n\n${armInstruction}\n\nRequirement:\n${caseItem.requirement}\n\nCode:\n${caseItem.code}\n\nResponse format:\n${caseItem.response_format}`;
+  exactKeys(request, ["model", "input", "reasoning", "max_output_tokens", "store", "tools", "metadata"], `request envelope for ${runKey}`);
+  exactKeys(request.reasoning, ["effort"], `request reasoning for ${runKey}`);
+  requireValue(request.model === config.model && request.input === expectedInput, `request model or input mismatch for ${runKey}`);
+  requireValue(request.reasoning.effort === config.reasoning_effort && request.max_output_tokens === config.max_output_tokens, `request inference config mismatch for ${runKey}`);
+  requireValue(request.store === false && pairsEqual(request.tools, []), `request storage or tools mismatch for ${runKey}`);
+  exactKeys(request.metadata, ["study_id", "attempt_id", "ordinal", "task_id", "arm", "case_corpus_digest", "model_config_digest"], `request metadata for ${runKey}`);
+  requireValue(request.metadata.study_id === manifest.study_id && request.metadata.attempt_id === attempt.attempt_id && request.metadata.ordinal === String(run.ordinal), `request metadata attempt mismatch for ${runKey}`);
+  requireValue(request.metadata.task_id === run.task_id && request.metadata.arm === run.arm && request.metadata.case_corpus_digest === manifest.case_corpus_digest && request.metadata.model_config_digest === manifest.model_config_digest, `request metadata binding mismatch for ${runKey}`);
+
   const artifactPath = await safeArtifactPath(run.artifact_path);
   requireValue(!referencedArtifactPaths.has(artifactPath), `duplicate artifact path for ${runKey}`);
   referencedArtifactPaths.add(artifactPath);
@@ -155,7 +178,6 @@ for (const [index, run] of journalRuns.entries()) {
   const response = parseJSON(artifactBody, `raw artifact for ${runKey}`);
   requireValue(response.id === run.response_id && response.model === run.response_model && response.status === "completed", `raw response identity mismatch for ${runKey}`);
   requireValue(response.error == null && response.incomplete_details == null, `raw response is incomplete or errored for ${runKey}`);
-  requireValue(Array.isArray(response.tools) && response.tools.length === 0, `raw response used tools for ${runKey}`);
   const metadata = response.metadata;
   exactKeys(metadata, ["study_id", "attempt_id", "ordinal", "task_id", "arm", "case_corpus_digest", "model_config_digest"], `raw response metadata for ${runKey}`);
   requireValue(metadata.study_id === manifest.study_id && metadata.attempt_id === attempt.attempt_id && metadata.ordinal === String(run.ordinal), `raw response metadata attempt mismatch for ${runKey}`);
@@ -218,6 +240,7 @@ for (const [index, run] of journalRuns.entries()) {
     repository: manifest.repository,
     revision: manifest.revision,
     run_id: run.response_id,
+    request_digest: run.request_digest,
     artifact_digest: run.artifact_digest,
     started_at: run.started_at,
     finished_at: run.finished_at,
@@ -244,6 +267,12 @@ for (const entry of rawEntries) {
   const rawPath = await realpath(join(rawRoot, entry.name));
   requireValue(referencedArtifactPaths.has(rawPath), `unreferenced raw artifact: ${entry.name}`);
 }
+const requestEntries = await readdir(requestsRoot, { withFileTypes: true });
+requireValue(requestEntries.length === 20 && requestEntries.every(entry => entry.isFile()), "requests directory must contain exactly 20 regular files");
+for (const entry of requestEntries) {
+  const requestPath = await realpath(join(requestsRoot, entry.name));
+  requireValue(referencedRequestPaths.has(requestPath), `unreferenced request envelope: ${entry.name}`);
+}
 for (const taskID of tasks.keys()) {
   requireValue(seenRunKeys.has(`${taskID}|control`) && seenRunKeys.has(`${taskID}|workflow`), `missing paired arm for ${taskID}`);
 }
@@ -265,7 +294,8 @@ const aggregateForArm = arm => {
 };
 const control = aggregateForArm("control");
 const workflow = aggregateForArm("workflow");
-const claimAllowed = control.failed === 0 && workflow.failed === 0;
+const executionValid = control.failed === 0 && workflow.failed === 0;
+const claimAllowed = false;
 const report = {
   schema_version: "1.0.0",
   study_id: manifest.study_id,
@@ -276,12 +306,15 @@ const report = {
     oracle_corpus_digest: manifest.oracle_corpus_digest,
     model_config_digest: manifest.model_config_digest,
   },
+  execution_valid: executionValid,
   execution: { attempt_id: attempt.attempt_id, terminal_runs: outcomes.length, unique_response_ids: seenRunIDs.size, unique_artifacts: seenArtifacts.size, complete_pairs: tasks.size },
   arms: { control, workflow },
   claim_allowed: claimAllowed,
-  limitations: claimAllowed ? [] : ["One or more raw-artifact-derived outcomes failed; performance claims remain blocked."],
+  limitations: executionValid
+    ? ["This descriptive pilot did not preregister a paired superiority threshold; comparative performance claims remain blocked."]
+    : ["One or more raw-artifact-derived outcomes failed; execution qualification and performance claims remain blocked."],
 };
 
 await writeFile(resultsPath, `${JSON.stringify(results, null, 2)}\n`, { flag: "wx", mode: 0o600 });
 await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, { flag: "wx", mode: 0o600 });
-process.stdout.write(`${JSON.stringify({ status: "PASS", results_path: resultsPath, report_path: reportPath, terminal_runs: outcomes.length, claim_allowed: claimAllowed })}\n`);
+process.stdout.write(`${JSON.stringify({ status: "PASS", results_path: resultsPath, report_path: reportPath, terminal_runs: outcomes.length, execution_valid: executionValid, claim_allowed: claimAllowed })}\n`);

@@ -21,20 +21,22 @@ type Task struct {
 	Oracle string   `json:"oracle"`
 }
 type Manifest struct {
-	SchemaVersion      string `json:"schema_version"`
-	StudyID            string `json:"study_id"`
-	Repository         string `json:"repository"`
-	Revision           string `json:"revision"`
-	CaseCorpusDigest   string `json:"case_corpus_digest"`
-	OracleCorpusDigest string `json:"oracle_corpus_digest"`
-	ModelConfigDigest  string `json:"model_config_digest"`
-	MinimumPairs       int    `json:"minimum_pairs"`
-	Tasks              []Task `json:"tasks"`
+	SchemaVersion         string `json:"schema_version"`
+	StudyID               string `json:"study_id"`
+	Repository            string `json:"repository"`
+	Revision              string `json:"revision"`
+	CaseCorpusDigest      string `json:"case_corpus_digest"`
+	OracleCorpusDigest    string `json:"oracle_corpus_digest"`
+	ModelConfigDigest     string `json:"model_config_digest"`
+	PreregistrationDigest string `json:"preregistration_digest"`
+	MinimumPairs          int    `json:"minimum_pairs"`
+	Tasks                 []Task `json:"tasks"`
 }
 type Outcome struct {
 	Repository         string   `json:"repository"`
 	Revision           string   `json:"revision"`
 	RunID              string   `json:"run_id"`
+	RequestDigest      string   `json:"request_digest"`
 	ArtifactDigest     string   `json:"artifact_digest"`
 	StartedAt          string   `json:"started_at"`
 	FinishedAt         string   `json:"finished_at"`
@@ -58,11 +60,12 @@ type Results struct {
 	Outcomes       []Outcome `json:"outcomes"`
 }
 type Report struct {
-	SchemaVersion string    `json:"schema_version"`
-	Pairs         int       `json:"pairs"`
-	ClaimAllowed  bool      `json:"claim_allowed"`
-	Outcomes      []Outcome `json:"outcomes"`
-	Limitations   []string  `json:"limitations"`
+	SchemaVersion  string    `json:"schema_version"`
+	Pairs          int       `json:"pairs"`
+	ExecutionValid bool      `json:"execution_valid"`
+	ClaimAllowed   bool      `json:"claim_allowed"`
+	Outcomes       []Outcome `json:"outcomes"`
+	Limitations    []string  `json:"limitations"`
 }
 
 var repoPattern = regexp.MustCompile(`^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$`)
@@ -75,7 +78,7 @@ func ParseManifest(body []byte) (Manifest, error) {
 	if err := strict(body, &m); err != nil {
 		return m, err
 	}
-	if m.SchemaVersion != "1.0.0" || !repoPattern.MatchString(m.Repository) || !revisionPattern.MatchString(m.Revision) || !digestPattern.MatchString(m.CaseCorpusDigest) || !digestPattern.MatchString(m.OracleCorpusDigest) || !digestPattern.MatchString(m.ModelConfigDigest) {
+	if m.SchemaVersion != "1.0.0" || !repoPattern.MatchString(m.Repository) || !revisionPattern.MatchString(m.Revision) || !digestPattern.MatchString(m.CaseCorpusDigest) || !digestPattern.MatchString(m.OracleCorpusDigest) || !digestPattern.MatchString(m.ModelConfigDigest) || !digestPattern.MatchString(m.PreregistrationDigest) {
 		return m, errors.New("study manifest identity is invalid")
 	}
 	return m, nil
@@ -92,7 +95,7 @@ func LoadManifest(path string) (Manifest, error) {
 	}
 	return ParseManifest(body)
 }
-func VerifyInputs(m Manifest, cases, oracle, config []byte) error {
+func VerifyInputs(m Manifest, cases, oracle, config, preregistration []byte) error {
 	if Digest(cases) != m.CaseCorpusDigest {
 		return errors.New("case corpus digest does not match preregistration")
 	}
@@ -101,6 +104,9 @@ func VerifyInputs(m Manifest, cases, oracle, config []byte) error {
 	}
 	if Digest(config) != m.ModelConfigDigest {
 		return errors.New("model config digest does not match preregistration")
+	}
+	if Digest(preregistration) != m.PreregistrationDigest {
+		return errors.New("preregistration digest does not match manifest")
 	}
 	return nil
 }
@@ -135,7 +141,7 @@ func Score(m Manifest, r Results) (Report, error) {
 		start, e1 := time.Parse(time.RFC3339, o.StartedAt)
 		finish, e2 := time.Parse(time.RFC3339, o.FinishedAt)
 		task := tasks[o.TaskID]
-		if task.ID == "" || o.Repository != m.Repository || o.Revision != m.Revision || o.RunID == "" || !digestPattern.MatchString(o.ArtifactDigest) || e1 != nil || e2 != nil || finish.Before(start) || o.FalsePositives < 0 || o.Model != task.Model || o.Limit != task.Limit || o.Oracle != task.Oracle || o.CaseCorpusDigest != m.CaseCorpusDigest || o.OracleCorpusDigest != m.OracleCorpusDigest || o.ModelConfigDigest != m.ModelConfigDigest || !same(o.Tools, task.Tools) || !one(o.Arm, "control", "workflow") || !one(o.Status, "PASS", "FAIL", "TIMEOUT") {
+		if task.ID == "" || o.Repository != m.Repository || o.Revision != m.Revision || o.RunID == "" || !digestPattern.MatchString(o.RequestDigest) || !digestPattern.MatchString(o.ArtifactDigest) || e1 != nil || e2 != nil || finish.Before(start) || o.FalsePositives < 0 || o.Model != task.Model || o.Limit != task.Limit || o.Oracle != task.Oracle || o.CaseCorpusDigest != m.CaseCorpusDigest || o.OracleCorpusDigest != m.OracleCorpusDigest || o.ModelConfigDigest != m.ModelConfigDigest || !same(o.Tools, task.Tools) || !one(o.Arm, "control", "workflow") || !one(o.Status, "PASS", "FAIL", "TIMEOUT") {
 			return Report{}, errors.New("raw outcome is invalid")
 		}
 		if ids[o.TaskID] == nil {
@@ -163,10 +169,10 @@ func Score(m Manifest, r Results) (Report, error) {
 			pairs++
 		}
 	}
-	allowed := pairs >= m.MinimumPairs && pairs == len(tasks) && !failed
-	limits := []string{}
-	if !allowed {
-		limits = append(limits, "insufficient, unbalanced, or failing paired cases; performance claims are blocked")
+	executionValid := pairs >= m.MinimumPairs && pairs == len(tasks) && !failed
+	limits := []string{"descriptive pilot has no preregistered superiority threshold; comparative performance claims are blocked"}
+	if !executionValid {
+		limits = []string{"insufficient, unbalanced, or failing paired cases; execution qualification and performance claims are blocked"}
 	}
 	sort.Slice(r.Outcomes, func(i, j int) bool {
 		if r.Outcomes[i].TaskID == r.Outcomes[j].TaskID {
@@ -174,7 +180,7 @@ func Score(m Manifest, r Results) (Report, error) {
 		}
 		return r.Outcomes[i].TaskID < r.Outcomes[j].TaskID
 	})
-	return Report{"1.0.0", pairs, allowed, r.Outcomes, limits}, nil
+	return Report{"1.0.0", pairs, executionValid, false, r.Outcomes, limits}, nil
 }
 func same(a, b []string) bool {
 	if len(a) != len(b) {

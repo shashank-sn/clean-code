@@ -523,17 +523,18 @@ func run(args []string, stdout, stderr io.Writer) int {
 		cases := flags.String("case-corpus", "", "exact preregistered case corpus")
 		oracle := flags.String("oracle-corpus", "", "exact committed oracle and scoring corpus")
 		config := flags.String("model-config", "", "exact preregistered model and harness configuration")
+		preregistration := flags.String("preregistration", "", "exact preregistered study method and claim policy")
 		results := flags.String("results", "", "signed raw paired results")
 		signature := flags.String("results-signature", "", "detached Ed25519 result signature")
 		key := flags.String("trusted-public-key", "", "external trusted public key")
 		if err := flags.Parse(args[1:]); err != nil {
 			return 2
 		}
-		if flags.NArg() != 0 || *manifest == "" || *cases == "" || *oracle == "" || *config == "" || *results == "" || *signature == "" || *key == "" {
-			fmt.Fprintln(stderr, "study requires --manifest --case-corpus --oracle-corpus --model-config --results --results-signature --trusted-public-key")
+		if flags.NArg() != 0 || *manifest == "" || *cases == "" || *oracle == "" || *config == "" || *preregistration == "" || *results == "" || *signature == "" || *key == "" {
+			fmt.Fprintln(stderr, "study requires --manifest --case-corpus --oracle-corpus --model-config --preregistration --results --results-signature --trusted-public-key")
 			return 2
 		}
-		paths := []string{*manifest, *cases, *oracle, *config, *results, *signature, *key}
+		paths := []string{*manifest, *cases, *oracle, *config, *preregistration, *results, *signature, *key}
 		snap := make([][]byte, len(paths))
 		for i, p := range paths {
 			body, readErr := os.ReadFile(p)
@@ -548,15 +549,15 @@ func run(args []string, stdout, stderr io.Writer) int {
 			fmt.Fprintln(stderr, err)
 			return 1
 		}
-		if err := study.VerifyInputs(m, snap[1], snap[2], snap[3]); err != nil {
+		if err := study.VerifyInputs(m, snap[1], snap[2], snap[3], snap[4]); err != nil {
 			fmt.Fprintln(stderr, err)
 			return 1
 		}
-		if err := approval.VerifyBytes(snap[4], snap[5], snap[6]); err != nil {
+		if err := approval.VerifyBytes(snap[5], snap[6], snap[7]); err != nil {
 			fmt.Fprintln(stderr, err)
 			return 1
 		}
-		raw, err := study.ParseResults(snap[4])
+		raw, err := study.ParseResults(snap[5])
 		if err != nil {
 			fmt.Fprintln(stderr, err)
 			return 1
@@ -573,7 +574,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		if code := writeJSON(stdout, stderr, report); code != 0 {
 			return code
 		}
-		if !report.ClaimAllowed {
+		if !report.ExecutionValid {
 			return 1
 		}
 		return 0

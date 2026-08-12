@@ -12,11 +12,12 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["repository", "revision", "run_id", "artifact_digest", "started_at", "finished_at", "task_id", "arm", "model", "tools", "limit", "oracle", "case_corpus_digest", "oracle_corpus_digest", "model_config_digest", "status", "false_positives", "correct_silence"],
+        "required": ["repository", "revision", "run_id", "request_digest", "artifact_digest", "started_at", "finished_at", "task_id", "arm", "model", "tools", "limit", "oracle", "case_corpus_digest", "oracle_corpus_digest", "model_config_digest", "status", "false_positives", "correct_silence"],
         "properties": {
           "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
           "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
           "run_id": {"type": "string", "minLength": 1},
+          "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "artifact_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "started_at": {"type": "string", "format": "date-time"},
           "finished_at": {"type": "string", "format": "date-time"},
