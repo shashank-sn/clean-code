@@ -57,11 +57,94 @@ func TestRunRejectsExtraArguments(t *testing.T) {
 		{"hosts", "extra"},
 		{"setup", "extra"},
 		{"discover", ".", "extra"},
+		{"verify", ".", "extra"},
 	}
 	for _, args := range tests {
 		var stdout, stderr bytes.Buffer
 		if code := run(args, &stdout, &stderr); code != 2 {
 			t.Errorf("expected usage error for %v, got %d", args, code)
 		}
+	}
+}
+
+func TestRunVerifyReportsNotConfigured(t *testing.T) {
+	root := t.TempDir()
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"verify", root}, &stdout, &stderr)
+	if code != 1 {
+		t.Fatalf("expected incomplete verification, got %d: %s", code, stderr.String())
+	}
+	var report struct {
+		Complete bool `json:"complete"`
+		Results  []struct {
+			Status string `json:"status"`
+		} `json:"results"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Complete || len(report.Results) != 1 || report.Results[0].Status != "NOT_CONFIGURED" {
+		t.Fatalf("unexpected report: %+v", report)
+	}
+}
+
+func TestRunVerifyPassesAndWritesEvidenceBundle(t *testing.T) {
+	root := t.TempDir()
+	configuration := `{
+  "schema_version": "1.0.0",
+  "commands": [{"id":"go-version","executable":"go","args":["version"],"required":true}]
+}`
+	if err := os.WriteFile(root+"/.clean-code.json", []byte(configuration), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	evidenceDirectory := root + "/evidence"
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"verify", "--allow-repository-policy", "--output", evidenceDirectory, root}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("expected passing verification, got %d: %s\n%s", code, stderr.String(), stdout.String())
+	}
+	var report struct {
+		Complete bool `json:"complete"`
+		Results  []struct {
+			Status string `json:"status"`
+		} `json:"results"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if !report.Complete || len(report.Results) != 1 || report.Results[0].Status != "PASS" {
+		t.Fatalf("unexpected report: %+v", report)
+	}
+	if _, err := os.Stat(evidenceDirectory + "/report.json"); err != nil {
+		t.Fatalf("expected evidence report: %v", err)
+	}
+}
+
+func TestRunVerifyDoesNotExecuteUnapprovedRepositoryPolicy(t *testing.T) {
+	root := t.TempDir()
+	configuration := `{
+  "schema_version": "1.0.0",
+  "commands": [{"id":"unapproved","executable":"go","args":["version"],"required":true}]
+}`
+	if err := os.WriteFile(root+"/.clean-code.json", []byte(configuration), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"verify", root}, &stdout, &stderr)
+	if code != 1 {
+		t.Fatalf("expected policy block, got %d: %s", code, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"check_id": "policy.approval"`)) ||
+		!bytes.Contains(stdout.Bytes(), []byte(`"status": "NOT_RUN"`)) {
+		t.Fatalf("expected unexecuted policy result: %s", stdout.String())
+	}
+}
+
+func TestRunVerifyRejectsMissingTrustedPolicy(t *testing.T) {
+	root := t.TempDir()
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"verify", "--trusted-policy", root + "/missing.json", root}, &stdout, &stderr)
+	if code != 1 || !bytes.Contains(stderr.Bytes(), []byte("inspect trusted policy")) {
+		t.Fatalf("expected missing policy error, got %d: %s", code, stderr.String())
 	}
 }

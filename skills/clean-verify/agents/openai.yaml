@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Verify"
+  short_description: "Run deterministic checks and preserve evidence"
+  default_prompt: "Use $clean-verify to run the repository checks and report revision-bound evidence."

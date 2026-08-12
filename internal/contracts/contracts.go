@@ -70,14 +70,25 @@ func (result CheckResult) Validate() error {
 }
 
 type CommandSpec struct {
-	ID         string            `json:"id"`
-	Executable string            `json:"executable"`
-	Args       []string          `json:"args,omitempty"`
-	WorkingDir string            `json:"working_directory,omitempty"`
-	TimeoutSec int               `json:"timeout_seconds,omitempty"`
-	Required   bool              `json:"required,omitempty"`
-	Env        map[string]string `json:"environment,omitempty"`
-	Shell      bool              `json:"shell,omitempty"`
+	ID               string            `json:"id"`
+	Category         string            `json:"category,omitempty"`
+	Executable       string            `json:"executable"`
+	Args             []string          `json:"args,omitempty"`
+	WorkingDir       string            `json:"working_directory,omitempty"`
+	TimeoutSec       int               `json:"timeout_seconds,omitempty"`
+	MaxOutputBytes   int               `json:"max_output_bytes,omitempty"`
+	AllowedExitCodes []int             `json:"allowed_exit_codes,omitempty"`
+	Required         bool              `json:"required,omitempty"`
+	Env              map[string]string `json:"environment,omitempty"`
+	Shell            bool              `json:"shell,omitempty"`
+	Artifacts        []ArtifactSpec    `json:"artifacts,omitempty"`
+}
+
+type ArtifactSpec struct {
+	Path     string `json:"path"`
+	Format   string `json:"format,omitempty"`
+	Required bool   `json:"required,omitempty"`
+	Fresh    bool   `json:"fresh,omitempty"`
 }
 
 func (spec CommandSpec) Validate() error {
@@ -99,7 +110,50 @@ func (spec CommandSpec) Validate() error {
 	if spec.TimeoutSec < 0 {
 		return errors.New("timeout_seconds cannot be negative")
 	}
+	if spec.MaxOutputBytes < 0 {
+		return errors.New("max_output_bytes cannot be negative")
+	}
+	for key := range spec.Env {
+		if strings.TrimSpace(key) == "" || strings.ContainsAny(key, "=\x00") {
+			return fmt.Errorf("invalid environment key %q", key)
+		}
+		if protectedEnvironmentKey(key) {
+			return fmt.Errorf("environment key %q requires separate execution policy", key)
+		}
+	}
+	seenArtifacts := map[string]bool{}
+	for index, artifact := range spec.Artifacts {
+		if strings.TrimSpace(artifact.Path) == "" {
+			return fmt.Errorf("artifact %d path is required", index)
+		}
+		if filepath.IsAbs(artifact.Path) {
+			return fmt.Errorf("artifact %d path must be repository-relative", index)
+		}
+		clean := filepath.Clean(artifact.Path)
+		if clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
+			return fmt.Errorf("artifact %d path escapes repository root", index)
+		}
+		if artifact.Format != "" && artifact.Format != "file" && artifact.Format != "json" {
+			return fmt.Errorf("artifact %d has unsupported format %q", index, artifact.Format)
+		}
+		if seenArtifacts[clean] {
+			return fmt.Errorf("artifact %d duplicates path %q", index, artifact.Path)
+		}
+		seenArtifacts[clean] = true
+	}
 	return nil
+}
+
+func protectedEnvironmentKey(key string) bool {
+	normalized := strings.ToUpper(key)
+	protected := map[string]bool{
+		"BASH_ENV": true, "CDPATH": true, "COMSPEC": true, "ENV": true,
+		"GODEBUG": true, "LD_LIBRARY_PATH": true, "LD_PRELOAD": true,
+		"NODE_OPTIONS": true, "PATH": true, "PATHEXT": true,
+		"PYTHONPATH": true, "RUBYOPT": true, "SHELLOPTS": true,
+		"SYSTEMROOT": true, "WINDIR": true,
+	}
+	return protected[normalized] || strings.HasPrefix(normalized, "DYLD_")
 }
 
 func invokesShellCommandMode(executable string, args []string) bool {

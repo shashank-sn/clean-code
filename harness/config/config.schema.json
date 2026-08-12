@@ -15,8 +15,25 @@
           "id": { "type": "string", "minLength": 1 },
           "executable": { "type": "string", "minLength": 1 },
           "args": { "type": "array", "items": { "type": "string" } },
+          "category": { "type": "string" },
           "working_directory": { "type": "string" },
           "timeout_seconds": { "type": "integer", "minimum": 0 },
+          "max_output_bytes": { "type": "integer", "minimum": 0 },
+          "allowed_exit_codes": { "type": "array", "items": { "type": "integer" } },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "format": { "enum": ["file", "json"] },
+                "required": { "type": "boolean" },
+                "fresh": { "type": "boolean" }
+              },
+              "additionalProperties": false
+            }
+          },
           "required": { "type": "boolean" },
           "environment": { "type": "object", "additionalProperties": { "type": "string" } },
           "shell": { "const": false }

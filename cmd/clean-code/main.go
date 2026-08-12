@@ -1,14 +1,21 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
+	"clean-code/internal/contracts"
 	"clean-code/internal/discover"
+	"clean-code/internal/evidence"
 	"clean-code/internal/hosts"
+	"clean-code/internal/repository"
+	"clean-code/internal/runner"
+	"clean-code/internal/verify"
 )
 
 const version = "0.1.0-dev"
@@ -69,6 +76,76 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return writeJSON(stdout, stderr, result)
+	case "verify":
+		flags := flag.NewFlagSet("verify", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		outputDirectory := flags.String("output", "", "directory for a protected evidence bundle")
+		trustedPolicy := flags.String("trusted-policy", "", "previously approved command policy")
+		allowRepositoryPolicy := flags.Bool("allow-repository-policy", false, "explicitly approve this repository's command policy")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() > 1 {
+			fmt.Fprintln(stderr, "verify accepts at most one repository path")
+			return 2
+		}
+		if *trustedPolicy != "" && *allowRepositoryPolicy {
+			fmt.Fprintln(stderr, "verify accepts either --trusted-policy or --allow-repository-policy, not both")
+			return 2
+		}
+		root := "."
+		if flags.NArg() == 1 {
+			root = flags.Arg(0)
+		}
+		discovery, err := discover.Inspect(root)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		var trustedCommands []contracts.CommandSpec
+		trustedSource := ""
+		if *trustedPolicy != "" {
+			trustedPath, err := filepath.Abs(*trustedPolicy)
+			if err != nil {
+				fmt.Fprintln(stderr, "resolve trusted policy:", err)
+				return 1
+			}
+			if _, err := os.Lstat(trustedPath); err != nil {
+				fmt.Fprintln(stderr, "inspect trusted policy:", err)
+				return 1
+			}
+			trustedCommands, err = discover.LoadCommands(trustedPath)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			trustedSource = trustedPath
+		} else if !*allowRepositoryPolicy && len(discovery.Commands) > 0 {
+			trustedSource = "unapproved repository policy"
+		}
+		revision := repository.Revision(discovery.Root)
+		report := verify.Service{
+			Runner:          runner.Runner{Root: discovery.Root},
+			CurrentRevision: repository.Revision,
+		}.Run(
+			context.Background(), discovery.Root, revision,
+			discovery.Commands, trustedCommands, trustedSource,
+		)
+		if *outputDirectory != "" {
+			path, err := evidence.WriteBundle(*outputDirectory, report)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			fmt.Fprintln(stderr, "evidence:", path)
+		}
+		if code := writeJSON(stdout, stderr, report); code != 0 {
+			return code
+		}
+		if !report.Successful() {
+			return 1
+		}
+		return 0
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n", args[0])
 		printUsage(stderr)
@@ -87,5 +164,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify>")
 }

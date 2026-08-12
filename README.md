@@ -4,7 +4,7 @@ Clean Code is a planned, language-neutral and host-neutral plugin for designing,
 
 Written rules alone are weak enforcement. An agent can forget instructions, misunderstand a requirement, write tests that repeat the same mistake, or report that its own work is clean. This project pairs guidance with deterministic checks, independent test tracks, architecture constraints, evidence-based review, and recorded human spot checks.
 
-The repository contains a working foundation and the complete implementation plan. The first two skills, shared contracts, doctrine catalog, host capability model, and read-only discovery CLI are implemented. Verification, architecture enforcement, orchestration, audit, and the remaining skills are still planned.
+The repository contains a working foundation and the complete implementation plan. Setup, discovery, and verification are implemented with shared contracts, a doctrine catalog, a host capability model, protected command execution, policy comparison, artifact validation, and revision-bound evidence. Architecture enforcement, orchestration, audit, and the remaining skills are still planned.
 
 ## Current commands
 
@@ -13,11 +13,13 @@ go run ./cmd/clean-code version
 go run ./cmd/clean-code hosts
 go run ./cmd/clean-code setup --host codex
 go run ./cmd/clean-code discover /path/to/repository
+go run ./cmd/clean-code verify --allow-repository-policy --output /path/to/evidence /path/to/repository
+go run ./cmd/clean-code verify --trusted-policy /path/to/approved.clean-code.json /path/to/repository
 ```
 
-Discovery reads project metadata and an optional `.clean-code.json`. It never executes the repository's commands. See `harness/config/example.clean-code.json` for the current configuration shape.
+Discovery reads project metadata and an optional `.clean-code.json`. It never runs the repository's commands. Verification requires a trusted policy file or an explicit repository-policy approval, then runs each executable with its argument array, timeout, output limit, working directory, exit-code rules, redaction, and optional artifact checks. It writes a normalized JSON report tied to the current commit and dirty-worktree state. See `harness/config/example.clean-code.json` for the current configuration shape.
 
-## Planned skills
+## Skill map
 
 | Skill | Responsibility |
 | --- | --- |
@@ -62,7 +64,7 @@ This project is informed by:
 - Robert C. Martin's *Clean Architecture*, especially use-case boundaries, dependency direction, component structure, testable policies, and keeping delivery mechanisms outside the core.
 - Martin's public description of supervising coding agents with deterministic analysis, mutation testing, unit tests, executable acceptance tests, UI-level QA procedures, independent agents, and human spot checks.
 - Huolter's [clean-code-skill](https://github.com/huolter/clean-code-skill), which demonstrates machine-readable heuristics, deterministic repository checks, calibrated review, honest unavailable states, and an evidence-or-silence reviewer.
-- Established testing and analysis systems including [Cucumber/Gherkin](https://cucumber.io/docs/gherkin/), [PIT](https://pitest.org/), [StrykerJS](https://stryker-mutator.io/docs/stryker-js/introduction/), [mutmut](https://mutmut.readthedocs.io/), [PMD Copy/Paste Detector](https://pmd.github.io/pmd/pmd_userdocs_cpd.html), [jscpd](https://github.com/kucherenko/jscpd), and [Playwright](https://playwright.dev/docs/best-practices).
+- [Cucumber/Gherkin](https://cucumber.io/docs/gherkin/) for executable acceptance examples; [PIT](https://pitest.org/), [StrykerJS](https://stryker-mutator.io/docs/stryker-js/introduction/), and [mutmut](https://mutmut.readthedocs.io/) for mutation testing; [PMD Copy/Paste Detector](https://pmd.github.io/pmd/pmd_userdocs_cpd.html) and [jscpd](https://github.com/kucherenko/jscpd) for duplication analysis; and [Playwright](https://playwright.dev/docs/best-practices) for UI-level QA.
 
 The project will summarize and operationalize ideas in original language. Book reproduction and the elevation of one author's preferences into universal law are outside its scope.
 
@@ -70,6 +72,7 @@ The project will summarize and operationalize ideas in original language. Book r
 
 - Done: local Git repository, plugin manifest, product scope, and implementation plan.
 - Done: `clean-setup`, `clean-discover`, generic host fallback, evidence schemas, initial doctrine rules, and tested Go CLI.
-- Next: implement deterministic command execution and normalized verification results.
+- Done: `clean-verify`, deterministic command execution, trusted-policy drift blocking, required artifact checks, and protected verification bundles.
+- Next: add language adapters and independent unit, acceptance, mutation, architecture, and UI/QA test tracks.
 
 See [the implementation plan](docs/plans/2026-08-12-001-feat-clean-code-system-plan.md).

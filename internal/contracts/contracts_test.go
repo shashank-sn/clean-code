@@ -74,3 +74,20 @@ func TestCommandSpecRejectsShellExecutableCommandMode(t *testing.T) {
 		}
 	}
 }
+
+func TestCommandSpecRejectsExecutionSensitiveEnvironmentOverrides(t *testing.T) {
+	keys := []string{"PATH", "LD_PRELOAD", "DYLD_INSERT_LIBRARIES", "NODE_OPTIONS", "PYTHONPATH", "BASH_ENV"}
+	for _, key := range keys {
+		spec := CommandSpec{ID: "test", Executable: "go", Env: map[string]string{key: "unsafe"}}
+		if err := spec.Validate(); err == nil {
+			t.Errorf("expected environment key %s to fail", key)
+		}
+	}
+}
+
+func TestCommandSpecRejectsUnsafeArtifact(t *testing.T) {
+	spec := CommandSpec{ID: "test", Executable: "go", Artifacts: []ArtifactSpec{{Path: "../outside.json", Format: "json"}}}
+	if err := spec.Validate(); err == nil {
+		t.Fatal("expected escaping artifact to be rejected")
+	}
+}

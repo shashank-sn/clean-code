@@ -73,7 +73,7 @@ func Inspect(root string) (Result, error) {
 	sort.Strings(projectFiles)
 
 	configPath := filepath.Join(absolute, ".clean-code.json")
-	commands, err := loadCommands(configPath)
+	commands, err := LoadCommands(configPath)
 	if err != nil {
 		return Result{}, err
 	}
@@ -138,7 +138,8 @@ func scanProjectFiles(root string) (map[string]bool, []string, error) {
 	return languages, projectFiles, nil
 }
 
-func loadCommands(path string) ([]contracts.CommandSpec, error) {
+// LoadCommands reads a strict command policy from path without executing it.
+func LoadCommands(path string) ([]contracts.CommandSpec, error) {
 	info, err := os.Lstat(path)
 	if os.IsNotExist(err) {
 		return nil, nil

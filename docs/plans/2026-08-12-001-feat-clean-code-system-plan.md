@@ -1,7 +1,7 @@
 ---
 title: Clean Code system implementation plan
 type: feat
-status: ready
+status: in-progress
 date: 2026-08-12
 ---
 
@@ -10,6 +10,13 @@ date: 2026-08-12
 ## Summary
 
 Build a language-neutral and host-neutral plugin that turns Clean Code and Clean Architecture principles into a repeatable agent workflow backed by deterministic checks, independent tests, architectural constraints, human spot checks, and auditable evidence. Deliver the complete skill suite, standalone CLI, host adapters, and shared harness in staged releases without claiming that one metric or one tool can certify software quality.
+
+## Implementation progress
+
+- Complete: repository and plugin foundation, shared statuses, initial doctrine, host capability fallback, and strict read-only discovery.
+- Complete: protected direct command execution, policy approval and comparison, timeout/cancellation, bounded redacted output, artifact validation, revision checks, normalized verification reports, and `clean-verify`.
+- Verified: unit tests, race tests, static analysis, schema parsing, skill/plugin validation, and Linux, Windows, and macOS builds.
+- Next: provider artifact parsers and baseline-aware analysis, followed by language adapters and independent test tracks.
 
 ## Problem frame
 
