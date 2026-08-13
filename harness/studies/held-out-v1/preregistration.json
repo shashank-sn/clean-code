@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "held-out-v1",
+  "repository": "shashank-sn/clean-code",
+  "target_revision": "80c18421cfd2a8f7389c2974ad799d94e2e07f60",
+  "corpus": {
+    "id": "held-out-v1-cases-2026-08-12",
+    "canonical_path": "harness/studies/held-out-v1/cases.json",
+    "task_id_pattern": "held-out-review-01..10",
+    "case_count": 10,
+    "actionable_count": 5,
+    "correct_silence_count": 5,
+    "answers_in_public_corpus": false
+  },
+  "scoring": {
+    "oracle_id": "review-oracle-v1",
+    "algorithm_id": "structured-semantic-token-v1",
+    "algorithm_version": "1.0.0",
+    "oracle_storage": "independent-owner-held-outside-repository",
+    "valid_response": "Strict UTF-8 containing exactly NO_FINDING or one FINDING|<severity>|<line>|<description> record, with either no terminator or one trailing LF and no other newline.",
+    "pass_rule": "Controls require exact NO_FINDING. Actionable cases require one structured finding whose integer line is within the hidden inclusive range and whose normalized description contains at least one exact token from every hidden semantic group.",
+    "invalid_response_rule": "Invalid encoding or syntax fails the case. An actionable case also records one false negative; a control records no correct silence.",
+    "wrong_finding_rule": "A syntactically valid finding that misses the hidden line range or semantic groups records one false positive; on an actionable case it also records one false negative.",
+    "aggregate_rule": "Sum true positives, false positives, false negatives, correct silences, and invalid responses across all ten task IDs."
+  },
+  "claims": {
+    "study_type": "descriptive_pilot",
+    "execution_rule": "All ten independently identified pairs must complete and pass the committed oracle.",
+    "comparative_claim_allowed": false,
+    "superiority_threshold": null
+  },
+  "canonicalization": {
+    "digest_algorithm": "SHA-256",
+    "byte_definition": "Exact file bytes as stored, UTF-8, LF line endings, including the final LF. No JSON reserialization or whitespace normalization."
+  },
+  "commitments": {
+    "case_corpus_sha256": "7454271f1d4faae87990ec4b976a67bb027c8df75ea974a08d1ef76f90b433d3",
+    "oracle_scoring_sha256": "2c3a1ec370597084f5fe959e07369c0d70384d1b01d404127b95753dc28d45c3"
+  },
+  "exclusions": {
+    "dry_run_case_ids": "H01-H10",
+    "dry_run_reused": false,
+    "trivial_renamings_used": false
+  }
+}

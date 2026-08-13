@@ -1,0 +1,108 @@
+{
+  "id": "resp_02296a2cdbf954c8016a7d276c3ee081a28a565f510432f244",
+  "object": "response",
+  "created_at": 1786586988,
+  "status": "completed",
+  "background": false,
+  "billing": {
+    "payer": "openai"
+  },
+  "completed_at": 1786586989,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": 600,
+  "max_tool_calls": null,
+  "model": "gpt-5-2025-08-07",
+  "moderation": null,
+  "output": [
+    {
+      "id": "rs_02296a2cdbf954c8016a7d276cd82881a2a75012a66be4003a",
+      "type": "reasoning",
+      "content": [],
+      "encrypted_content": "gAAAAABqfSdtnombRPzAPHtT-6wf1mN3A_yf9Jfo4UA3OMj6kaVV2E4ZlhvPZV0qIBORnksCkDXWsx63sjser94FPBWYI1PNYw4wrEtJ3YraCGQDvuGTPIE9TI-gOaaBNM4YYtV8eXTYai5feCKNK-XdVwjxeD_RVdrz7ZfRz3zKspQVwFA-feuKGrqTRUkNxrWhKNfPjXBQoBnXB3oeaNu5P6O2qh_bUo5ktH2maMdHXN6CT2BjUNwcNc5MUxxYPcLrW058UrKgso9E_fsPuDbGLBRlngL4NjsYK_L_5qq1u5abZoPgT4G9i83g7xHX2_8ZIz1wpP__XdURRYCCNhTtbSnW_ykDuSRdvwFcEw6eLiF8sGXLoC7injpNdVw6rS2ZcmxLZ1A99vDj6mabJuY-cZSl--FYFC3AQ0tf5P8nQzXPW9CARdQDsdskFi3fXW4TG6MGFpYO7IDRrypRFsJWN4v08B2UUHtZHtl0xggyz6eU46RizNWlewt0_rii4OimWyN-FXjCz9TKuC68wcy2zaDUuPsE2iZa_UGD7aOdELsdOrGtEONFvwK8SUuDClfSX9rNU1qRYry2vzHjAhNJvSzYcRMM3csdY2j31gx_7DHZsNT02KIRKiKqzCTDLO9a3_t6r8DvrgfICjoBrZxWcNP-9qNGN0JbN05f0XqEmIivporR23HD10K18YHH5xNAfxKumZvQVd_L9nAAUalXEMTIm1-8mb8YyD-nEXWqvnFcA3Ovke7Q5kalHEugc9z_1pth2jbuZV3HHvLZlkNpzpBuX6yM-aEc86LuNPgAmhglrlDlfWA5P6mzOXi2rBtaeizlhp6Z-9kH4cX7XFQW9TpLtATRD_1gIG5vHt1-kjK1_l2R-D7qa1EA5EnBqoUNsgHR4B0La3ibnXP-VJXLaxPKVtw6k0G5xqNFfnCQfDSp1eFmKerTZYrMqmi1afog0oMTnW3pJthLcoLxwhoyE0gQVCflgZ12-uzQmPJ89B3u4U8C9AA=",
+      "summary": []
+    },
+    {
+      "id": "msg_02296a2cdbf954c8016a7d276d143c81a286a5973ec51b78c9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FINDING|HIGH|5|Rename is allowed based on membership in destination org rather than the project's current organization; actor could rename without belonging to current org"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "context": "current_turn",
+    "effort": "minimal",
+    "mode": "standard",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": false,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "total_tokens": 0
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 260,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 50,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 310
+  },
+  "user": null,
+  "metadata": {
+    "study_id": "held-out-v1",
+    "attempt_id": "a12ac508-4d42-4cd4-8334-907d45462206",
+    "ordinal": "4",
+    "task_id": "held-out-review-02",
+    "arm": "control",
+    "case_corpus_digest": "7454271f1d4faae87990ec4b976a67bb027c8df75ea974a08d1ef76f90b433d3",
+    "model_config_digest": "604afb78dd156a9a871b11741999ddead696437ffdfbc01706d28525bc908d28"
+  }
+}

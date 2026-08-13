@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "provider": "openai",
+  "endpoint": "https://api.openai.com/v1/responses",
+  "model": "gpt-5-2025-08-07",
+  "reasoning_effort": "minimal",
+  "max_output_tokens": 600,
+  "max_output_words": 120,
+  "execution_order": "alternating",
+  "store": false,
+  "tools": [],
+  "shared_instruction": "Review the supplied requirement and code as written. Return either NO_FINDING or one or more findings in the exact requested format. Do not use tools. Do not exceed 120 words.",
+  "control_instruction": "Perform a careful code review using the requirement and code only.",
+  "workflow_instruction": "Apply the agent-first Clean Code review contract: trace behavior against the requirement, check boundary and failure paths, distinguish evidence from assumption, report only actionable defects, and preserve correct silence when no defect is proven. Stop after the bounded review pass."
+}

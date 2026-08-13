@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "study_id", "repository", "target_revision", "corpus", "scoring", "claims", "canonicalization", "commitments", "exclusions"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "study_id": {"type": "string", "minLength": 1},
+    "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+    "target_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "corpus": {"type": "object", "additionalProperties": false, "required": ["id", "canonical_path", "task_id_pattern", "case_count", "actionable_count", "correct_silence_count", "answers_in_public_corpus"], "properties": {"id": {"type": "string", "minLength": 1}, "canonical_path": {"type": "string", "minLength": 1}, "task_id_pattern": {"type": "string", "minLength": 1}, "case_count": {"type": "integer", "minimum": 1}, "actionable_count": {"type": "integer", "minimum": 0}, "correct_silence_count": {"type": "integer", "minimum": 0}, "answers_in_public_corpus": {"const": false}}},
+    "scoring": {"type": "object", "additionalProperties": false, "required": ["oracle_id", "algorithm_id", "algorithm_version", "oracle_storage", "valid_response", "pass_rule", "invalid_response_rule", "wrong_finding_rule", "aggregate_rule"], "properties": {"oracle_id": {"type": "string", "minLength": 1}, "algorithm_id": {"type": "string", "minLength": 1}, "algorithm_version": {"type": "string", "minLength": 1}, "oracle_storage": {"type": "string", "minLength": 1}, "valid_response": {"type": "string", "minLength": 1}, "pass_rule": {"type": "string", "minLength": 1}, "invalid_response_rule": {"type": "string", "minLength": 1}, "wrong_finding_rule": {"type": "string", "minLength": 1}, "aggregate_rule": {"type": "string", "minLength": 1}}},
+    "claims": {"type": "object", "additionalProperties": false, "required": ["study_type", "execution_rule", "comparative_claim_allowed", "superiority_threshold"], "properties": {"study_type": {"const": "descriptive_pilot"}, "execution_rule": {"type": "string", "minLength": 1}, "comparative_claim_allowed": {"const": false}, "superiority_threshold": {"type": "null"}}},
+    "canonicalization": {"type": "object", "additionalProperties": false, "required": ["digest_algorithm", "byte_definition"], "properties": {"digest_algorithm": {"const": "SHA-256"}, "byte_definition": {"type": "string", "minLength": 1}}},
+    "commitments": {"type": "object", "additionalProperties": false, "required": ["case_corpus_sha256", "oracle_scoring_sha256"], "properties": {"case_corpus_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "oracle_scoring_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}},
+    "exclusions": {"type": "object", "additionalProperties": false, "required": ["dry_run_case_ids", "dry_run_reused", "trivial_renamings_used"], "properties": {"dry_run_case_ids": {"type": "string", "minLength": 1}, "dry_run_reused": {"const": false}, "trivial_renamings_used": {"const": false}}}
+  }
+}

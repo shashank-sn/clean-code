@@ -1,0 +1,108 @@
+{
+  "id": "resp_08174bc6fadb9f87016a7d2770078081a08669396abd9ee578",
+  "object": "response",
+  "created_at": 1786586992,
+  "status": "completed",
+  "background": false,
+  "billing": {
+    "payer": "openai"
+  },
+  "completed_at": 1786586992,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": 600,
+  "max_tool_calls": null,
+  "model": "gpt-5-2025-08-07",
+  "moderation": null,
+  "output": [
+    {
+      "id": "rs_08174bc6fadb9f87016a7d2770703881a0bb8b5b06f61b068f",
+      "type": "reasoning",
+      "content": [],
+      "encrypted_content": "gAAAAABqfSdwhXNmOYJTN8tgSyUfgrFKTmYVBCknprDzQFz0aqZU7iHfZ7UAg5eIheWX6HDM68GFkbyCTswulMBqPDNV9NsXGT9m_yalLOnxr-CT2taOXyFDBRRUc7VzTQcKhtoOC6IBu4P1a9kp_5aPvfx93yuSpUD2XprYqSCPZmTFUdwyBQ5cahtAcxRjGum_cA1ylnFhDuJopGypwLHGLzyLG3BeTPnGKBuUzbNtOAOIf281kror8BwDDEHIhX8vEGjns9DRqjpN0yy8KUgdaTZTZO2GqWbwfBCTe_2Y3-oRaj8S8FT1Qsw-lQxPAhw2wi-JNEU3AG66irD9G8Zp0mnMt50SPlvAwcWxD1_ZcUDsU2V7JmW2MbvdujJt8R5hjVinLZKHaagZShUhUIf2xs7NBv_pXMOKE2s4P0APh-WhpJ7ql-vUnwzR5Q0YKA0m5fm9Sq7LuD-V02mm2d3F9nxy4qoEKbv5DNZTEQ5O4P1-Y2hDXVg8nOgcIfocnZagVAFmXJD95AX2GK67G37r4BwpwR1V8ycvgl4rdUKnauYRZHbKW7214qV-aymcM-PRqLaRMmPZ8CuZoz_vKWH_h3YiKAPsdGq9UwKw-_tqelQak8nbJb3Y7MIn8VyxybQX8gJ7b7nJNnNgOUMcxe-40iN8px4sq-bjLEyuKmfzjinrLk-RaOJhrYq50R6HC7pj39YE4MGLgQcakm-kbIuX7uicmLcBJStecxI_Ex31eAlQNzKJZXTWkTwshUSmOQCFVYABYI1zF_1BzX4VyXDT3T4foRnFF6sUwrgLaT3nIjsCBd3_ly4O-X6T-JPy06PC-NmCrPo43z8lHzD1dsUXhxlK1x9fUqdFBc9s2EjsmXTcYfN4qo9HI2pKTg8fhvhv7BNb2ghDXAaKKiuw00jIN3fLqK-FknTtZVtbAeIk81bhB80JumCLKfBJ2xpaEIUhCfhu4UqKeUw2Tqb-UNgw-gg3e8px9bhup_XtVvn91pDrGq4ARhg=",
+      "summary": []
+    },
+    {
+      "id": "msg_08174bc6fadb9f87016a7d277093ac81a0bfb8ebbabf9a9a34",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FINDING|HIGH|8|Response body is never closed leading to resource leak and violating requirement to close every response body"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "context": "current_turn",
+    "effort": "minimal",
+    "mode": "standard",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": false,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "total_tokens": 0
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 386,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 43,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 429
+  },
+  "user": null,
+  "metadata": {
+    "study_id": "held-out-v1",
+    "attempt_id": "a12ac508-4d42-4cd4-8334-907d45462206",
+    "ordinal": "6",
+    "task_id": "held-out-review-03",
+    "arm": "workflow",
+    "case_corpus_digest": "7454271f1d4faae87990ec4b976a67bb027c8df75ea974a08d1ef76f90b433d3",
+    "model_config_digest": "604afb78dd156a9a871b11741999ddead696437ffdfbc01706d28525bc908d28"
+  }
+}

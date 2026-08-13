@@ -1,0 +1,108 @@
+{
+  "id": "resp_0ee2052dfed77940016a7d2766b93481a28b69c28e6e369f59",
+  "object": "response",
+  "created_at": 1786586982,
+  "status": "completed",
+  "background": false,
+  "billing": {
+    "payer": "openai"
+  },
+  "completed_at": 1786586984,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": 600,
+  "max_tool_calls": null,
+  "model": "gpt-5-2025-08-07",
+  "moderation": null,
+  "output": [
+    {
+      "id": "rs_0ee2052dfed77940016a7d2767db5c81a299ca25b192eaa7f4",
+      "type": "reasoning",
+      "content": [],
+      "encrypted_content": "gAAAAABqfSdo09acTvxzVTIVH1igLNxmku2Xy3OkCe39-_ZiDflceQvQJ_1TlscDsK4rQ1_2OUQe1gvassqHQRO-JoCPTe4Zv0jkRS9CYnC6xm2V94kKcJP-tjTXU87t6faGCyV3CkKRfH8BmYm9qHwmGX6FZgwXjUO5t1i_6a1ssFL-3KXGfkp-bd-jPq9kJYlKL2VAnpngd8-6ys-_lmJdIs0BHCFOwCThZSmBiFiJQ08PCKDdTSeBEMb0249kZmeZp9X_1G_CEPbcbcChEf4KOyCoZ9e961PCNHhUxqzC6Oy1xINaMhjuBKiYbSv6IS7bmlidLBAMbbLyr7F4SnbrFPV8z3kuWLH0zF2rP043_MwkGc7m0uGqh0kXhQG6F9kXxrselUo9tZZqiHlWLkoiYZExsZ2aDWGnWeEUFtWzK5svW4bpgc871QFBYJE6Iy1kKiBQmH6yK01OKMRXrGPYpPOCRTtQSfFpZeenOsGXCrFRGr2yI0J1WBGohbwqSFTha_4Y-cpalsw9Xly7FZ0pCe14y32UFPM1plDG8UWM4RHnhKRSpBqJVHPr0YKw3kFtBrPhOr4LNHOaIRYiQZbURSUh_GLzBiThCHLOeHFoE_MsRODq_ykrHP4niytQB44pTCGjFNBOeEPWt-rrARHNO1KQLbdLIdnLfBWICsAgvsWmkvNfnfrTtUzrK1lPGnMFwUH0cwmBFjlavtBU-qyTQNsO9_r_xbmIfxsH_tqTC1Xo3PjBZ-NKn8Hueq61EySorEyuEOZDmTDyYU7wQVzoskc7szrlt6tFd3xFIette99jmN2a2YrVg1XFKKplbGFENNrafdjx7nKunAW8lvvlJ0R5gWwbKsDEGqw6voDbUQFG1IbP4wLxVvqUb2_yuZ1NU9Zzgy-pxlJglamH7aUoYhasY7-89TdwMuky2ZCWKzL8XL85jKUmKy86Dbwd6wpH-vMK_afPT4W0LiNsEEfM7LNXCJSYEQ==",
+      "summary": []
+    },
+    {
+      "id": "msg_0ee2052dfed77940016a7d2768073081a2b2d5270cdca45a17",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "NO_FINDING"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "context": "current_turn",
+    "effort": "minimal",
+    "mode": "standard",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": false,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "total_tokens": 0
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 277,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 21,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 298
+  },
+  "user": null,
+  "metadata": {
+    "study_id": "held-out-v1",
+    "attempt_id": "a12ac508-4d42-4cd4-8334-907d45462206",
+    "ordinal": "1",
+    "task_id": "held-out-review-01",
+    "arm": "control",
+    "case_corpus_digest": "7454271f1d4faae87990ec4b976a67bb027c8df75ea974a08d1ef76f90b433d3",
+    "model_config_digest": "604afb78dd156a9a871b11741999ddead696437ffdfbc01706d28525bc908d28"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "held-out-v1",
+  "attempt_id": "a12ac508-4d42-4cd4-8334-907d45462206",
+  "manifest_digest": "63a1ad26f4a9c836ba6760903c43d5b1eea0aaad41a3543ded68dd43102eefc8",
+  "created_at": "2026-08-13T02:09:39.467Z",
+  "schedule": [
+    {
+      "ordinal": 1,
+      "task_id": "held-out-review-01",
+      "arm": "control"
+    },
+    {
+      "ordinal": 2,
+      "task_id": "held-out-review-01",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 3,
+      "task_id": "held-out-review-02",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 4,
+      "task_id": "held-out-review-02",
+      "arm": "control"
+    },
+    {
+      "ordinal": 5,
+      "task_id": "held-out-review-03",
+      "arm": "control"
+    },
+    {
+      "ordinal": 6,
+      "task_id": "held-out-review-03",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 7,
+      "task_id": "held-out-review-04",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 8,
+      "task_id": "held-out-review-04",
+      "arm": "control"
+    },
+    {
+      "ordinal": 9,
+      "task_id": "held-out-review-05",
+      "arm": "control"
+    },
+    {
+      "ordinal": 10,
+      "task_id": "held-out-review-05",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 11,
+      "task_id": "held-out-review-06",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 12,
+      "task_id": "held-out-review-06",
+      "arm": "control"
+    },
+    {
+      "ordinal": 13,
+      "task_id": "held-out-review-07",
+      "arm": "control"
+    },
+    {
+      "ordinal": 14,
+      "task_id": "held-out-review-07",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 15,
+      "task_id": "held-out-review-08",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 16,
+      "task_id": "held-out-review-08",
+      "arm": "control"
+    },
+    {
+      "ordinal": 17,
+      "task_id": "held-out-review-09",
+      "arm": "control"
+    },
+    {
+      "ordinal": 18,
+      "task_id": "held-out-review-09",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 19,
+      "task_id": "held-out-review-10",
+      "arm": "workflow"
+    },
+    {
+      "ordinal": 20,
+      "task_id": "held-out-review-10",
+      "arm": "control"
+    }
+  ]
+}

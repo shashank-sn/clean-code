@@ -95,7 +95,7 @@ The project will summarize and operationalize ideas in original language. Book r
 - Done: `clean-build`, `clean-refactor`, and `clean-test`, plus contracts and trace validation for independent unit, acceptance, integration, and UI/QA tracks.
 - Done: `clean-review`, `clean-orchestrate`, `clean-audit`, and `clean-learn`, with independent review checks, human spot-check gates, hashed immutable receipts, and proposal-only learning.
 - Done: generated host packages, configuration and authoring docs, release automation, and a benchmark scorer with seeded defects and clean controls.
-- Open before a public release: run a controlled held-out agent study; the included benchmark manifest validates scoring and makes no performance claim.
+- Open before a public release: the first controlled held-out attempt stopped on a timeout at ordinal 10 of 20. Its partial evidence is published, but it does not qualify a release or support a performance claim.
 
 See [the implementation plan](docs/plans/2026-08-12-001-feat-clean-code-system-plan.md).
 

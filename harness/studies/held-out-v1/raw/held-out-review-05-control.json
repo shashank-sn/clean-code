@@ -1,0 +1,108 @@
+{
+  "id": "resp_081702693255fa2a016a7d2773759081a3b37a2e56b08cf962",
+  "object": "response",
+  "created_at": 1786586995,
+  "status": "completed",
+  "background": false,
+  "billing": {
+    "payer": "openai"
+  },
+  "completed_at": 1786586997,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": 600,
+  "max_tool_calls": null,
+  "model": "gpt-5-2025-08-07",
+  "moderation": null,
+  "output": [
+    {
+      "id": "rs_081702693255fa2a016a7d2773da8081a383c81f170f5a49a4",
+      "type": "reasoning",
+      "content": [],
+      "encrypted_content": "gAAAAABqfSd1nxqcUZgryg9QweDt5l7AiX3NP_LAGStcGTkxAm4zCASHOexi6vooR-01IkVUG16ADtYgdJcAag-b95MKehJbjTtcOd4s7tpHykV4udiZZmCE75Y6x1cb_qN_jal8hmQ7NJRIn-iOCRh8K_VH6dI93OqSmQGLaiVLx1wSFoj9gbh_qjcwEwcTUYGNXI2KusxD4cL1nyM9YWDUkVQV0W4WBNNie0lvHbG5FV1Sj94-bnsZHg6HzHA6nnwgARvU4knuwsGcagKSSvLi36srlbG_UeBkFqiU2n2D-ZSX7ZPGOtjmubKQv5s7cupikcpHMM7q38gCdT5s4mKzb3HqHjIG3UvS14IUTY9sBqsAL7LxQjXGDumyyyNSOeIiNJl6B7d54kjBDJpvvpEVTSHJaUdYVC2SU4oD7gc6o5lnOfBE4PDrhzuqydEUqKAPDOAOFDxjUrQhpe5REe8gslXMmDcpmWhfrE23FAvaKyIEpyor7tppdOoMErtDFQkKkjacUAVV49QweuVswsPaszzd4lC1OaIAGwQy12d_R97L2dpRE9-ch_H8sFgm9kWAmhV4BebVPbhGJyh5B2-ebE_ttVwNzQeDkcf-luSb_xJUNibstIIqbcXElUb0gnBAQ-59rGqK7fn4vvOvnAg-vt_AaoadiKRxiC6Et3s33mk6jaiYuacpzVxWMPnV3tc1mdXEQEvRh2YsOICZh76RGmrYetcmEiIrMrCy2iXA5WNgN4y-bJmOTzqqbzlKn4Kddq2yi3gjzg2lmSs1MqDH6CVLzxIT47cwrEhE51TB6yemnqdHs4REPk-n864JUYxFbSfvAr_YJIwPvditBX7dN2uoiliXPAyjJBxYK3Rt6wPlvFBdW7r_LWz87XM8dQU2t6Uu7FxCyxHBvYG6T7vwOFmQAT_35kkG604WEYdbFu94cmBqx7hsWTcuTDDO4kAcpYZgG4AjqVArJsrhrUZOKRIAoroHPw==",
+      "summary": []
+    },
+    {
+      "id": "msg_081702693255fa2a016a7d2774140881a39b74798e9d5cbc93",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FINDING|HIGH|2|Processed event claim is persisted before applyAccountChange effects; if applyAccountChange throws, the transaction rolls back the claim along with effects causing reprocessing to remain possible but if processed_events is outside tx or claim should be outside effects transaction to avoid coupling; also requirement says all effects in applyAccountChange use the supplied transaction but claiming should be in a separate transaction so failures remain retryable without duplicate effects"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "context": "current_turn",
+    "effort": "minimal",
+    "mode": "standard",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": false,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "total_tokens": 0
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 262,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 105,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 367
+  },
+  "user": null,
+  "metadata": {
+    "study_id": "held-out-v1",
+    "attempt_id": "a12ac508-4d42-4cd4-8334-907d45462206",
+    "ordinal": "9",
+    "task_id": "held-out-review-05",
+    "arm": "control",
+    "case_corpus_digest": "7454271f1d4faae87990ec4b976a67bb027c8df75ea974a08d1ef76f90b433d3",
+    "model_config_digest": "604afb78dd156a9a871b11741999ddead696437ffdfbc01706d28525bc908d28"
+  }
+}

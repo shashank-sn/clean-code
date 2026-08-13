@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "held-out-v1",
+  "cases": [
+    {
+      "task_id": "held-out-review-01",
+      "language": "python",
+      "requirement": "Atomically claim at most limit queued jobs. Multiple workers may call this function concurrently; a job must not be returned to two workers.",
+      "code": "def claim_jobs(conn, worker_id, limit):\n    with conn.transaction():\n        rows = conn.execute(\n            \"\"\"\n            SELECT id\n            FROM jobs\n            WHERE state = 'queued'\n            ORDER BY created_at, id\n            LIMIT %s\n            FOR UPDATE SKIP LOCKED\n            \"\"\",\n            (limit,),\n        ).fetchall()\n        conn.executemany(\n            \"UPDATE jobs SET state = 'running', worker_id = %s WHERE id = %s\",\n            [(worker_id, row[\"id\"]) for row in rows],\n        )\n        return [row[\"id\"] for row in rows]\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-02",
+      "language": "typescript",
+      "requirement": "An actor may rename a project only when they belong to its current organization. Moving a project also requires membership in the destination organization.",
+      "code": "export async function updateProject(req: Request, actor: Actor) {\n  const project = await projects.get(req.params.projectId);\n  if (!project) {\n    return response.notFound();\n  }\n\n  const destinationOrgId = req.body.organizationId ?? project.organizationId;\n  if (!actor.organizationIds.includes(destinationOrgId)) {\n    return response.forbidden();\n  }\n\n  await projects.update(project.id, {\n    name: req.body.name ?? project.name,\n    organizationId: destinationOrgId,\n  });\n  return response.noContent();\n}\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-03",
+      "language": "go",
+      "requirement": "Fetch one JSON document over HTTP, reject non-2xx responses, cap the response at 1 MiB, and close every response body.",
+      "code": "func FetchJSON(ctx context.Context, client *http.Client, url string, dst any) error {\n\treq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)\n\tif err != nil {\n\t\treturn err\n\t}\n\tresp, err := client.Do(req)\n\tif err != nil {\n\t\treturn err\n\t}\n\n\tconst maxBody = 1 << 20\n\tbody, err := io.ReadAll(io.LimitReader(resp.Body, maxBody+1))\n\tif err != nil {\n\t\treturn err\n\t}\n\tif len(body) > maxBody {\n\t\treturn fmt.Errorf(\"response exceeds %d bytes\", maxBody)\n\t}\n\tif resp.StatusCode < 200 || resp.StatusCode >= 300 {\n\t\treturn fmt.Errorf(\"unexpected HTTP status %d\", resp.StatusCode)\n\t}\n\tif err := json.Unmarshal(body, dst); err != nil {\n\t\treturn fmt.Errorf(\"decode response: %w\", err)\n\t}\n\treturn nil\n}\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-04",
+      "language": "java",
+      "requirement": "Prices can differ by product, currency, and customer tier. A cached result must never be reused across any of those dimensions.",
+      "code": "public final class PriceService {\n  private record PriceKey(String productId, String currency, String customerTier) {}\n\n  private final ConcurrentMap<PriceKey, Money> cache = new ConcurrentHashMap<>();\n  private final PriceRepository repository;\n\n  public PriceService(PriceRepository repository) {\n    this.repository = repository;\n  }\n\n  public Money price(String productId, String currency, String customerTier) {\n    PriceKey key = new PriceKey(productId, currency, customerTier);\n    return cache.computeIfAbsent(\n        key,\n        ignored -> repository.load(productId, currency, customerTier));\n  }\n}\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-05",
+      "language": "typescript",
+      "requirement": "Authenticated webhook events have immutable unique IDs. Apply each event's database effects exactly once under concurrent delivery; a failed application must remain retryable. All effects in applyAccountChange use the supplied transaction.",
+      "code": "export async function applyEvent(event: AccountEvent): Promise<void> {\n  await db.transaction(async (tx) => {\n    const claimed = await tx.query(\n      `INSERT INTO processed_events (event_id)\n       VALUES ($1)\n       ON CONFLICT (event_id) DO NOTHING\n       RETURNING event_id`,\n      [event.id],\n    );\n\n    if (claimed.rowCount === 0) {\n      return;\n    }\n\n    await applyAccountChange(tx, event);\n  });\n}\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-06",
+      "language": "go",
+      "requirement": "PostgreSQL uses its default READ COMMITTED isolation. Reserve must reject requests above available stock and must never make available negative, including under concurrent calls for the same SKU.",
+      "code": "func Reserve(ctx context.Context, db *sql.DB, sku string, qty int) error {\n\ttx, err := db.BeginTx(ctx, nil)\n\tif err != nil {\n\t\treturn err\n\t}\n\tdefer tx.Rollback()\n\n\tvar available int\n\tif err := tx.QueryRowContext(ctx,\n\t\t\"SELECT available FROM inventory WHERE sku = $1\", sku,\n\t).Scan(&available); err != nil {\n\t\treturn err\n\t}\n\tif available < qty {\n\t\treturn ErrInsufficientStock\n\t}\n\tif _, err := tx.ExecContext(ctx,\n\t\t\"UPDATE inventory SET available = available - $1 WHERE sku = $2\", qty, sku,\n\t); err != nil {\n\t\treturn err\n\t}\n\treturn tx.Commit()\n}\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-07",
+      "language": "ruby",
+      "requirement": "Verify a webhook signature supplied as exactly 64 lowercase hexadecimal characters. Comparison of valid-length signatures must be constant time.",
+      "code": "def valid_signature?(body, provided, secret)\n  return false unless provided.is_a?(String)\n  return false unless provided.match?(/\\A[0-9a-fA-F]{64}\\z/)\n\n  expected = OpenSSL::HMAC.hexdigest(\"SHA256\", secret, body)\n  ActiveSupport::SecurityUtils.secure_compare(expected, provided.downcase)\nend\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-08",
+      "language": "python",
+      "requirement": "Fetch manifests only from an exact hostname in ALLOWED_HOSTS. Redirects to a hostname outside that allowlist must never be followed.",
+      "code": "from urllib.parse import urlparse\n\nimport requests\n\nALLOWED_HOSTS = {\"artifacts.example.com\", \"mirror.example.com\"}\n\ndef fetch_manifest(url: str) -> dict:\n    parsed = urlparse(url)\n    if parsed.scheme != \"https\" or parsed.hostname not in ALLOWED_HOSTS:\n        raise ValueError(\"manifest URL is not allowed\")\n\n    response = requests.get(url, timeout=2, allow_redirects=False)\n    if response.is_redirect or response.is_permanent_redirect:\n        raise ValueError(\"manifest redirect is not allowed\")\n    response.raise_for_status()\n    return response.json()\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-09",
+      "language": "java",
+      "requirement": "For each key, allow at most one active refresh. Concurrent callers must share its future. Success or failure must remove the active entry so a later call can retry.",
+      "code": "public final class RefreshCoordinator {\n  private final Map<String, CompletableFuture<Void>> active = new HashMap<>();\n  private final Executor executor;\n  private final Loader loader;\n\n  public CompletableFuture<Void> refresh(String key) {\n    synchronized (active) {\n      CompletableFuture<Void> existing = active.get(key);\n      if (existing != null) {\n        return existing;\n      }\n\n      CompletableFuture<Void> created = new CompletableFuture<>();\n      active.put(key, created);\n      try {\n        executor.execute(() -> {\n          try {\n            loader.refresh(key);\n            created.complete(null);\n          } catch (Throwable failure) {\n            created.completeExceptionally(failure);\n            return;\n          }\n          synchronized (active) {\n            active.remove(key);\n          }\n        });\n      } catch (RuntimeException submissionFailure) {\n        active.remove(key);\n        created.completeExceptionally(submissionFailure);\n      }\n      return created;\n    }\n  }\n}\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    },
+    {
+      "task_id": "held-out-review-10",
+      "language": "javascript",
+      "requirement": "Retry gateway timeouts up to three times without creating more than one charge. The gateway stores and replays results by idempotency key, including when the first response is lost.",
+      "code": "export async function capturePayment(gateway, paymentId, amount) {\n  const idempotencyKey = crypto.randomUUID();\n  let lastError;\n  for (let attempt = 1; attempt <= 3; attempt += 1) {\n    try {\n      return await gateway.capture({\n        paymentId,\n        amount,\n        idempotencyKey,\n      });\n    } catch (error) {\n      if (!isTimeout(error)) {\n        throw error;\n      }\n      lastError = error;\n    }\n  }\n  throw lastError;\n}\n",
+      "response_format": "Return exactly NO_FINDING if there is no actionable correctness defect. Otherwise return one line exactly as FINDING|<severity>|<line>|<description>, where severity is HIGH, MEDIUM, or LOW, line is one positive integer, and description contains no pipe or newline. Report at most one finding."
+    }
+  ]
+}
