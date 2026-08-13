@@ -1,0 +1,108 @@
+{
+  "id": "resp_09ffc75b88a67e2a016a7d276a55e481a3b1f08499d34c7e3f",
+  "object": "response",
+  "created_at": 1786586986,
+  "status": "completed",
+  "background": false,
+  "billing": {
+    "payer": "openai"
+  },
+  "completed_at": 1786586987,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": 600,
+  "max_tool_calls": null,
+  "model": "gpt-5-2025-08-07",
+  "moderation": null,
+  "output": [
+    {
+      "id": "rs_09ffc75b88a67e2a016a7d276afe0881a38052021947506e81",
+      "type": "reasoning",
+      "content": [],
+      "encrypted_content": "gAAAAABqfSdrVj0aPAzui5avwt8DxWedRukuYy16PEOIjso7XQsxdSdzukNWD-fv9onWnydn1FL3f2wmWIuUwjhJY0vCHPtLkbUoMNMbvjErp2LXbBPo8nuzYBnjVAdjx4DdpHpqU1X0neRnE7oBKIDunaC0BkIVrk5i6Al5zteWeClSh0wy7evuBk5ahV16zcjFl5tx-UP8_3sj5NmHCnTwRY1cdZBsrnJ_5QSco51zfTPuMrkx8x_O3ujR8weXnnAqDW240ExLyBjIeMl1ueI6Zn5r68g50nZcToRIkOJ3p0GfFJ509ctGzST3ND-zYcTSGM2nMprZ1TctDb_75WtgpeT6xKuLBazFmFntgSqiyINHvkNLAYux2j7NjyOyzDw1mnlXf15PqPhgjz4SXufFUfp7iYWNjCqkQ4DzoiLpmBoO5_wh9jjBpzypfxfCNW2EXBKcniBN805r667Br2T0jXyK1osNV81y_iSQaNDGH8XoYrEBF0YBMNtZOXedGIolDj16dbyZLKiNj9OqRTgWL_w7FcQTyjxXewl-LcLFcU8tK7vG0nM012_X-ZZi0Jx1TQhj3u9t9InmL-avODbakstdeH258wpYrvLvpYWyaiGgmK5U4x3qmT0QL7BlmORY_Tt9fqmLQQpGjCwZluRafUfcu06DiL3rrgCP848cRXwrZrsrcz73aute0V8RcBHBM8WG3BMC3h-3aWRw4sJYxX6Rhclgah9SnbmxJSPC7PkYJ6wHOmv0nB3DpW47H4uLjNHygcyZxv_Z68lnUR221SWFCfkBhmYT2cEapgckzy9SRyEdw7BErDQX-YOIB7I6xioojcJv5OVf1RYlMCJyoWeWTGYxtNgqysA1tD9vacRF7uALlqmJhsZIMcIhPNatdBw0ikbSeolGzIr5GVqI78zpqfWrWfbPdJfHXmny_LjtMIV65yUAl6zf4UR9vt1mbYkFCPGVW9u6HyITxCSjJjOGdPma_g1huBmk8VHHRBxtCZNcDWQ=",
+      "summary": []
+    },
+    {
+      "id": "msg_09ffc75b88a67e2a016a7d276b374481a3aad7ec9b5f42d2c3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FINDING|HIGH|6|Allows renaming by any actor who is a member of the destination organization even if they do not belong to the project's current organization; should require membership in current org for rename and in destination org for move"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "context": "current_turn",
+    "effort": "minimal",
+    "mode": "standard",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": false,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "total_tokens": 0
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 296,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 66,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 362
+  },
+  "user": null,
+  "metadata": {
+    "study_id": "held-out-v1",
+    "attempt_id": "a12ac508-4d42-4cd4-8334-907d45462206",
+    "ordinal": "3",
+    "task_id": "held-out-review-02",
+    "arm": "workflow",
+    "case_corpus_digest": "7454271f1d4faae87990ec4b976a67bb027c8df75ea974a08d1ef76f90b433d3",
+    "model_config_digest": "604afb78dd156a9a871b11741999ddead696437ffdfbc01706d28525bc908d28"
+  }
+}

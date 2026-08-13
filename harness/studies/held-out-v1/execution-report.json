@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "held-out-v1",
+  "attempt_id": "a12ac508-4d42-4cd4-8334-907d45462206",
+  "status": "INCOMPLETE",
+  "execution_valid": false,
+  "claim_allowed": false,
+  "reserved_slots": 20,
+  "terminal_records": 10,
+  "completed_runs": 9,
+  "failed_runs": 0,
+  "timed_out_runs": 1,
+  "first_non_completed_ordinal": 10,
+  "first_non_completed_task_id": "held-out-review-05",
+  "first_non_completed_arm": "workflow",
+  "started_at": "2026-08-13T02:09:39.470Z",
+  "finished_at": "2026-08-13T02:20:02.488Z",
+  "observed_usage": {
+    "completed_responses_with_usage": 9,
+    "input_tokens": 2726,
+    "output_tokens": 388,
+    "total_tokens": 3114,
+    "cached_input_tokens": 0
+  },
+  "limitations": [
+    "The single preregistered no-retry attempt timed out at ordinal 10 of 20.",
+    "Unexecuted reserved slots remain intentionally unfilled.",
+    "The incomplete evidence set is not scored and cannot qualify a release or support a comparative claim."
+  ]
+}
