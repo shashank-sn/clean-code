@@ -10,24 +10,48 @@ Agents forget instructions, mirror mistakes in tests, and narrate success withou
 
 ## Install
 
-### npm (recommended)
+> **`clean-code-skills` is not on the public npm registry yet.** The commands below work today. After the first npm release, `npm install -g clean-code-skills` will work as documented.
 
-Requires **Node 18+** and **Go 1.22+** (the CLI is built in Go; npm installs skills + wrapper).
+### One-line install (macOS / Linux)
+
+Requires **Go 1.22+** (`brew install go` on macOS).
 
 ```bash
-npm install -g clean-code-skills
+curl -fsSL https://raw.githubusercontent.com/shashank-stitch/clean-code/cursor/ce-parity-shipping-pipeline-70e7/scripts/install.sh | bash
+```
+
+Then ensure `~/.local/bin` is on your `PATH`:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+clean-code version
+```
+
+### Install from Git (npm, before registry publish)
+
+Requires **Node 18+** and **Go 1.22+**.
+
+```bash
+npm install -g "git+https://github.com/shashank-stitch/clean-code.git#cursor/ce-parity-shipping-pipeline-70e7"
 clean-code version
 clean-code setup --host cursor --output /path/to/your/repo
 ```
 
-Project-local install:
+Project-local:
 
 ```bash
-npm install clean-code-skills
+npm install "git+https://github.com/shashank-stitch/clean-code.git#cursor/ce-parity-shipping-pipeline-70e7"
 npx clean-code discover .
 ```
 
-Skills are installed under `node_modules/clean-code-skills/skills/`. Point your agent host at that path or copy skills into your project.
+### npm registry (after first publish)
+
+```bash
+npm install -g clean-code-skills
+clean-code version
+```
+
+Maintainers: set GitHub secret `NPM_TOKEN` and publish with [GitHub Releases](https://github.com/shashank-stitch/clean-code/releases) (workflow `npm-publish.yml`), or run `npm login` and `npm publish --access public` from a clone.
 
 ### Go build
 
