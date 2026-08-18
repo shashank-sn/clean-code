@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 - 2026-08-18
+
+- Publish on npm as `@shashanksn/clean-code` with polished README and install docs.
+- Deprecate `clean-code-skills` on npm (renamed package).
+
 ## 0.2.0 - Unreleased
 
 - Add shipping pipeline skills: `clean-brainstorm`, `clean-plan`, `clean-debug`, `clean-ship`, `clean-simplify`, `clean-compound`, `clean-worktree`, `clean-watch-pr`, and `clean-lfg`.
