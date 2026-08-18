@@ -137,19 +137,15 @@ func CompareWorkflows(manifest WorkflowManifest) WorkflowComparison {
 	})
 
 	advantage := map[string]float64{}
-	leaderByDimension := map[string]string{}
 	for _, dimension := range manifest.Dimensions {
-		var bestID string
 		var bestScore float64
 		for _, workflow := range manifest.Workflows {
 			score := workflow.Scores[dimension]
 			if score > bestScore {
 				bestScore = score
-				bestID = workflow.ID
 			}
 		}
 		advantage[dimension] = bestScore
-		leaderByDimension[dimension] = bestID
 	}
 
 	summary := buildWorkflowSummary(workflows, totals)

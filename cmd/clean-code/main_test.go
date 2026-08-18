@@ -260,8 +260,22 @@ func TestRunVerifyRejectsMissingTrustedPolicy(t *testing.T) {
 }
 
 func TestRunCompareWorkflows(t *testing.T) {
+	repoRoot := filepath.Join("..", "..")
+	if wd, err := os.Getwd(); err == nil {
+		for {
+			if _, err := os.Stat(filepath.Join(wd, "go.mod")); err == nil {
+				repoRoot = wd
+				break
+			}
+			parent := filepath.Dir(wd)
+			if parent == wd {
+				break
+			}
+			wd = parent
+		}
+	}
 	var stdout, stderr bytes.Buffer
-	code := run([]string{"compare-workflows"}, &stdout, &stderr)
+	code := run([]string{"compare-workflows", "--manifest", filepath.Join(repoRoot, "harness/calibration/workflow-comparison.json")}, &stdout, &stderr)
 	if code != 0 {
 		t.Fatalf("expected success, got %d: %s", code, stderr.String())
 	}
@@ -280,5 +294,36 @@ func TestRunCompareWorkflows(t *testing.T) {
 	}
 	if report.Summary == "" {
 		t.Fatal("expected summary")
+	}
+}
+
+func TestRunBenchmarkFullFlow(t *testing.T) {
+	repoRoot := filepath.Join("..", "..")
+	if wd, err := os.Getwd(); err == nil {
+		for {
+			if _, err := os.Stat(filepath.Join(wd, "go.mod")); err == nil {
+				repoRoot = wd
+				break
+			}
+			parent := filepath.Dir(wd)
+			if parent == wd {
+				break
+			}
+			wd = parent
+		}
+	}
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"benchmark-full-flow", "--repo", repoRoot, "--manifest", filepath.Join(repoRoot, "harness/calibration/full-flow-manifest.json")}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("expected success, got %d: %s", code, stderr.String())
+	}
+	var report struct {
+		Winner string `json:"winner"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.Winner != "clean-code" {
+		t.Fatalf("expected clean-code winner, got %q", report.Winner)
 	}
 }

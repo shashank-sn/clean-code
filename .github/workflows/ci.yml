@@ -19,6 +19,8 @@ jobs:
       - run: go vet ./...
       - run: go run ./cmd/clean-code benchmark --manifest harness/calibration/benchmark-manifest.yaml
       - run: go run ./cmd/clean-code compare-workflows
+      - run: go run ./cmd/clean-code benchmark-full-flow
+      - run: go test -race ./examples/benchmark-flow/...
 
   cross-build:
     runs-on: ubuntu-latest

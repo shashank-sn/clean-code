@@ -1,12 +1,32 @@
 package benchmark
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
 
+func repoRoot(t *testing.T) string {
+	t.Helper()
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(wd, "go.mod")); err == nil {
+			return wd
+		}
+		parent := filepath.Dir(wd)
+		if parent == wd {
+			t.Fatal("go.mod not found")
+		}
+		wd = parent
+	}
+}
+
 func TestCompareWorkflowsFromManifest(t *testing.T) {
-	path := filepath.Join("..", "..", "harness", "calibration", "workflow-comparison.json")
+	root := repoRoot(t)
+	path := filepath.Join(root, "harness", "calibration", "workflow-comparison.json")
 	manifest, err := LoadWorkflowManifest(path)
 	if err != nil {
 		t.Fatal(err)

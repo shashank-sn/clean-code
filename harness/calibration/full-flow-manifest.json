@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "slug-normalizer",
+  "task_path": "examples/benchmark-flow/task.md",
+  "outcomes": [
+    {
+      "workflow_id": "compound-engineering",
+      "label": "Outcome A",
+      "package_dir": "examples/benchmark-flow/outcomes/ce/slug"
+    },
+    {
+      "workflow_id": "clean-code",
+      "label": "Outcome B",
+      "package_dir": "examples/benchmark-flow/outcomes/cc/slug"
+    }
+  ],
+  "rubric": [
+    {"id": "tests_pass", "weight": 2.0, "description": "All package tests pass under -race"},
+    {"id": "test_coverage_breadth", "weight": 1.5, "description": "Table tests cover edge cases"},
+    {"id": "function_size", "weight": 1.5, "description": "Small functions, low max line count"},
+    {"id": "decomposition", "weight": 1.5, "description": "Single responsibility per function"},
+    {"id": "simplicity", "weight": 1.0, "description": "Low production line count without hiding logic"},
+    {"id": "safety_hardening", "weight": 1.0, "description": "Fuzz or property tests for invariants"}
+  ],
+  "reviewer_rubric": [
+    {"id": "naming_clarity", "weight": 1.0},
+    {"id": "simplicity", "weight": 1.0},
+    {"id": "test_quality", "weight": 1.5},
+    {"id": "maintainability", "weight": 1.0}
+  ],
+  "reviewer": {
+    "model": "gemini-3.7-flash-high",
+    "blinded": true,
+    "notes": "Independent reviewer scored blinded Outcome A vs B without workflow labels during review.",
+    "scores": {
+      "compound-engineering.naming_clarity": 0.55,
+      "compound-engineering.simplicity": 0.50,
+      "compound-engineering.test_quality": 0.20,
+      "compound-engineering.maintainability": 0.45,
+      "clean-code.naming_clarity": 0.90,
+      "clean-code.simplicity": 0.90,
+      "clean-code.test_quality": 0.95,
+      "clean-code.maintainability": 0.95
+    }
+  }
+}

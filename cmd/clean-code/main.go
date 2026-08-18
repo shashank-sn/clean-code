@@ -310,6 +310,29 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return writeJSON(stdout, stderr, benchmark.CompareWorkflows(manifest))
+	case "benchmark-full-flow":
+		flags := flag.NewFlagSet("benchmark-full-flow", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		manifestPath := flags.String("manifest", "harness/calibration/full-flow-manifest.json", "full-flow benchmark manifest")
+		repoRoot := flags.String("repo", ".", "repository root")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 {
+			fmt.Fprintln(stderr, "benchmark-full-flow accepts flags only")
+			return 2
+		}
+		manifest, err := benchmark.LoadFullFlowManifest(*manifestPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		report, err := benchmark.RunFullFlow(*repoRoot, manifest)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		return writeJSON(stdout, stderr, report)
 	case "learn":
 		flags := flag.NewFlagSet("learn", flag.ContinueOnError)
 		flags.SetOutput(stderr)
@@ -352,5 +375,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|benchmark|compare-workflows|learn>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|benchmark|compare-workflows|benchmark-full-flow|learn>")
 }
