@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.7 - 2026-08-18
+
+- Add `clean-code doctor` to diagnose npm global `PATH` and binary location.
+- README documents `export PATH="$(npm prefix -g)/bin:$PATH"` after global install on macOS.
+
 ## 0.2.6 - 2026-08-18
 
 - Go CLI resolves version from nearby `package.json` when ldflags are not set.

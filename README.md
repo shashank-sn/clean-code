@@ -21,9 +21,18 @@ Published on npm as `@shashanksn/clean-code`. **Node 18+** is required for npm; 
 
 ```bash
 npm install -g @shashanksn/clean-code@latest
+export PATH="$(npm prefix -g)/bin:$PATH"
 clean-code version
 clean-code setup --host cursor --output /path/to/your/repo
 ```
+
+On macOS, if `clean-code` is not found after install, your npm global bin is not on `PATH`. Add once to `~/.zshrc`:
+
+```bash
+export PATH="$(npm prefix -g)/bin:$PATH"
+```
+
+Then run `clean-code doctor` to verify install and PATH.
 
 First `clean-code` run may download Go and compile the CLI once (subsequent runs are instant).
 

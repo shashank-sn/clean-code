@@ -89,6 +89,40 @@ async function main() {
     process.exit(0);
   }
 
+  if (args[0] === "doctor" && args.length === 1) {
+    const meta = readPackageMeta(packageRoot);
+    const prefixResult = spawnSync("npm", ["prefix", "-g"], {
+      encoding: "utf8",
+    });
+    const npmPrefix = (prefixResult.stdout || "").trim();
+    const npmBin = npmPrefix ? path.join(npmPrefix, "bin") : "";
+    const onPath =
+      npmBin &&
+      (process.env.PATH || "")
+        .split(path.delimiter)
+        .some((entry) => entry === npmBin);
+
+    console.log(`package: ${meta.name} ${meta.version}`);
+    console.log(`package root: ${packageRoot}`);
+    if (npmPrefix) {
+      console.log(`npm global prefix: ${npmPrefix}`);
+      console.log(`npm global bin: ${npmBin}`);
+      console.log(`npm global bin on PATH: ${onPath ? "yes" : "no"}`);
+      if (!onPath) {
+        console.log("");
+        console.log("Add to ~/.zshrc then restart the terminal:");
+        console.log(`  export PATH="${npmBin}:$PATH"`);
+      }
+    }
+    const whichResult = spawnSync("which", ["-a", "clean-code"], {
+      encoding: "utf8",
+      shell: true,
+    });
+    const whichOut = (whichResult.stdout || "").trim();
+    console.log(`which -a clean-code: ${whichOut || "(not found)"}`);
+    process.exit(0);
+  }
+
   const hadGo = goWorks();
 
   try {
