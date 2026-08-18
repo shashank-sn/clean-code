@@ -5,7 +5,7 @@
 - Add shipping pipeline skills: `clean-brainstorm`, `clean-plan`, `clean-debug`, `clean-ship`, `clean-simplify`, `clean-compound`, `clean-worktree`, `clean-watch-pr`, and `clean-lfg`.
 - Add `compare-workflows` CLI command and workflow coverage benchmark manifest vs Compound Engineering.
 - Add `benchmark-full-flow` CLI with slug normalizer CE vs CC outcomes, automated rubric, and blind Gemini reviewer scores.
-- Add npm package `clean-code-skills` with CLI wrapper and CONTRIBUTING guide.
+- Add npm package `clean-code` with CLI wrapper and CONTRIBUTING guide.
 - Rewrite README: install via npm, step-by-step pipeline, CE mapping notes, remove status checklist.
 - Add default policy template, generic example, benchmark-flow fixtures, CI template, and shipping pipeline docs.
 

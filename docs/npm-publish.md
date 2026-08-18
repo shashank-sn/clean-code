@@ -1,38 +1,23 @@
-# Publishing `clean-code-skills` to npm
+# Publishing to npm
 
-The package is configured but **not yet published**. Users installing from npm today will see `404 Not Found`.
+**Live package:** https://www.npmjs.com/package/@shashanksn/clean-code
 
-## First-time publish (maintainer)
-
-1. Create an npm account and log in: `npm login`
-2. From a clean clone on the release branch:
+The unscoped name `clean-code` is blocked by npm (similar to `cleancode`). The scoped package installs the `clean-code` CLI binary.
 
 ```bash
-npm publish --access public --provenance
-```
-
-3. Verify:
-
-```bash
-npm view clean-code-skills version
-npm install -g clean-code-skills
+npm install -g @shashanksn/clean-code
 clean-code version
 ```
 
-## Automated publish on GitHub Release
+Deprecated predecessor: `clean-code-skills` → use `@shashanksn/clean-code`.
 
-1. Add repository secret `NPM_TOKEN` (npm access token with publish permission).
-2. Create a GitHub Release (tag e.g. `v0.2.0`).
-3. Workflow `.github/workflows/npm-publish.yml` runs `npm publish`.
+## Publish
 
-Ensure `package.json` `version` matches the release before tagging.
-
-## Until npm is live
-
-Users should install from Git:
+From repository root:
 
 ```bash
-npm install -g "git+https://github.com/shashank-stitch/clean-code.git#cursor/ce-parity-shipping-pipeline-70e7"
+npm login
+npm publish --access public
 ```
 
-Or use `scripts/install.sh` (Go only, no Node required).
+Scoped packages require `--access public` for global install without npm login to the scope.

@@ -1,5 +1,6 @@
 /dist/
 bin/clean-code.bin
+.npmrc
 /.clean-code/evidence/
 /.clean-code/cache/
 *.test

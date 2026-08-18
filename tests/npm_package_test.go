@@ -22,7 +22,7 @@ func TestNpmPackageManifest(t *testing.T) {
 	if err := json.Unmarshal(body, &manifest); err != nil {
 		t.Fatal(err)
 	}
-	if manifest.Name != "clean-code-skills" || manifest.License != "MIT" {
+	if manifest.Name != "@shashanksn/clean-code" || manifest.License != "MIT" {
 		t.Fatalf("unexpected package manifest: %+v", manifest)
 	}
 	if manifest.Bin["clean-code"] != "bin/clean-code.js" {

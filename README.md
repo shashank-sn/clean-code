@@ -10,29 +10,14 @@ Agents forget instructions, mirror mistakes in tests, and narrate success withou
 
 ## Install
 
-> **`clean-code-skills` is not on the public npm registry yet.** The commands below work today. After the first npm release, `npm install -g clean-code-skills` will work as documented.
+> Install: `npm install -g @shashanksn/clean-code` — CLI command is `clean-code` (requires Node 18+ and Go 1.22+).
 
-### One-line install (macOS / Linux)
+Unscoped `clean-code` is blocked by npm (too similar to package `cleancode`).
 
-Requires **Go 1.22+** (`brew install go` on macOS).
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/shashank-stitch/clean-code/cursor/ce-parity-shipping-pipeline-70e7/scripts/install.sh | bash
-```
-
-Then ensure `~/.local/bin` is on your `PATH`:
+### npm
 
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
-clean-code version
-```
-
-### Install from Git (npm, before registry publish)
-
-Requires **Node 18+** and **Go 1.22+**.
-
-```bash
-npm install -g "git+https://github.com/shashank-stitch/clean-code.git#cursor/ce-parity-shipping-pipeline-70e7"
+npm install -g @shashanksn/clean-code
 clean-code version
 clean-code setup --host cursor --output /path/to/your/repo
 ```
@@ -40,18 +25,25 @@ clean-code setup --host cursor --output /path/to/your/repo
 Project-local:
 
 ```bash
-npm install "git+https://github.com/shashank-stitch/clean-code.git#cursor/ce-parity-shipping-pipeline-70e7"
+npm install @shashanksn/clean-code
 npx clean-code discover .
 ```
 
-### npm registry (after first publish)
+### Install from Git (alternative)
 
 ```bash
-npm install -g clean-code-skills
-clean-code version
+npm install -g "git+https://github.com/shashank-stitch/clean-code.git#cursor/ce-parity-shipping-pipeline-70e7"
 ```
 
-Maintainers: set GitHub secret `NPM_TOKEN` and publish with [GitHub Releases](https://github.com/shashank-stitch/clean-code/releases) (workflow `npm-publish.yml`), or run `npm login` and `npm publish --access public` from a clone.
+### One-line install (macOS / Linux, Go only)
+
+Requires **Go 1.22+** (`brew install go` on macOS).
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shashank-stitch/clean-code/cursor/ce-parity-shipping-pipeline-70e7/scripts/install.sh | bash
+export PATH="$HOME/.local/bin:$PATH"
+clean-code version
+```
 
 ### Go build
 
@@ -234,7 +226,7 @@ internal/         # Runner, verify, audit, benchmark
 harness/          # Schemas, adapters, calibration
 examples/         # Adoption and benchmark fixtures
 docs/             # Architecture, shipping, benchmarks
-package.json      # npm package clean-code-skills
+package.json      # npm package @shashanksn/clean-code
 ```
 
 ---

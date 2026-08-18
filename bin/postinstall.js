@@ -8,7 +8,7 @@ const goCheck = spawnSync("go", ["version"], { encoding: "utf8" });
 
 if (goCheck.status !== 0) {
   console.log(
-    "clean-code-skills: Go is not installed. The clean-code CLI needs Go 1.22+ or a release binary."
+    "clean-code: Go is not installed. The clean-code CLI needs Go 1.22+ or a release binary."
   );
   console.log("See https://github.com/shashank-stitch/clean-code#install");
   process.exit(0);
@@ -21,7 +21,7 @@ const build = spawnSync(
 );
 
 if (build.status !== 0) {
-  console.log("clean-code-skills: optional native binary build skipped.");
+  console.log("clean-code: optional native binary build skipped.");
   if (build.stderr) {
     console.log(build.stderr.trim());
   }
