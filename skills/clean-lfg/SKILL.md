@@ -27,6 +27,6 @@ Autonomous pipeline: plan → build → verify → review → simplify → ship 
 - Stop if `clean-verify` returns ERROR for a required check.
 - Record procedural independence when the host cannot enforce separate agent contexts.
 
-## Comparison to Compound Engineering `lfg`
+## Comparison to autonomous shipping pipelines
 
-This pipeline adds deterministic verification, architecture checks, trace validation, immutable audit receipts, and policy learning gates that CE does not enforce by default. CE remains stronger on optional cross-model implementation routing; combine both when external worker routes are required.
+This skill sequences the same planning-to-ship stages many teams run manually, but adds mandatory `clean-verify`, architecture/trace checks, audit receipts, and proposal-only `clean-learn` gates that generic ship skills typically leave optional.

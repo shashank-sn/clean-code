@@ -1,0 +1,46 @@
+{
+  "name": "clean-code-skills",
+  "version": "0.2.0",
+  "description": "Language-neutral agent skills and CLI for designing, verifying, and shipping maintainable software.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shashank-stitch/clean-code.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shashank-stitch/clean-code/issues"
+  },
+  "homepage": "https://github.com/shashank-stitch/clean-code#readme",
+  "keywords": [
+    "clean-code",
+    "coding-agent",
+    "cursor",
+    "codex",
+    "cli",
+    "verification",
+    "skills"
+  ],
+  "bin": {
+    "clean-code": "bin/clean-code.js"
+  },
+  "files": [
+    "bin",
+    "cmd",
+    "internal",
+    "harness",
+    "hosts",
+    "skills",
+    ".codex-plugin",
+    "go.mod",
+    "go.sum",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "postinstall": "node bin/postinstall.js",
+    "test": "go test ./..."
+  }
+}

@@ -1,0 +1,8 @@
+.git
+.github
+dist
+examples
+docs/plans
+tests
+*.test.go
+**/*_test.go

@@ -1,38 +1,48 @@
 # Clean Code
 
-Clean Code is a language-neutral and host-neutral plugin for designing, building, testing, verifying, and shipping maintainable software with coding agents. It works across Codex, Cursor, Claude Code, Copilot, terminal agents, CI pipelines, and a standalone CLI.
+Clean Code is an open-source (MIT) plugin for designing, building, testing, verifying, and shipping maintainable software with coding agents. It works across Codex, Cursor, Claude Code, Copilot, terminal agents, CI pipelines, and a standalone CLI.
 
-Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **immutable audit receipts** — then adds a **full planning-to-PR pipeline** comparable to Compound Engineering, with stronger verification gates.
+Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **immutable audit receipts**, plus a **full planning-to-PR skill pipeline**.
 
-**Twenty skills**, a Go CLI, five language discovery adapters, generated host instructions, calibration benchmarks, and CE workflow comparison tooling ship in this repository.
-
----
-
-## Quick start
-
-```bash
-go build -o clean-code ./cmd/clean-code
-clean-code setup --host cursor --output /path/to/your/repo
-cp harness/config/defaults.clean-code.json /path/to/your/repo/.clean-code.json   # edit commands
-clean-code discover /path/to/your/repo
-clean-code verify --allow-repository-policy /path/to/your/repo
-```
-
-For autonomous delivery, invoke the **`clean-lfg`** skill with your feature description (see [Autonomous pipeline](#autonomous-pipeline-clean-lfg)).
+**Twenty skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
 
 ---
 
 ## Install
 
-Build locally:
+### npm (recommended)
+
+Requires **Node 18+** and **Go 1.22+** (the CLI is built in Go; npm installs skills + wrapper).
 
 ```bash
-go build -o clean-code ./cmd/clean-code
+npm install -g clean-code-skills
+clean-code version
+clean-code setup --host cursor --output /path/to/your/repo
 ```
 
-Or download a checksummed release binary for macOS, Linux, or Windows (no runtime after build).
+Project-local install:
 
-Generate host instructions:
+```bash
+npm install clean-code-skills
+npx clean-code discover .
+```
+
+Skills are installed under `node_modules/clean-code-skills/skills/`. Point your agent host at that path or copy skills into your project.
+
+### Go build
+
+```bash
+git clone https://github.com/shashank-stitch/clean-code.git
+cd clean-code
+go build -o clean-code ./cmd/clean-code
+./clean-code version
+```
+
+### Release binary
+
+Download a checksummed binary for macOS, Linux, or Windows from [GitHub Releases](https://github.com/shashank-stitch/clean-code/releases). No Go install required after download.
+
+### Host instructions
 
 ```bash
 clean-code setup --host cursor --output /path/to/repository
@@ -40,117 +50,102 @@ clean-code setup --host cursor --output /path/to/repository
 
 Existing instruction files are never overwritten. Unknown hosts receive the portable `AGENTS.md` fallback. See the [compatibility matrix](docs/host-compatibility.md).
 
----
+Copy a starter policy into your repo:
 
-## Step-by-step workflow (manual)
-
-Use this when you want control at each gate. Each step maps to a skill and optional CLI command.
-
-### 1. Connect the host
-
-| Step | Skill | Action |
-| --- | --- | --- |
-| Detect platform | `clean-setup` | Run `clean-code setup --host <id> --output <repo>` |
-| Discover capabilities | `clean-discover` | Run `clean-code discover <repo>` (read-only, no command execution) |
-
-### 2. Define what to build
-
-| Step | Skill | Output |
-| --- | --- | --- |
-| Explore scope (if vague) | `clean-brainstorm` | Requirements-only plan in `docs/plans/` |
-| Implementation plan | `clean-plan` | Units, verification contract, definition of done |
-| Design boundaries | `clean-design` | Use cases, acceptance examples, architecture policy |
-
-### 3. Implement with evidence
-
-| Step | Skill | Rule |
-| --- | --- | --- |
-| Isolate work (optional) | `clean-worktree` | Feature branch or worktree off default |
-| Build in small steps | `clean-build` | One bounded behavior; cheapest feedback first |
-| Independent tests | `clean-test` | Unit, acceptance, integration, UI/QA tracks — not implementation-shaped oracles |
-| Refactor safely | `clean-refactor` | Green baseline; behavior changes recorded separately |
-| Fix failures | `clean-debug` | Full causal chain before fixing |
-
-### 4. Verify and review
-
-| Step | Skill / CLI | Gate |
-| --- | --- | --- |
-| Run checks | `clean-verify` → `clean-code verify` | Trusted policy required; honest PASS/FAIL/NOT_RUN states |
-| Architecture | `clean-code architecture` | Declared component graph vs policy |
-| Traceability | `clean-code trace` | Requirements ↔ tests ↔ evidence |
-| Review | `clean-review` → `clean-code review` | Evidence-backed findings; **zero findings allowed** |
-| Simplify | `clean-simplify` | Behavior-preserving cleanup before ship |
-
-### 5. Ship and record
-
-| Step | Skill | Action |
-| --- | --- | --- |
-| Commit, push, PR | `clean-ship` | Conventional commits; PR lists verification summary |
-| Watch CI | `clean-watch-pr` | Until green or documented blocker |
-| Audit receipt | `clean-audit` → `clean-code audit` | Immutable receipt bound to revision |
-| Capture learning | `clean-compound` | `docs/solutions/` + `CONCEPTS.md` |
-| Policy proposals | `clean-learn` → `clean-code learn` | Proposal-only; cannot weaken hard gates |
-
-### 6. Orchestrate multi-agent work
-
-| Skill | When |
-| --- | --- |
-| `clean-orchestrate` | Multiple roles (spec, build, test, review) — procedural independence when host lacks subagents |
-| `clean-lfg` | Hands-off version of the entire sequence (below) |
-
-Canonical stage order: `harness/workflow/shipping-pipeline.json`. Details: [shipping pipeline](docs/shipping-pipeline.md).
+```bash
+cp harness/config/defaults.clean-code.json /path/to/your/repo/.clean-code.json
+```
 
 ---
 
-## Autonomous pipeline (`clean-lfg`)
+## Step-by-step
 
-Invoke **`clean-lfg`** with a feature description when you want planning through PR without step-by-step check-ins. It runs:
+Default manual pipeline:
 
-1. `clean-brainstorm` (if needed) → `clean-plan`
-2. `clean-design` (when boundaries change)
-3. `clean-worktree` (when isolation helps)
-4. `clean-build` per plan unit
-5. `clean-test` — independent tracks
-6. `clean-verify` — mandatory deterministic evidence
-7. `clean-review` — apply blocking fixes
-8. `clean-simplify` — unless docs-only/trivial
-9. `clean-ship` — commit, push, PR (`mode:pipeline`)
-10. `clean-watch-pr` — CI to green
-11. `clean-audit` — receipt
-12. `clean-compound` — durable learnings
+```
+clean-brainstorm → clean-plan
+clean-build + clean-test + clean-verify
+clean-review → clean-simplify → clean-ship → clean-watch-pr
+clean-audit + clean-compound
+```
 
-**Stops** when mandatory verification fails, human spot checks are missing, or review finds unresolved blocking defects.
+| Phase | Skills | What happens |
+| --- | --- | --- |
+| **Plan** | `clean-brainstorm` → `clean-plan` | Scope and requirements, then implementation units and verification contract |
+| **Build** | `clean-build` + `clean-test` + `clean-verify` | Small verified changes, independent test tracks, deterministic checks (`clean-code verify`) |
+| **Ship** | `clean-review` → `clean-simplify` → `clean-ship` → `clean-watch-pr` | Evidence-based review, behavior-preserving cleanup, PR, CI watch |
+| **Record** | `clean-audit` + `clean-compound` | Immutable audit receipt and durable repo learnings |
 
-Compound Engineering equivalent: `lfg`. Clean Code adds verify, architecture, trace, audit, and learn gates CE does not enforce by default.
+Optional helpers: `clean-setup`, `clean-discover`, `clean-design`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-learn`, `clean-orchestrate`.
+
+Hands-off version of the same path: invoke **`clean-lfg`** with your feature description.
+
+---
+
+## Quick start
+
+```bash
+clean-code discover /path/to/your/repo
+clean-code verify --allow-repository-policy /path/to/your/repo
+```
 
 ---
 
 ## Skill map (20 skills)
 
-| Skill | Responsibility | CE equivalent |
-| --- | --- | --- |
-| `clean-setup` | Host integration without changing repo policy | `ce-setup` |
-| `clean-brainstorm` | Requirements-only plans | `ce-brainstorm` |
-| `clean-plan` | Implementation-ready units + verification contract | `ce-plan` |
-| `clean-discover` | Read-only capability discovery | — |
-| `clean-design` | Use cases, boundaries, acceptance, architecture policy | (in `ce-plan`) |
-| `clean-build` | Small verified implementation steps | `ce-work` |
-| `clean-refactor` | Behavior-preserving structure improvements | — |
-| `clean-debug` | Causal-chain debugging | `ce-debug` |
-| `clean-test` | Independent unit/acceptance/integration/UI tracks | `ce-test-browser` (partial) |
-| `clean-verify` | Deterministic checks + normalized evidence | — |
-| `clean-review` | Evidence-based review; zero findings OK | `ce-code-review` |
-| `clean-simplify` | Behavior-preserving simplification | `ce-simplify-code` |
-| `clean-ship` | Commit, push, PR | `ce-commit-push-pr` |
-| `clean-watch-pr` | CI watch loop | `ce-babysit-pr` |
-| `clean-orchestrate` | Multi-role coordination | — |
-| `clean-lfg` | Full autonomous pipeline | `lfg` |
-| `clean-audit` | Immutable release receipts | — |
-| `clean-learn` | Proposal-only policy learning | — |
-| `clean-compound` | `docs/solutions/` learnings | `ce-compound` |
-| `clean-worktree` | Isolated worktrees | `ce-worktree` |
+| Skill | Responsibility |
+| --- | --- |
+| `clean-setup` | Host integration without changing repo policy |
+| `clean-brainstorm` | Requirements-only plans |
+| `clean-plan` | Implementation-ready units + verification contract |
+| `clean-discover` | Read-only capability discovery |
+| `clean-design` | Use cases, boundaries, acceptance, architecture policy |
+| `clean-build` | Small verified implementation steps |
+| `clean-refactor` | Behavior-preserving structure improvements |
+| `clean-debug` | Causal-chain debugging |
+| `clean-test` | Independent unit, acceptance, integration, UI/QA tracks |
+| `clean-verify` | Deterministic checks + normalized evidence |
+| `clean-review` | Evidence-based review; zero findings allowed |
+| `clean-simplify` | Behavior-preserving simplification |
+| `clean-ship` | Commit, push, PR |
+| `clean-watch-pr` | CI watch loop |
+| `clean-orchestrate` | Multi-role coordination |
+| `clean-lfg` | Full autonomous pipeline |
+| `clean-audit` | Immutable release receipts |
+| `clean-learn` | Proposal-only policy learning |
+| `clean-compound` | `docs/solutions/` learnings |
+| `clean-worktree` | Isolated worktrees |
 
-**Clean Code-only:** deterministic verification, architecture enforcement, trace validation, audit receipts, policy learning, human spot-check gates, host-neutral CLI.
+**Clean Code-only capabilities:** `clean-verify`, `clean-audit`, `clean-learn`, architecture/trace CLI checks, and host-neutral evidence contracts.
+
+---
+
+## Compound Engineering mapping
+
+Several Clean Code skills mirror stages found in **Compound Engineering** (a separate Cursor plugin). That mapping is **documentation and benchmark metadata only** — this project does **not** import, call, or require Compound Engineering at runtime.
+
+| Clean Code skill | Analogous CE skill (if you use both) |
+| --- | --- |
+| `clean-brainstorm` | `ce-brainstorm` |
+| `clean-plan` | `ce-plan` |
+| `clean-build` | `ce-work` |
+| `clean-debug` | `ce-debug` |
+| `clean-review` | `ce-code-review` |
+| `clean-simplify` | `ce-simplify-code` |
+| `clean-ship` | `ce-commit-push-pr` |
+| `clean-watch-pr` | `ce-babysit-pr` |
+| `clean-compound` | `ce-compound` |
+| `clean-worktree` | `ce-worktree` |
+| `clean-lfg` | `lfg` |
+
+**Where CE names appear in this repo (not in the Go CLI logic):**
+
+- `harness/workflow/shipping-pipeline.json` — optional `ce_equivalent` labels on stages
+- `harness/calibration/workflow-comparison.json` — rubric benchmark fixture
+- `harness/calibration/full-flow-manifest.json` — sample outcome comparison
+- `docs/shipping-pipeline.md`, `docs/benchmark-full-flow.md` — contributor docs
+
+The `compare-workflows` and `benchmark-full-flow` commands read those JSON fixtures to score workflow coverage. No CE code is loaded.
 
 ---
 
@@ -172,61 +167,27 @@ clean-code benchmark-full-flow [--manifest FILE] [--repo ROOT]
 clean-code learn --proposal FILE
 ```
 
-Discovery reads `.clean-code.json` and never executes repo commands. Verification requires trusted policy or explicit `--allow-repository-policy`. See [commands](docs/commands.md), [configuration](docs/configuration.md), and [adapter authoring](docs/adapter-authoring.md).
-
-Default policy template: `harness/config/defaults.clean-code.json`.
+See [commands](docs/commands.md), [configuration](docs/configuration.md), and [adapter authoring](docs/adapter-authoring.md).
 
 ---
 
 ## Benchmarks
 
-### Workflow coverage rubric (CE vs Clean Code)
-
-Scores **workflow capability** on 18 dimensions (not agent performance):
-
 ```bash
 go run ./cmd/clean-code compare-workflows
-```
-
-Latest rubric: **Clean Code ~96%** vs **Compound Engineering ~71%** — CC leads on verification, architecture, testing independence, audit, policy learning, human gates, and host neutrality.
-
-### Full-flow code quality benchmark
-
-Same small task, two outcomes, automated metrics + **blind independent reviewer**:
-
-```bash
-go test -race ./examples/benchmark-flow/...
 go run ./cmd/clean-code benchmark-full-flow
+go test -race ./examples/benchmark-flow/...
 ```
 
-Task: [slug normalizer](examples/benchmark-flow/task.md). CE-style vs CC-style implementations live under `examples/benchmark-flow/outcomes/`.
-
-| Source | Winner | Notes |
-| --- | --- | --- |
-| Automated rubric | Clean Code | More tests, smaller functions, fuzz hardening |
-| Blind reviewer (Gemini) | Clean Code (Outcome B) | Naming, simplicity, test quality, maintainability |
-
-Details: [benchmark-full-flow](docs/benchmark-full-flow.md).
-
-### Defect detection scorer
-
-```bash
-go run ./cmd/clean-code benchmark --manifest harness/calibration/benchmark-manifest.yaml
-```
+Details: [benchmark-full-flow](docs/benchmark-full-flow.md), [shipping pipeline](docs/shipping-pipeline.md).
 
 ---
 
-## Language support
+## Language and platform support
 
-Any repository can declare commands and artifacts. Universal support: orchestration, declared commands, path-based architecture rules, review, audit.
+Any repository can declare commands and artifacts. Maintained discovery adapters: **Go, Java, JavaScript/TypeScript, Python, Rust**.
 
-Maintained discovery adapters: **Go, Java, JavaScript/TypeScript, Python, Rust**. Missing tools report `NOT_AVAILABLE` or `NOT_CONFIGURED` — never silent pass.
-
----
-
-## Platform and IDE support
-
-Canonical skills + generated host instructions for Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf, Cline, Roo Code, and generic agents. Host adapters change invocation only — not doctrine, schemas, or gate semantics.
+Host instructions for Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf, Cline, Roo Code, and generic agents.
 
 ---
 
@@ -235,36 +196,31 @@ Canonical skills + generated host instructions for Codex, Claude Code, Cursor, C
 - Build, test, requirement, and architecture failures can **block** completion when configured.
 - Mutation, complexity, duplication, and coverage stay **separate evidence** — no universal cleanliness score.
 - Acceptance and UI/QA checked **independently** from implementation.
-- Human spot checks recorded explicitly (including what was **not** inspected).
-- Review findings require evidence; **clean review may return zero findings**.
+- Human spot checks recorded explicitly.
+- Review findings require evidence; **zero findings is valid**.
 
 ---
 
 ## Repository layout
 
 ```text
-skills/           # 20 agent skills (canonical source)
-cmd/clean-code/   # Standalone CLI
-internal/         # Runner, verify, audit, benchmark, …
-harness/          # Schemas, adapters, doctrine, calibration, workflow
-examples/         # generic + benchmark-flow fixtures
-docs/             # Architecture, shipping, benchmarks, plans
-hosts/generic/    # Portable AGENTS.md fallback
+skills/           # 20 agent skills
+cmd/clean-code/   # CLI
+internal/         # Runner, verify, audit, benchmark
+harness/          # Schemas, adapters, calibration
+examples/         # Adoption and benchmark fixtures
+docs/             # Architecture, shipping, benchmarks
+package.json      # npm package clean-code-skills
 ```
 
 ---
 
-## Status
+## Contributing
 
-- **Done:** full skill suite, CLI, host generation, shipping pipeline, workflow + full-flow benchmarks, calibration fixtures, examples.
-- **Open before public release:** controlled held-out **agent** study (rubrics measure workflow coverage and sample outcomes; they do not claim production agent uplift).
-
-Implementation plan: [docs/plans/2026-08-12-001-feat-clean-code-system-plan.md](docs/plans/2026-08-12-001-feat-clean-code-system-plan.md).
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under [MIT](LICENSE).
 
 ---
 
 ## Inspiration
 
-Robert C. Martin's *Clean Code* and *Clean Architecture* (names, functions, boundaries, tests, dependency direction); Martin's agent-supervision practices; Huolter's [clean-code-skill](https://github.com/huolter/clean-code-skill); Cucumber/Gherkin; PIT, StrykerJS, mutmut; PMD CPD, jscpd; Playwright.
-
-Ideas are summarized in original language — not book reproduction or universal law.
+Robert C. Martin's *Clean Code* and *Clean Architecture* — names, functions, boundaries, tests, dependency direction, and agent supervision with deterministic evidence. Ideas are summarized in original language; this project does not reproduce book text or treat one author's preferences as universal law.
