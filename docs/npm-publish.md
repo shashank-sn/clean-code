@@ -11,7 +11,24 @@ clean-code version
 
 Deprecated predecessor: `clean-code-skills` → use `@shashanksn/clean-code`.
 
-## Publish
+## Automated publish (recommended)
+
+1. Add repository secret **`NPM_TOKEN`** (npm granular token with publish access for `@shashanksn/clean-code`).
+2. Bump `package.json` `version` and update `CHANGELOG.md`.
+3. Push a tag matching the version:
+
+```bash
+git tag v0.2.4
+git push origin v0.2.4
+```
+
+4. GitHub Actions:
+   - `release.yml` — builds platform binaries and creates a GitHub Release with artifacts.
+   - `npm-publish.yml` — runs on `release: published`, tests, and `npm publish --provenance --access public`.
+
+Manual re-run: Actions → **npm-publish** → **Run workflow**.
+
+## Manual publish
 
 From repository root:
 
@@ -22,4 +39,4 @@ npm publish --access public
 
 Scoped packages require `--access public` for global install without npm login to the scope.
 
-`npm publish` no longer runs lifecycle scripts on install — Go bootstrap and native CLI build happen on first `clean-code` run.
+Go bootstrap and native CLI build happen on first `clean-code` run (no `postinstall` script).

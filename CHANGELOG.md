@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.4 - 2026-08-18
+
+- GitHub Release workflow publishes checksumed binaries and triggers automated npm publish via `NPM_TOKEN`.
+- npm publish skips when the package version is already on the registry.
+
 ## 0.2.3 - 2026-08-18
 
 - Remove `postinstall` script so global install works without npm `allowScripts` / `--allow-scripts`.

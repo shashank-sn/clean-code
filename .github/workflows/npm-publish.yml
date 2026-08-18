@@ -3,6 +3,7 @@ name: npm-publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,13 +14,56 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: npm publish --provenance --access public
+
+      - name: Read package version
+        id: pkg
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Verify release tag matches package.json
+        if: github.event_name == 'release'
+        run: |
+          tag="${GITHUB_REF_NAME:-}"
+          if [ -z "$tag" ]; then
+            tag="${{ github.event.release.tag_name }}"
+          fi
+          expected="v${{ steps.pkg.outputs.version }}"
+          if [ "$tag" != "$expected" ]; then
+            echo "Release tag $tag does not match package.json version ${{ steps.pkg.outputs.version }} (expected $expected)"
+            exit 1
+          fi
+
+      - name: Test
+        run: go test -race ./...
+
+      - name: Check registry
+        id: registry
+        run: |
+          if npm view "@shashanksn/clean-code@${{ steps.pkg.outputs.version }}" version \
+            --registry https://registry.npmjs.org 2>/dev/null; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        if: steps.registry.outputs.published != 'true'
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Already on npm
+        if: steps.registry.outputs.published == 'true'
+        run: echo "@shashanksn/clean-code@${{ steps.pkg.outputs.version }} is already on npm — skipping publish."
