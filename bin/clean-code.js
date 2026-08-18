@@ -10,6 +10,7 @@ const {
   goBinaryPath,
   goWorks,
 } = require("./runtime");
+const { readPackageMeta, goVersionLdflags } = require("./package-meta");
 
 const packageRoot = path.resolve(__dirname, "..");
 const args = process.argv.slice(2);
@@ -56,7 +57,14 @@ function buildNativeBinary(verbose) {
 
   const build = spawnSync(
     "go",
-    ["build", "-o", localBinary, "./cmd/clean-code"],
+    [
+      "build",
+      "-ldflags",
+      goVersionLdflags(packageRoot),
+      "-o",
+      localBinary,
+      "./cmd/clean-code",
+    ],
     {
       cwd: packageRoot,
       encoding: "utf8",
@@ -75,6 +83,12 @@ function buildNativeBinary(verbose) {
 }
 
 async function main() {
+  if (args[0] === "version" && args.length === 1) {
+    const { version } = readPackageMeta(packageRoot);
+    console.log(version);
+    return;
+  }
+
   const hadGo = goWorks();
 
   try {

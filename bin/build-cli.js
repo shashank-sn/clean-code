@@ -3,13 +3,21 @@
 const { spawnSync } = require("child_process");
 const path = require("path");
 const { augmentEnv } = require("./runtime");
+const { goVersionLdflags } = require("./package-meta");
 
 const packageRoot = path.resolve(__dirname, "..");
 const output = path.join(packageRoot, "bin", "clean-code.bin");
 
 const build = spawnSync(
   "go",
-  ["build", "-o", output, "./cmd/clean-code"],
+  [
+    "build",
+    "-ldflags",
+    goVersionLdflags(packageRoot),
+    "-o",
+    output,
+    "./cmd/clean-code",
+  ],
   {
     cwd: packageRoot,
     encoding: "utf8",

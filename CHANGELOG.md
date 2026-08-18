@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.5 - 2026-08-18
+
+- `clean-code version` reports the npm package version (e.g. `0.2.5`) instead of `0.1.0-dev` on global install.
+
 ## 0.2.4 - 2026-08-18
 
 - GitHub Release workflow publishes checksumed binaries and triggers automated npm publish via `NPM_TOKEN`.

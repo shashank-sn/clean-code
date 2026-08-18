@@ -36,6 +36,7 @@ func TestNpmPackageManifest(t *testing.T) {
 	for _, path := range []string{
 		"bin/runtime.js",
 		"bin/build-cli.js",
+		"bin/package-meta.js",
 		"scripts/ensure-runtimes.sh",
 	} {
 		if _, err := os.Stat(filepath.Join(root, path)); err != nil {
