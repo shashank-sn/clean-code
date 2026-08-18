@@ -17,7 +17,7 @@ Agents forget instructions, mirror mistakes in tests, and narrate success withou
 
 ### npm (recommended)
 
-Published on npm as `@shashanksn/clean-code`. Requires **Node 18+** and **Go 1.22+** (`brew install go` on macOS).
+Published on npm as `@shashanksn/clean-code`. **Node 18+** and **Go 1.22+** are required to run the CLI; if they are missing, install bootstraps them automatically into `~/.clean-code-cli/runtime` (no `brew install` needed).
 
 ```bash
 npm install -g @shashanksn/clean-code
@@ -45,7 +45,9 @@ go build -o clean-code ./cmd/clean-code
 ./clean-code version
 ```
 
-### One-line install (Go only, no npm)
+### One-line install (no npm)
+
+Bootstraps Node.js and Go when missing, then builds the CLI.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/shashank-stitch/clean-code/codex/initial-release/scripts/install.sh | bash

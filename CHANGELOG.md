@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2 - 2026-08-18
+
+- Auto-install Node.js 20 and Go 1.22 when missing during npm postinstall and `install.sh`.
+- Managed runtimes live under `~/.clean-code-cli/runtime` and are prepended to PATH for the CLI.
+
 ## 0.2.1 - 2026-08-18
 
 - Publish on npm as `@shashanksn/clean-code` with polished README and install docs.

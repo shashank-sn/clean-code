@@ -4,19 +4,36 @@ set -euo pipefail
 REPO_URL="${CLEAN_CODE_REPO:-https://github.com/shashank-stitch/clean-code.git}"
 BRANCH="${CLEAN_CODE_BRANCH:-codex/initial-release}"
 INSTALL_DIR="${CLEAN_CODE_INSTALL_DIR:-${HOME}/.clean-code-cli}"
+CLEAN_CODE_HOME="${CLEAN_CODE_HOME:-${INSTALL_DIR}}"
 
 echo "Installing Clean Code CLI from ${REPO_URL} (${BRANCH})..."
-
-if ! command -v go >/dev/null 2>&1; then
-  echo "Go 1.22+ is required. Install from https://go.dev/dl/ or: brew install go"
-  exit 1
-fi
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 git clone --depth 1 --branch "$BRANCH" "$REPO_URL" "$TMP/clean-code"
 cd "$TMP/clean-code"
+
+if command -v node >/dev/null 2>&1; then
+  node bin/runtime.js ensure-all
+else
+  bash scripts/ensure-runtimes.sh
+fi
+
+RUNTIME_PATH=""
+if [[ -d "${CLEAN_CODE_HOME}/runtime/go/bin" ]]; then
+  RUNTIME_PATH="${CLEAN_CODE_HOME}/runtime/go/bin"
+fi
+if [[ -d "${CLEAN_CODE_HOME}/runtime/node/bin" ]]; then
+  if [[ -n "$RUNTIME_PATH" ]]; then
+    RUNTIME_PATH="${RUNTIME_PATH}:${CLEAN_CODE_HOME}/runtime/node/bin"
+  else
+    RUNTIME_PATH="${CLEAN_CODE_HOME}/runtime/node/bin"
+  fi
+fi
+if [[ -n "$RUNTIME_PATH" ]]; then
+  export PATH="${RUNTIME_PATH}:${PATH}"
+fi
 
 mkdir -p "$INSTALL_DIR"
 go build -o "$INSTALL_DIR/clean-code" ./cmd/clean-code

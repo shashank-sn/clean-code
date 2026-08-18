@@ -28,4 +28,14 @@ func TestNpmPackageManifest(t *testing.T) {
 	if manifest.Bin["clean-code"] != "bin/clean-code.js" {
 		t.Fatalf("unexpected bin map: %+v", manifest.Bin)
 	}
+
+	for _, path := range []string{
+		"bin/runtime.js",
+		"bin/postinstall.js",
+		"scripts/ensure-runtimes.sh",
+	} {
+		if _, err := os.Stat(filepath.Join(root, path)); err != nil {
+			t.Fatalf("expected package file %s: %v", path, err)
+		}
+	}
 }

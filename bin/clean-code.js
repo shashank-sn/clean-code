@@ -4,19 +4,21 @@
 const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const { augmentEnv, ensureGo, goBinaryPath } = require("./runtime");
 
 const packageRoot = path.resolve(__dirname, "..");
 const args = process.argv.slice(2);
 
 function runGo() {
-  const result = spawnSync("go", ["run", "./cmd/clean-code", ...args], {
+  const goCmd = goBinaryPath();
+  const result = spawnSync(goCmd, ["run", "./cmd/clean-code", ...args], {
     cwd: packageRoot,
     stdio: "inherit",
-    env: process.env,
+    env: augmentEnv(process.env),
   });
   if (result.error) {
     console.error("clean-code: failed to run Go CLI:", result.error.message);
-    console.error("Install Go 1.22+ or use a release binary from GitHub.");
+    console.error("Re-run npm install or see https://github.com/shashank-stitch/clean-code#install");
     process.exit(1);
   }
   process.exit(result.status ?? 1);
@@ -26,7 +28,7 @@ function runBinary(binaryPath) {
   const result = spawnSync(binaryPath, args, {
     cwd: process.cwd(),
     stdio: "inherit",
-    env: process.env,
+    env: augmentEnv(process.env),
   });
   if (result.error) {
     console.error("clean-code: failed to run binary:", result.error.message);
@@ -35,9 +37,23 @@ function runBinary(binaryPath) {
   process.exit(result.status ?? 1);
 }
 
-const localBinary = path.join(packageRoot, "bin", "clean-code.bin");
-if (fs.existsSync(localBinary)) {
-  runBinary(localBinary);
+async function main() {
+  try {
+    await ensureGo(false);
+  } catch (error) {
+    console.error(`clean-code: ${error.message}`);
+    process.exit(1);
+  }
+
+  const localBinary = path.join(packageRoot, "bin", "clean-code.bin");
+  if (fs.existsSync(localBinary)) {
+    runBinary(localBinary);
+  }
+
+  runGo();
 }
 
-runGo();
+main().catch((error) => {
+  console.error(`clean-code: ${error.message}`);
+  process.exit(1);
+});
