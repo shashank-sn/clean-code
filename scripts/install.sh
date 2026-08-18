@@ -36,10 +36,17 @@ if [[ -n "$RUNTIME_PATH" ]]; then
 fi
 
 mkdir -p "$INSTALL_DIR"
-go build -o "$INSTALL_DIR/clean-code" ./cmd/clean-code
+PKG_VERSION="$(node -p "require('./package.json').version" 2>/dev/null || sed -n 's/.*"version": "\([^"]*\)".*/\1/p' package.json | head -1)"
+go build -ldflags "-X main.version=${PKG_VERSION}" -o "$INSTALL_DIR/clean-code" ./cmd/clean-code
 
 BIN_DIR="${HOME}/.local/bin"
 mkdir -p "$BIN_DIR"
+if [[ -L "${BIN_DIR}/clean-code" || -e "${BIN_DIR}/clean-code" ]]; then
+  echo ""
+  echo "Note: ${BIN_DIR}/clean-code already exists and will be replaced."
+  echo "If you use npm, prefer: npm install -g @shashanksn/clean-code"
+  echo "and remove ${BIN_DIR}/clean-code to avoid PATH shadowing."
+fi
 ln -sf "$INSTALL_DIR/clean-code" "$BIN_DIR/clean-code"
 
 echo ""

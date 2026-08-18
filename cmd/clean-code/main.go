@@ -42,7 +42,16 @@ func run(args []string, stdout, stderr io.Writer) int {
 			fmt.Fprintln(stderr, "version accepts no arguments")
 			return 2
 		}
-		fmt.Fprintln(stdout, version)
+		displayVersion := resolveVersion()
+		fmt.Fprintln(stdout, displayVersion)
+		if displayVersion == "0.1.0-dev" {
+			exe, err := os.Executable()
+			if err == nil {
+				fmt.Fprintf(stderr, "clean-code: Go binary at %s (not the npm wrapper).\n", exe)
+			}
+			fmt.Fprintln(stderr, "clean-code: run `which -a clean-code` — remove ~/.local/bin/clean-code if you use npm.")
+			fmt.Fprintln(stderr, "clean-code: npm install -g @shashanksn/clean-code@latest && hash -r")
+		}
 		return 0
 	case "hosts":
 		if len(args) != 1 {

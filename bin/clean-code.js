@@ -86,7 +86,7 @@ async function main() {
   if (args[0] === "version" && args.length === 1) {
     const { version } = readPackageMeta(packageRoot);
     console.log(version);
-    return;
+    process.exit(0);
   }
 
   const hadGo = goWorks();

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.6 - 2026-08-18
+
+- Go CLI resolves version from nearby `package.json` when ldflags are not set.
+- `version` warns when a curl-installed Go binary shadows the npm wrapper (`~/.local/bin/clean-code`).
+- `install.sh` embeds package version in the Go binary at build time.
+
 ## 0.2.5 - 2026-08-18
 
 - `clean-code version` reports the npm package version (e.g. `0.2.5`) instead of `0.1.0-dev` on global install.

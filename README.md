@@ -38,6 +38,15 @@ npx clean-code discover .
 
 Skills install under `node_modules/@shashanksn/clean-code/skills/`.
 
+**Troubleshooting:** If `clean-code version` shows `0.1.0-dev`, an old Go binary is first on your `PATH` (often `~/.local/bin/clean-code` from the curl installer). Run `which -a clean-code`, then:
+
+```bash
+rm -f ~/.local/bin/clean-code   # remove curl-installed shim
+hash -r
+npm install -g @shashanksn/clean-code@latest
+clean-code version
+```
+
 > npm blocks the unscoped name `clean-code` (too similar to package `cleancode`). The scoped package installs the **`clean-code`** command.
 
 ### Go build (from source)
