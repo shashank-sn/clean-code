@@ -1,5 +1,5 @@
-/bin/
 /dist/
+bin/clean-code.bin
 /.clean-code/evidence/
 /.clean-code/cache/
 *.test
