@@ -1,6 +1,6 @@
 {
   "name": "@shashanksn/clean-code",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Language-neutral agent skills and CLI for designing, verifying, and shipping maintainable software.",
   "license": "MIT",
   "repository": {
@@ -41,7 +41,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "postinstall": "node bin/postinstall.js",
+    "build-cli": "node bin/build-cli.js",
     "test": "go test ./..."
   }
 }

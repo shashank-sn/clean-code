@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -28,10 +29,13 @@ func TestNpmPackageManifest(t *testing.T) {
 	if manifest.Bin["clean-code"] != "bin/clean-code.js" {
 		t.Fatalf("unexpected bin map: %+v", manifest.Bin)
 	}
+	if strings.Contains(string(body), "postinstall") {
+		t.Fatal("package.json must not define postinstall (npm allowScripts blocks it on global install)")
+	}
 
 	for _, path := range []string{
 		"bin/runtime.js",
-		"bin/postinstall.js",
+		"bin/build-cli.js",
 		"scripts/ensure-runtimes.sh",
 	} {
 		if _, err := os.Stat(filepath.Join(root, path)); err != nil {

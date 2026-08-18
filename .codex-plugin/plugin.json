@@ -1,6 +1,6 @@
 {
   "name": "clean-code",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Language-neutral skills and deterministic checks for clean code, architecture, testing, and agent review.",
   "author": "Clean Code contributors",
   "skills": "./skills/",

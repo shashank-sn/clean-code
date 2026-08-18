@@ -20,4 +20,6 @@ npm login
 npm publish --access public
 ```
 
-`postinstall` downloads Go 1.22 when it is not already on PATH (Node is required to run npm). The one-line `install.sh` bootstrap installs both Node 20 and Go when missing.
+Scoped packages require `--access public` for global install without npm login to the scope.
+
+`npm publish` no longer runs lifecycle scripts on install — Go bootstrap and native CLI build happen on first `clean-code` run.

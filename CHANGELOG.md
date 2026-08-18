@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3 - 2026-08-18
+
+- Remove `postinstall` script so global install works without npm `allowScripts` / `--allow-scripts`.
+- Bootstrap Go and build the native CLI lazily on first `clean-code` invocation instead.
+
 ## 0.2.2 - 2026-08-18
 
 - Auto-install Node.js 20 and Go 1.22 when missing during npm postinstall and `install.sh`.

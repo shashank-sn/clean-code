@@ -4,10 +4,16 @@
 const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const { augmentEnv, ensureGo, goBinaryPath } = require("./runtime");
+const {
+  augmentEnv,
+  ensureGo,
+  goBinaryPath,
+  goWorks,
+} = require("./runtime");
 
 const packageRoot = path.resolve(__dirname, "..");
 const args = process.argv.slice(2);
+const localBinary = path.join(packageRoot, "bin", "clean-code.bin");
 
 function runGo() {
   const goCmd = goBinaryPath();
@@ -18,7 +24,9 @@ function runGo() {
   });
   if (result.error) {
     console.error("clean-code: failed to run Go CLI:", result.error.message);
-    console.error("Re-run npm install or see https://github.com/shashank-stitch/clean-code#install");
+    console.error(
+      "See https://github.com/shashank-stitch/clean-code#install"
+    );
     process.exit(1);
   }
   process.exit(result.status ?? 1);
@@ -37,17 +45,53 @@ function runBinary(binaryPath) {
   process.exit(result.status ?? 1);
 }
 
+function buildNativeBinary(verbose) {
+  if (fs.existsSync(localBinary)) {
+    return localBinary;
+  }
+
+  if (verbose) {
+    console.log("clean-code: building native CLI (one-time, first run)...");
+  }
+
+  const build = spawnSync(
+    "go",
+    ["build", "-o", localBinary, "./cmd/clean-code"],
+    {
+      cwd: packageRoot,
+      encoding: "utf8",
+      env: augmentEnv(process.env),
+    }
+  );
+
+  if (build.status === 0 && fs.existsSync(localBinary)) {
+    return localBinary;
+  }
+
+  if (verbose && build.stderr) {
+    console.log(build.stderr.trim());
+  }
+  return null;
+}
+
 async function main() {
+  const hadGo = goWorks();
+
   try {
-    await ensureGo(false);
+    if (!hadGo) {
+      console.log("clean-code: Go not found — bootstrapping runtime...");
+      await ensureGo(true);
+    } else {
+      await ensureGo(false);
+    }
   } catch (error) {
     console.error(`clean-code: ${error.message}`);
     process.exit(1);
   }
 
-  const localBinary = path.join(packageRoot, "bin", "clean-code.bin");
-  if (fs.existsSync(localBinary)) {
-    runBinary(localBinary);
+  const binary = buildNativeBinary(!hadGo);
+  if (binary) {
+    runBinary(binary);
   }
 
   runGo();

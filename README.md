@@ -17,13 +17,17 @@ Agents forget instructions, mirror mistakes in tests, and narrate success withou
 
 ### npm (recommended)
 
-Published on npm as `@shashanksn/clean-code`. **Node 18+** and **Go 1.22+** are required to run the CLI; if they are missing, install bootstraps them automatically into `~/.clean-code-cli/runtime` (no `brew install` needed).
+Published on npm as `@shashanksn/clean-code`. **Node 18+** is required for npm; **Go 1.22+** is bootstrapped automatically on first `clean-code` run if missing (into `~/.clean-code-cli/runtime`). No install scripts — works with npm's default `allowScripts` policy.
 
 ```bash
-npm install -g @shashanksn/clean-code
+npm install -g @shashanksn/clean-code@latest
 clean-code version
 clean-code setup --host cursor --output /path/to/your/repo
 ```
+
+First `clean-code` run may download Go and compile the CLI once (subsequent runs are instant).
+
+> **Upgrading from 0.2.0:** reinstall with `@latest`. Scoped name is `@shashanksn/clean-code` (not `@shashank/clean-code`).
 
 In a project:
 
