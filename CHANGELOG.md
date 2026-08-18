@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0 - Unreleased
+
+- Add shipping pipeline skills: `clean-brainstorm`, `clean-plan`, `clean-debug`, `clean-ship`, `clean-simplify`, `clean-compound`, `clean-worktree`, `clean-watch-pr`, and `clean-lfg`.
+- Add `compare-workflows` CLI command and workflow coverage benchmark manifest vs Compound Engineering.
+- Add default policy template, generic example, calibration fixture directories, CI template, and shipping pipeline docs.
+
 ## 0.1.0 - Unreleased
 
 - Add eleven language-neutral skills for setup, discovery, design, build, refactor, test, verify, review, orchestration, audit, and learning.

@@ -10,6 +10,7 @@
 - `review --input FILE`: validate independent evidence-backed findings; zero findings are valid.
 - `audit --input FILE --output NEW_FILE`: create a revision-bound immutable receipt. Use `--check RECEIPT` in place of `--output` to detect receipt or evidence changes.
 - `benchmark --manifest FILE`: report detection, false positives, misses, and correct silence.
+- `compare-workflows [--manifest FILE]`: score Clean Code vs Compound Engineering workflow coverage on a fixed rubric.
 - `learn --proposal FILE`: validate that a policy proposal is reversible, independently reviewed when decided, and unable to suppress protected gates.
 
 All report-producing commands write JSON to standard output and diagnostics to standard error. Usage errors return 2; failed checks or invalid input return 1.

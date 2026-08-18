@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "stages": [
+    {"id": "brainstorm", "skill": "clean-brainstorm", "ce_equivalent": "ce-brainstorm"},
+    {"id": "plan", "skill": "clean-plan", "ce_equivalent": "ce-plan"},
+    {"id": "design", "skill": "clean-design", "ce_equivalent": "ce-plan"},
+    {"id": "worktree", "skill": "clean-worktree", "ce_equivalent": "ce-worktree"},
+    {"id": "build", "skill": "clean-build", "ce_equivalent": "ce-work"},
+    {"id": "test", "skill": "clean-test", "ce_equivalent": "ce-test-browser"},
+    {"id": "verify", "skill": "clean-verify", "cli": "clean-code verify", "ce_equivalent": null},
+    {"id": "review", "skill": "clean-review", "ce_equivalent": "ce-code-review"},
+    {"id": "simplify", "skill": "clean-simplify", "ce_equivalent": "ce-simplify-code"},
+    {"id": "ship", "skill": "clean-ship", "ce_equivalent": "ce-commit-push-pr"},
+    {"id": "watch", "skill": "clean-watch-pr", "ce_equivalent": "ce-babysit-pr"},
+    {"id": "audit", "skill": "clean-audit", "ce_equivalent": null},
+    {"id": "compound", "skill": "clean-compound", "ce_equivalent": "ce-compound"},
+    {"id": "learn", "skill": "clean-learn", "ce_equivalent": "ce-compound"},
+    {"id": "orchestrate", "skill": "clean-lfg", "ce_equivalent": "lfg"}
+  ],
+  "clean_code_advantages": [
+    "deterministic_verification",
+    "architecture_enforcement",
+    "independent_testing",
+    "audit_receipt",
+    "policy_learning",
+    "human_gates",
+    "host_neutrality"
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Simplify"
+  short_description: "Behavior-preserving simplification"
+  default_prompt: "Use $clean-simplify on the branch diff before review."

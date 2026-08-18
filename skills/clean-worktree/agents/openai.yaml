@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Worktree"
+  short_description: "Isolated branch worktree setup"
+  default_prompt: "Use $clean-worktree for an isolated worktree for this feature."

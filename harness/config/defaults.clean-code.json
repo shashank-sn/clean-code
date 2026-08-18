@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "commands": [
+    {
+      "id": "go-test",
+      "category": "unit-test",
+      "executable": "go",
+      "args": ["test", "./..."],
+      "timeout_seconds": 300,
+      "max_output_bytes": 1048576,
+      "allowed_exit_codes": [0],
+      "required": true
+    },
+    {
+      "id": "go-vet",
+      "category": "static-analysis",
+      "executable": "go",
+      "args": ["vet", "./..."],
+      "timeout_seconds": 120,
+      "max_output_bytes": 524288,
+      "allowed_exit_codes": [0],
+      "required": false
+    }
+  ]
+}

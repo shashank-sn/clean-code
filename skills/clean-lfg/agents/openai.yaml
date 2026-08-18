@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean LFG"
+  short_description: "Full pipeline to verified PR"
+  default_prompt: "Use $clean-lfg to plan, build, verify, and ship this feature to a PR."

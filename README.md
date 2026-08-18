@@ -4,7 +4,7 @@ Clean Code is a language-neutral and host-neutral plugin for designing, building
 
 Written rules alone are weak enforcement. An agent can forget instructions, misunderstand a requirement, write tests that repeat the same mistake, or report that its own work is clean. This project pairs guidance with deterministic checks, independent test tracks, architecture constraints, evidence-based review, and recorded human spot checks.
 
-The repository contains eleven skills, a standalone Go CLI, declarative language adapters, generated host instructions, architecture and trace checks, protected command execution, revision-bound evidence, independent review, immutable audit receipts, and a calibration scorer.
+The repository contains twenty skills, a standalone Go CLI, declarative language adapters, generated host instructions, architecture and trace checks, protected command execution, revision-bound evidence, independent review, immutable audit receipts, a full shipping pipeline, and workflow comparison benchmarks.
 
 ## Install
 
@@ -31,6 +31,7 @@ go run ./cmd/clean-code trace --plan /path/to/test-plan.json
 go run ./cmd/clean-code review --input /path/to/review.json
 go run ./cmd/clean-code audit --input /path/to/audit-input.json --output /path/to/new-receipt.json
 go run ./cmd/clean-code benchmark --manifest harness/calibration/benchmark-manifest.yaml
+go run ./cmd/clean-code compare-workflows
 go run ./cmd/clean-code learn --proposal /path/to/change-proposal.json
 ```
 
@@ -41,16 +42,27 @@ Discovery reads project metadata and an optional `.clean-code.json`. It never ru
 | Skill | Responsibility |
 | --- | --- |
 | `clean-setup` | Detect the current coding host and install or generate the correct integration without changing project policy. |
+| `clean-brainstorm` | Explore scope and write requirements-only plans before implementation. |
+| `clean-plan` | Enrich plans into implementation-ready units with verification contracts. |
 | `clean-discover` | Detect repository structure, commands, languages, tools, and available quality signals. |
 | `clean-design` | Turn requirements into use cases, boundaries, dependency rules, and acceptance examples. |
 | `clean-build` | Guide small, verified implementation steps while protecting design boundaries. |
 | `clean-refactor` | Improve structure through behavior-preserving changes and explicit safety checks. |
+| `clean-debug` | Diagnose failures with causal-chain discipline before fixing. |
 | `clean-test` | Coordinate independent unit, acceptance, integration, contract, and UI/QA test tracks. |
 | `clean-verify` | Run configured deterministic checks and normalize their evidence. |
 | `clean-review` | Review code and architecture from evidence, including returning zero findings when warranted. |
+| `clean-simplify` | Simplify the change set while preserving verified behavior. |
+| `clean-ship` | Commit, push, and open a PR with evidence-linked description. |
+| `clean-watch-pr` | Watch PR CI until green or a documented blocker. |
 | `clean-orchestrate` | Separate specification, implementation, testing, verification, and review responsibilities. |
+| `clean-lfg` | Autonomous pipeline from brainstorm through audit and compound learnings. |
 | `clean-audit` | Produce a traceable release receipt covering requirements, tests, checks, exceptions, and spot checks. |
 | `clean-learn` | Calibrate rules from confirmed outcomes without weakening hard safety constraints. |
+| `clean-compound` | Document solved problems under `docs/solutions/` and update CONCEPTS when present. |
+| `clean-worktree` | Create isolated git worktrees for parallel or focused work. |
+
+See [shipping pipeline](docs/shipping-pipeline.md) for CE parity and `compare-workflows` benchmark.
 
 ## Language support
 
@@ -94,7 +106,7 @@ The project will summarize and operationalize ideas in original language. Book r
 - Done: `clean-design` and generic architecture enforcement for declared component dependencies, public surfaces, exceptions, exclusions, and cycles.
 - Done: `clean-build`, `clean-refactor`, and `clean-test`, plus contracts and trace validation for independent unit, acceptance, integration, and UI/QA tracks.
 - Done: `clean-review`, `clean-orchestrate`, `clean-audit`, and `clean-learn`, with independent review checks, human spot-check gates, hashed immutable receipts, and proposal-only learning.
-- Done: generated host packages, configuration and authoring docs, release automation, and a benchmark scorer with seeded defects and clean controls.
-- Open before a public release: run a controlled held-out agent study; the included benchmark manifest validates scoring and makes no performance claim.
+- Done: generated host packages, configuration and authoring docs, release automation, workflow comparison benchmark, shipping pipeline skills, and calibration fixtures.
+- Open before a public release: run a controlled held-out agent study; rubric scores measure workflow coverage, not agent performance.
 
 See [the implementation plan](docs/plans/2026-08-12-001-feat-clean-code-system-plan.md).

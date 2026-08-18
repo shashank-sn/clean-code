@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Plan"
+  short_description: "Implementation-ready planning with verification"
+  default_prompt: "Use $clean-plan to enrich this plan for implementation."

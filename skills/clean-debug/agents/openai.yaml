@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Debug"
+  short_description: "Root-cause debugging with evidence"
+  default_prompt: "Use $clean-debug to diagnose and fix this failure."

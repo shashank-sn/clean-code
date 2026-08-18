@@ -293,6 +293,23 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return writeJSON(stdout, stderr, benchmark.Score(manifest))
+	case "compare-workflows":
+		flags := flag.NewFlagSet("compare-workflows", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		manifestPath := flags.String("manifest", "harness/calibration/workflow-comparison.json", "workflow comparison manifest")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 {
+			fmt.Fprintln(stderr, "compare-workflows accepts flags only")
+			return 2
+		}
+		manifest, err := benchmark.LoadWorkflowManifest(*manifestPath)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		return writeJSON(stdout, stderr, benchmark.CompareWorkflows(manifest))
 	case "learn":
 		flags := flag.NewFlagSet("learn", flag.ContinueOnError)
 		flags.SetOutput(stderr)
@@ -335,5 +352,5 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|benchmark|learn>")
+	fmt.Fprintln(output, "usage: clean-code <version|hosts|setup|discover|verify|architecture|trace|review|audit|benchmark|compare-workflows|learn>")
 }

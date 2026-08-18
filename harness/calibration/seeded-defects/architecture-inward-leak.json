@@ -1,0 +1,7 @@
+{
+  "id": "architecture-inward-leak",
+  "class": "seeded-defect",
+  "description": "Core module imports delivery layer.",
+  "expected_findings": ["architecture-inward-leak"],
+  "oracle": "Dependency graph shows core -> delivery edge."
+}

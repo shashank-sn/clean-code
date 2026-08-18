@@ -1,0 +1,7 @@
+{
+  "id": "unconventional-clear-code",
+  "class": "clean-control",
+  "description": "Unusual naming but correct behavior and tests.",
+  "expected_findings": [],
+  "oracle": "Review and mutation show no semantic defect."
+}

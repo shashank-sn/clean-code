@@ -17,6 +17,8 @@ Assign clear ownership and make every completion claim traceable to evidence.
 6. Request human spot checks for configured requirement, acceptance, UI/QA, and code-sample boundaries.
 7. Reconcile contradictions from source evidence, rerun stale checks, and hand the complete evidence set to audit.
 
+For end-to-end delivery to an open PR, prefer `clean-lfg`, which sequences brainstorm, plan, build, test, verify, review, simplify, ship, watch, audit, and compound. See `docs/shipping-pipeline.md`.
+
 ## Host differences
 
 - With subagents, assign explicit file and responsibility ownership and keep independent contexts narrow.

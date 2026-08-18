@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "commands": [
+    {
+      "id": "noop-check",
+      "category": "repository-check",
+      "executable": "go",
+      "args": ["version"],
+      "timeout_seconds": 30,
+      "max_output_bytes": 4096,
+      "allowed_exit_codes": [0],
+      "required": false
+    }
+  ]
+}

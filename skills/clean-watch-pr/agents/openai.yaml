@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Watch PR"
+  short_description: "Watch PR CI to green"
+  default_prompt: "Use $clean-watch-pr to watch this PR until CI passes."

@@ -1,0 +1,7 @@
+{
+  "id": "requirement-output-mismatch",
+  "class": "seeded-defect",
+  "description": "Implementation returns wrong status for a stated requirement.",
+  "expected_findings": ["requirement-output-mismatch"],
+  "oracle": "Acceptance example expects 404; implementation returns 200."
+}

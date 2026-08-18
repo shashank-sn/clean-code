@@ -258,3 +258,27 @@ func TestRunVerifyRejectsMissingTrustedPolicy(t *testing.T) {
 		t.Fatalf("expected missing policy error, got %d: %s", code, stderr.String())
 	}
 }
+
+func TestRunCompareWorkflows(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"compare-workflows"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("expected success, got %d: %s", code, stderr.String())
+	}
+	var report struct {
+		Workflows []struct {
+			ID       string  `json:"id"`
+			Coverage float64 `json:"coverage"`
+		} `json:"workflows"`
+		Summary string `json:"summary"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Workflows) != 2 || report.Workflows[0].ID != "clean-code" {
+		t.Fatalf("unexpected comparison: %+v", report)
+	}
+	if report.Summary == "" {
+		t.Fatal("expected summary")
+	}
+}

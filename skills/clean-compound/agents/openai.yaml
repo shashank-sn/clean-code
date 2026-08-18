@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Compound"
+  short_description: "Capture durable repo learnings"
+  default_prompt: "Use $clean-compound to document what we just solved."

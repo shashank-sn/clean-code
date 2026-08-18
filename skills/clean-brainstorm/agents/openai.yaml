@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Brainstorm"
+  short_description: "Scope product intent before planning"
+  default_prompt: "Use $clean-brainstorm to explore scope and write a requirements-only plan."

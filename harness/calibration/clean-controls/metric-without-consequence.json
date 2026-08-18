@@ -1,0 +1,7 @@
+{
+  "id": "metric-without-consequence",
+  "class": "clean-control",
+  "description": "Coverage gap without reviewer-established consequence.",
+  "expected_findings": [],
+  "oracle": "Metric is advisory; no blocking finding without semantic diagnosis."
+}

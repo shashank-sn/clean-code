@@ -1,0 +1,23 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Discover
+        run: go run ./cmd/clean-code discover .
+      - name: Verify
+        run: go run ./cmd/clean-code verify --allow-repository-policy .
+      - name: Workflow benchmark
+        run: go run ./cmd/clean-code compare-workflows

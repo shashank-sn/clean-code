@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Ship"
+  short_description: "Commit, push, and open PR with evidence"
+  default_prompt: "Use $clean-ship to commit, push, and open a PR for this work."
