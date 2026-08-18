@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.8 - 2026-08-18
+
+- Fix npm `repository`, `bugs`, and `homepage` URLs to `https://github.com/shashank-sn/clean-code`.
+
 ## 0.2.7 - 2026-08-18
 
 - Add `clean-code doctor` to diagnose npm global `PATH` and binary location.

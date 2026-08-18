@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="${CLEAN_CODE_REPO:-https://github.com/shashank-stitch/clean-code.git}"
+REPO_URL="${CLEAN_CODE_REPO:-https://github.com/shashank-sn/clean-code.git}"
 BRANCH="${CLEAN_CODE_BRANCH:-codex/initial-release}"
 INSTALL_DIR="${CLEAN_CODE_INSTALL_DIR:-${HOME}/.clean-code-cli}"
 CLEAN_CODE_HOME="${CLEAN_CODE_HOME:-${INSTALL_DIR}}"

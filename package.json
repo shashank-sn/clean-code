@@ -1,16 +1,16 @@
 {
   "name": "@shashanksn/clean-code",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Language-neutral agent skills and CLI for designing, verifying, and shipping maintainable software.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shashank-stitch/clean-code.git"
+    "url": "git+https://github.com/shashank-sn/clean-code.git"
   },
   "bugs": {
-    "url": "https://github.com/shashank-stitch/clean-code/issues"
+    "url": "https://github.com/shashank-sn/clean-code/issues"
   },
-  "homepage": "https://github.com/shashank-stitch/clean-code#readme",
+  "homepage": "https://github.com/shashank-sn/clean-code#readme",
   "keywords": [
     "clean-code",
     "coding-agent",

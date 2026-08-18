@@ -26,7 +26,7 @@ function runGo() {
   if (result.error) {
     console.error("clean-code: failed to run Go CLI:", result.error.message);
     console.error(
-      "See https://github.com/shashank-stitch/clean-code#install"
+      "See https://github.com/shashank-sn/clean-code#install"
     );
     process.exit(1);
   }

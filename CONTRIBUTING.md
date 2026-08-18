@@ -13,7 +13,7 @@ Thank you for helping improve Clean Code. This project is open source under the 
 ## Development setup
 
 ```bash
-git clone https://github.com/shashank-stitch/clean-code.git
+git clone https://github.com/shashank-sn/clean-code.git
 cd clean-code
 go test -race ./...
 ```

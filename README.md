@@ -61,7 +61,7 @@ clean-code version
 ### Go build (from source)
 
 ```bash
-git clone https://github.com/shashank-stitch/clean-code.git
+git clone https://github.com/shashank-sn/clean-code.git
 cd clean-code
 go build -o clean-code ./cmd/clean-code
 ./clean-code version
@@ -72,14 +72,14 @@ go build -o clean-code ./cmd/clean-code
 Bootstraps Node.js and Go when missing, then builds the CLI.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shashank-stitch/clean-code/codex/initial-release/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shashank-sn/clean-code/codex/initial-release/scripts/install.sh | bash
 export PATH="$HOME/.local/bin:$PATH"
 clean-code version
 ```
 
 ### Release binary
 
-Checksummed binaries for macOS, Linux, and Windows: [GitHub Releases](https://github.com/shashank-stitch/clean-code/releases).
+Checksummed binaries for macOS, Linux, and Windows: [GitHub Releases](https://github.com/shashank-sn/clean-code/releases).
 
 ### First-time repo setup
 
