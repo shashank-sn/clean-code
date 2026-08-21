@@ -16,12 +16,16 @@ const packageRoot = path.resolve(__dirname, "..");
 const args = process.argv.slice(2);
 const localBinary = path.join(packageRoot, "bin", "clean-code.bin");
 
+function commandEnv() {
+  return augmentEnv({ ...process.env, CLEAN_CODE_PACKAGE_ROOT: packageRoot });
+}
+
 function runGo() {
   const goCmd = goBinaryPath();
   const result = spawnSync(goCmd, ["run", "./cmd/clean-code", ...args], {
     cwd: packageRoot,
     stdio: "inherit",
-    env: augmentEnv(process.env),
+    env: commandEnv(),
   });
   if (result.error) {
     console.error("clean-code: failed to run Go CLI:", result.error.message);
@@ -37,7 +41,7 @@ function runBinary(binaryPath) {
   const result = spawnSync(binaryPath, args, {
     cwd: process.cwd(),
     stdio: "inherit",
-    env: augmentEnv(process.env),
+    env: commandEnv(),
   });
   if (result.error) {
     console.error("clean-code: failed to run binary:", result.error.message);
@@ -68,7 +72,7 @@ function buildNativeBinary(verbose) {
     {
       cwd: packageRoot,
       encoding: "utf8",
-      env: augmentEnv(process.env),
+      env: commandEnv(),
     }
   );
 

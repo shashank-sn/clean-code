@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "id": "fixture-mutation",
+  "category": "mutation",
+  "version": "fixture-1",
+  "languages": ["javascript-typescript"],
+  "command": {"id": "fixture-mutation", "category": "mutation", "executable": "mutation-tool", "args": ["--report", "reports/mutation.json"]},
+  "input": {"format": "json", "schema": "clean-code/mutation-input/v1"},
+  "output": {"format": "json", "schema": "clean-code/mutation-result/v1"},
+  "availability": {"mode": "optional", "cost": "none"},
+  "policy": {"requires_trusted_policy": true, "network_access": false, "may_install_dependencies": false}
+}

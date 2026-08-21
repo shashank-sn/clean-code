@@ -26,6 +26,35 @@ func TestRunSetupUsesGenericFallback(t *testing.T) {
 	}
 }
 
+func TestRunPortableAgentCommands(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"agent", "describe", "clean-build", "--host", "generic"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected agent describe success, got %d: %s", code, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"execution_mode": "prompt-only"`)) {
+		t.Fatalf("expected degraded generic descriptor: %s", stdout.String())
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := run([]string{"agent", "emit", "clean-build", "--mode", "prompt", "--host", "generic"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected agent prompt success, got %d: %s", code, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("Capability boundary")) {
+		t.Fatalf("expected portable prompt: %s", stdout.String())
+	}
+}
+
+func TestRunProviderValidation(t *testing.T) {
+	manifest := filepath.Join("..", "..", "harness", "providers", "mutation", "provider.json")
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"provider", "validate", "--manifest", manifest}, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected provider validation success, got %d: %s", code, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"category": "mutation"`)) {
+		t.Fatalf("unexpected provider output: %s", stdout.String())
+	}
+}
+
 func TestRunSetupWritesHostInstructionsWithoutOverwrite(t *testing.T) {
 	root := t.TempDir()
 	var stdout, stderr bytes.Buffer
@@ -174,6 +203,25 @@ func TestRunArchitectureReportsViolation(t *testing.T) {
 	code := run([]string{"architecture", "--policy", policy, "--graph", graph}, &stdout, &stderr)
 	if code != 1 || !bytes.Contains(stdout.Bytes(), []byte(`"kind": "forbidden-dependency"`)) {
 		t.Fatalf("expected architecture failure, got %d: %s\n%s", code, stderr.String(), stdout.String())
+	}
+}
+
+func TestRunArchitectureViewReportsUnknownCoverage(t *testing.T) {
+	root := t.TempDir()
+	policy := root + "/policy.json"
+	graph := root + "/graph.json"
+	if err := os.WriteFile(policy, []byte(`{"schema_version":"1.0.0","components":[{"id":"core","paths":["core/**"]}]}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(graph, []byte(`{"schema_version":"1.0.0","edges":[{"from":"unknown/a.go","to":"core/b.go"}]}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"architecture", "view", "--policy", policy, "--graph", graph}, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected architecture view, got %d: %s", code, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"unknown_edges": 1`)) || !bytes.Contains(stdout.Bytes(), []byte(`"complete": false`)) {
+		t.Fatalf("expected conservative graph coverage: %s", stdout.String())
 	}
 }
 

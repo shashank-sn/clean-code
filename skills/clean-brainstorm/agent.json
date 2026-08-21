@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-brainstorm",
+  "title": "clean-brainstorm",
+  "description": "Portable specifier agent for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Specifier",
+  "workflow_phase": "plan",
+  "input": {
+    "required": ["feature request and repository context"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["requirements-only plan with explicit acceptance and non-goals"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository"],
+  "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-plan"]
+}

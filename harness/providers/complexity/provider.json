@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "id": "fixture-complexity",
+  "category": "complexity",
+  "version": "fixture-1",
+  "languages": ["go"],
+  "command": {"id": "fixture-complexity", "category": "complexity", "executable": "complexity-tool", "args": ["--report", "reports/complexity.json"]},
+  "input": {"format": "json", "schema": "clean-code/complexity-input/v1"},
+  "output": {"format": "json", "schema": "clean-code/complexity-result/v1"},
+  "availability": {"mode": "optional", "cost": "none"},
+  "policy": {"requires_trusted_policy": true, "network_access": false, "may_install_dependencies": false}
+}

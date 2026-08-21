@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-design",
+  "title": "clean-design",
+  "description": "Portable designer agent for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Designer",
+  "workflow_phase": "design",
+  "input": {
+    "required": ["requirements and repository boundaries"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["use cases, boundary policy, graph requirements, and acceptance examples"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository", "write_repository", "execute_commands"],
+  "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-build", "clean-test"]
+}

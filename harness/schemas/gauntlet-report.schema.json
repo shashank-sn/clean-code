@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/gauntlet-report.schema.json",
+  "title": "Clean Code gauntlet report",
+  "type": "object",
+  "required": ["schema_version", "revision", "stories"],
+  "properties": {"schema_version": {"const": "1.0.0"}, "revision": {"type": "string", "minLength": 1}, "stories": {"type": "array"}},
+  "additionalProperties": false
+}

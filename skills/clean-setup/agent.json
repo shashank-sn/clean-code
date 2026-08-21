@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-setup",
+  "title": "clean-setup",
+  "description": "Portable integrator agent for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Integrator",
+  "workflow_phase": "setup",
+  "input": {
+    "required": ["host evidence or explicit host identifier"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["host capability result and generated instructions when authorized"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository", "write_repository"],
+  "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-discover"]
+}

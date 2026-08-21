@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/provider-result.schema.json",
+  "title": "Clean Code provider result",
+  "type": "object",
+  "required": ["schema_version", "provider_id", "provider_version", "category", "revision", "status", "started_at", "duration_ms"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "provider_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "provider_version": { "type": "string", "minLength": 1 },
+    "category": { "enum": ["complexity", "mutation", "acceptance", "browser-qa", "dependency-graph", "architecture-render"] },
+    "revision": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["PASS", "FAIL", "NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "STALE", "ERROR"] },
+    "started_at": { "type": "string", "format": "date-time" },
+    "duration_ms": { "type": "integer", "minimum": 0 },
+    "evidence": { "$ref": "check-result.schema.json#/properties/evidence" }
+  },
+  "additionalProperties": false
+}

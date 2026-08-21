@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "id": "fixture-browser-qa",
+  "category": "browser-qa",
+  "version": "fixture-1",
+  "languages": ["generic"],
+  "command": {"id": "fixture-browser-qa", "category": "browser-qa", "executable": "browser-qa-tool", "args": ["--output", "reports/browser-qa.json"]},
+  "input": {"format": "json", "schema": "clean-code/qa-procedure/v1"},
+  "output": {
+    "format": "json", "schema": "clean-code/browser-qa-result/v1",
+    "artifacts": [
+      {"id": "report", "format": "json", "schema": "clean-code/browser-qa-result/v1", "required": true},
+      {"id": "screenshot", "format": "file", "schema": "image/png", "required": true},
+      {"id": "trace", "format": "file", "schema": "playwright/trace", "required": true},
+      {"id": "log", "format": "text", "schema": "clean-code/browser-log/v1", "required": true},
+      {"id": "accessibility", "format": "json", "schema": "clean-code/accessibility-result/v1", "required": true},
+      {"id": "flake-classification", "format": "json", "schema": "clean-code/flake-classification/v1", "required": true}
+    ]
+  },
+  "availability": {"mode": "optional", "cost": "external"},
+  "policy": {"requires_trusted_policy": true, "network_access": false, "may_install_dependencies": false}
+}

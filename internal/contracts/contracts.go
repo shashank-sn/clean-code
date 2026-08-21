@@ -17,12 +17,13 @@ const (
 	StatusNotAvailable  Status = "NOT_AVAILABLE"
 	StatusNotConfigured Status = "NOT_CONFIGURED"
 	StatusNotRun        Status = "NOT_RUN"
+	StatusStale         Status = "STALE"
 	StatusError         Status = "ERROR"
 )
 
 var validStatuses = map[Status]struct{}{
 	StatusPass: {}, StatusFail: {}, StatusNotAvailable: {},
-	StatusNotConfigured: {}, StatusNotRun: {}, StatusError: {},
+	StatusNotConfigured: {}, StatusNotRun: {}, StatusStale: {}, StatusError: {},
 }
 
 var validArtifactFormats = map[string]bool{
@@ -31,10 +32,21 @@ var validArtifactFormats = map[string]bool{
 }
 
 type Evidence struct {
-	Summary   string               `json:"summary,omitempty"`
-	Artifacts []string             `json:"artifacts,omitempty"`
-	Baselines []BaselineComparison `json:"baselines,omitempty"`
-	Warnings  []string             `json:"warnings,omitempty"`
+	Summary         string               `json:"summary,omitempty"`
+	Artifacts       []string             `json:"artifacts,omitempty"`
+	ArtifactDetails []ArtifactProvenance `json:"artifact_details,omitempty"`
+	Baselines       []BaselineComparison `json:"baselines,omitempty"`
+	Warnings        []string             `json:"warnings,omitempty"`
+}
+
+// ArtifactProvenance binds a produced artifact to the revision that was checked.
+// Artifacts remains as a compatibility projection for older command providers.
+type ArtifactProvenance struct {
+	Path     string `json:"path"`
+	SHA256   string `json:"sha256"`
+	Schema   string `json:"schema"`
+	Revision string `json:"revision"`
+	Fresh    bool   `json:"fresh"`
 }
 
 type BaselineComparison struct {
@@ -83,6 +95,32 @@ func (result CheckResult) Validate() error {
 	}
 	if result.DurationMS < 0 {
 		return errors.New("duration_ms cannot be negative")
+	}
+	for index, artifact := range result.Evidence.ArtifactDetails {
+		if strings.TrimSpace(artifact.Path) == "" {
+			return fmt.Errorf("evidence artifact %d path is required", index)
+		}
+		if filepath.IsAbs(artifact.Path) {
+			return fmt.Errorf("evidence artifact %d path must be repository-relative", index)
+		}
+		clean := filepath.Clean(artifact.Path)
+		if clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
+			return fmt.Errorf("evidence artifact %d path escapes repository root", index)
+		}
+		if len(artifact.SHA256) != 64 {
+			return fmt.Errorf("evidence artifact %d sha256 must be a 64-character hex digest", index)
+		}
+		for _, character := range artifact.SHA256 {
+			if !((character >= '0' && character <= '9') || (character >= 'a' && character <= 'f') || (character >= 'A' && character <= 'F')) {
+				return fmt.Errorf("evidence artifact %d sha256 must be a 64-character hex digest", index)
+			}
+		}
+		if strings.TrimSpace(artifact.Schema) == "" {
+			return fmt.Errorf("evidence artifact %d schema is required", index)
+		}
+		if strings.TrimSpace(artifact.Revision) == "" {
+			return fmt.Errorf("evidence artifact %d revision is required", index)
+		}
 	}
 	for index, baseline := range result.Evidence.Baselines {
 		if strings.TrimSpace(baseline.Artifact) == "" {

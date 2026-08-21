@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "id": "fixture-acceptance",
+  "category": "acceptance",
+  "version": "fixture-1",
+  "languages": ["generic"],
+  "command": {"id": "fixture-acceptance", "category": "acceptance", "executable": "acceptance-tool", "args": ["--format", "json"]},
+  "input": {"format": "text", "schema": "gherkin/v1"},
+  "output": {"format": "json", "schema": "clean-code/acceptance-result/v1"},
+  "availability": {"mode": "optional", "cost": "none"},
+  "policy": {"requires_trusted_policy": true, "network_access": false, "may_install_dependencies": false}
+}

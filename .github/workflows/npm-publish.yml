@@ -43,7 +43,7 @@ jobs:
             exit 1
           fi
 
-      - name: Test
+      - name: Test source and packed npm artifact
         run: go test -race ./...
 
       - name: Check registry

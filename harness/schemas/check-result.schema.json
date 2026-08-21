@@ -10,7 +10,7 @@
     "category": { "type": "string", "minLength": 1 },
     "provider": { "type": "string", "minLength": 1 },
     "status": {
-      "enum": ["PASS", "FAIL", "NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+      "enum": ["PASS", "FAIL", "NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "STALE", "ERROR"]
     },
     "required": { "type": "boolean" },
     "revision": { "type": "string" },
@@ -22,6 +22,21 @@
       "properties": {
         "summary": { "type": "string" },
         "artifacts": { "type": "array", "items": { "type": "string" } },
+        "artifact_details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "sha256", "schema", "revision", "fresh"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+              "schema": { "type": "string", "minLength": 1 },
+              "revision": { "type": "string", "minLength": 1 },
+              "fresh": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
         "baselines": {
           "type": "array",
           "items": {
