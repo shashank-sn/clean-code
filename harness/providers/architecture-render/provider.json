@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "id": "fixture-architecture-render",
+  "category": "architecture-render",
+  "version": "fixture-1",
+  "languages": ["generic"],
+  "command": {"id": "fixture-architecture-render", "category": "architecture-render", "executable": "architecture-render-tool", "args": ["--output", "reports/architecture.html"]},
+  "input": {"format": "json", "schema": "clean-code/dependency-graph/v1"},
+  "output": {"format": "text", "schema": "clean-code/architecture-view/v1"},
+  "availability": {"mode": "local", "cost": "none"},
+  "policy": {"requires_trusted_policy": true, "network_access": false, "may_install_dependencies": false}
+}

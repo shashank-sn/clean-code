@@ -1,6 +1,6 @@
 {
   "name": "@shashanksn/clean-code",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "Language-neutral agent skills and CLI for designing, verifying, and shipping maintainable software.",
   "license": "MIT",
   "repository": {
@@ -31,10 +31,13 @@
     "harness",
     "hosts",
     "skills",
+    "docs",
+    "examples",
     ".codex-plugin",
     "go.mod",
     "go.sum",
     "LICENSE",
+    "CONTRIBUTING.md",
     "README.md"
   ],
   "engines": {

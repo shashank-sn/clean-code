@@ -3,7 +3,7 @@
   "$id": "https://clean-code.local/schemas/host-capabilities.schema.json",
   "title": "Coding host capabilities",
   "type": "object",
-  "required": ["id", "display_name", "native_skills", "subagents", "hooks", "blocking_approvals", "file_edits", "command_execution", "browser_automation", "background_tasks", "cli", "integration"],
+  "required": ["id", "display_name", "native_skills", "subagents", "hooks", "blocking_approvals", "file_edits", "command_execution", "browser_automation", "background_tasks", "cli", "repository_read", "context_capacity", "filesystem_mode", "network_policy", "subagent_isolation", "session_reset", "structured_output", "integration"],
   "properties": {
     "id": { "type": "string", "minLength": 1 },
     "display_name": { "type": "string", "minLength": 1 },
@@ -16,6 +16,13 @@
     "browser_automation": { "type": "boolean" },
     "background_tasks": { "type": "boolean" },
     "cli": { "type": "boolean" },
+    "repository_read": { "type": "boolean" },
+    "context_capacity": { "type": "string", "minLength": 1 },
+    "filesystem_mode": { "type": "string", "minLength": 1 },
+    "network_policy": { "type": "string", "minLength": 1 },
+    "subagent_isolation": { "type": "boolean" },
+    "session_reset": { "type": "boolean" },
+    "structured_output": { "type": "boolean" },
     "integration": { "type": "string", "minLength": 1 }
   },
   "additionalProperties": false

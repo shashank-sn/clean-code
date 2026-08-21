@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-build",
+  "title": "clean-build",
+  "description": "Portable implementer agent for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Implementer",
+  "workflow_phase": "build",
+  "input": {
+    "required": ["bounded requirement, accepted plan, and repository context"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["changed files, focused check evidence, and handoff"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository", "write_repository", "execute_commands"],
+  "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-test", "clean-verify", "clean-review"]
+}

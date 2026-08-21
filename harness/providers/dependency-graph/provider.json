@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "id": "fixture-dependency-graph",
+  "category": "dependency-graph",
+  "version": "fixture-1",
+  "languages": ["go"],
+  "command": {"id": "fixture-dependency-graph", "category": "dependency-graph", "executable": "dependency-graph-tool", "args": ["--output", "reports/graph.json"]},
+  "input": {"format": "text", "schema": "clean-code/source-tree/v1"},
+  "output": {"format": "json", "schema": "clean-code/dependency-graph/v1"},
+  "availability": {"mode": "optional", "cost": "none"},
+  "policy": {"requires_trusted_policy": true, "network_access": false, "may_install_dependencies": false}
+}

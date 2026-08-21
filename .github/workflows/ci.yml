@@ -12,10 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test -race ./...
+      - name: Test source and packed npm artifact
+        run: go test -race ./...
       - run: go vet ./...
       - run: go run ./cmd/clean-code benchmark --manifest harness/calibration/benchmark-manifest.yaml
       - run: go run ./cmd/clean-code compare-workflows

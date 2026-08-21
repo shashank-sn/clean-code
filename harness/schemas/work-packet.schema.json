@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/work-packet.schema.json",
+  "title": "Clean Code gauntlet work packet",
+  "type": "object",
+  "required": ["schema_version", "story_id", "revision", "role", "owner", "requirement_ids", "allowed_files", "stop_condition"],
+  "properties": {"schema_version": {"const": "1.0.0"}, "story_id": {"type": "string"}, "revision": {"type": "string"}, "role": {"type": "string"}, "owner": {"type": "string"}, "requirement_ids": {"type": "array"}, "allowed_files": {"type": "array"}, "stop_condition": {"type": "string"}},
+  "additionalProperties": true
+}

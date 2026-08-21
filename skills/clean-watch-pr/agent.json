@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-watch-pr",
+  "title": "clean-watch-pr",
+  "description": "Portable ci watcher agent for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "CI watcher",
+  "workflow_phase": "ship",
+  "input": {
+    "required": ["open PR and expected revision"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["green, failed, or blocked CI status with evidence"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository", "execute_commands", "network"],
+  "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-debug", "clean-audit"]
+}

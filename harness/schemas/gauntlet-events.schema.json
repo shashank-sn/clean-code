@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/gauntlet-events.schema.json",
+  "title": "Clean Code gauntlet events",
+  "type": "object",
+  "required": ["at", "kind"],
+  "properties": {"at": {"type": "string", "format": "date-time"}, "kind": {"type": "string", "minLength": 1}, "files": {"type": "array", "items": {"type": "string"}}, "check_id": {"type": "string"}, "result": {"enum": ["PASS", "FAIL", "NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "STALE", "ERROR"]}, "retry": {"type": "boolean"}, "context_exhausted": {"type": "boolean"}},
+  "additionalProperties": false
+}

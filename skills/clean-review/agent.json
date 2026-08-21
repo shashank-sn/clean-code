@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-review",
+  "title": "clean-review",
+  "description": "Portable independent reviewer agent for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Independent reviewer",
+  "workflow_phase": "review",
+  "input": {
+    "required": ["final diff, requirements, and revision-bound evidence"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["evidence-backed findings or correct silence"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository"],
+  "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-audit"]
+}

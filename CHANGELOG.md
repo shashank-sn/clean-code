@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 - Unreleased
+
+- Ship portable, model-neutral agent manifests for all Clean Code skills with host capability descriptors and CLI emitters.
+- Add offline, trusted-policy provider contracts, an evidence-gated multi-role gauntlet, and architecture graph views with explicit coverage proof.
+- Pack README-linked documentation and benchmark fixtures, then test the extracted npm artifact in CI.
+
 ## 0.2.8 - 2026-08-18
 
 - Fix npm `repository`, `bugs`, and `homepage` URLs to `https://github.com/shashank-sn/clean-code`.

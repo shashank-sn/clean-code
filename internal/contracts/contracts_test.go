@@ -37,6 +37,31 @@ func TestCheckResultValidateRejectsUnknownStatus(t *testing.T) {
 	}
 }
 
+func TestCheckResultValidateAcceptsStaleStatusAndArtifactProvenance(t *testing.T) {
+	result := CheckResult{
+		SchemaVersion: "1.0.0", CheckID: "provider.mutation", Category: "mutation", Provider: "fixture-mutation",
+		Status: StatusStale, Revision: "abc123", StartedAt: time.Now(), Evidence: Evidence{ArtifactDetails: []ArtifactProvenance{{
+			Path: "reports/mutation.json", SHA256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+			Schema: "clean-code/mutation-result/v1", Revision: "abc123", Fresh: false,
+		}}},
+	}
+	if err := result.Validate(); err != nil {
+		t.Fatalf("expected stale result with provenance to validate, got %v", err)
+	}
+}
+
+func TestCheckResultValidateRejectsInvalidArtifactProvenance(t *testing.T) {
+	result := CheckResult{
+		SchemaVersion: "1.0.0", CheckID: "provider.mutation", Category: "mutation", Provider: "fixture-mutation",
+		Status: StatusPass, StartedAt: time.Now(), Evidence: Evidence{ArtifactDetails: []ArtifactProvenance{{
+			Path: "../outside.json", SHA256: "bad", Schema: "schema", Revision: "abc123",
+		}}},
+	}
+	if err := result.Validate(); err == nil {
+		t.Fatal("expected invalid artifact provenance to fail validation")
+	}
+}
+
 func TestCommandSpecRejectsImplicitShell(t *testing.T) {
 	spec := CommandSpec{ID: "lint", Executable: "npm && echo unsafe"}
 

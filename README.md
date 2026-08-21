@@ -150,6 +150,12 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 ```bash
 clean-code version
 clean-code hosts
+clean-code agent list
+clean-code agent describe clean-build --host codex
+clean-code agent emit clean-lfg --mode prompt --host generic
+clean-code provider validate --manifest harness/providers/mutation/provider.json
+clean-code gauntlet plan --manifest gauntlet.json --output .clean-code/packets
+clean-code gauntlet run --manifest gauntlet.json --output .clean-code/gauntlet
 clean-code setup --host codex [--output DIR]
 clean-code discover [REPO]
 clean-code verify [--trusted-policy FILE | --allow-repository-policy] [--output DIR] [REPO]
@@ -163,7 +169,7 @@ clean-code benchmark-full-flow [--manifest FILE] [--repo ROOT]
 clean-code learn --proposal FILE
 ```
 
-See [commands](docs/commands.md), [configuration](docs/configuration.md), and [adapter authoring](docs/adapter-authoring.md).
+See [commands](docs/commands.md), [configuration](docs/configuration.md), [portable agents](docs/portable-agents.md), [agent-quality gauntlet](docs/gauntlet.md), and [adapter authoring](docs/adapter-authoring.md).
 
 ---
 
