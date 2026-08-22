@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-dispatcher",
+  "title": "clean-dispatcher",
+  "description": "Dispatcher that assigns implementation, test-writing, review, and audit to dedicated sub-agents in isolated contexts for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Orchestrator",
+  "workflow_phase": "orchestrate",
+  "input": {
+    "required": ["requirements, role assignments, and final revision"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["role handoffs, evidence reconciliation, and unresolved gaps"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository", "write_repository", "subagents"],
+  "stop_conditions": [
+    "Stop when mandatory evidence is missing, stale, or belongs to another revision.",
+    "Stop when an independent role received biasing implementation context; record the correlation and mark the evidence."
+  ],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-test-writer", "clean-reviewer", "clean-auditor", "clean-merge-resolver", "clean-verify"]
+}

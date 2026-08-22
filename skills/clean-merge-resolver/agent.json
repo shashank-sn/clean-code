@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-merge-resolver",
+  "title": "clean-merge-resolver",
+  "description": "Intent-traced conflict resolver that finishes merges and rebases without aborting for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Conflict resolver",
+  "workflow_phase": "resolve",
+  "input": {
+    "required": ["in-progress merge or rebase with unmerged paths"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["resolved tree, per-hunk reasoning, and completed operation"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository", "write_repository", "execute_commands", "git_write"],
+  "stop_conditions": [
+    "Stop when a hunk cannot be resolved to source evidence; never resolve by guessing.",
+    "Stop when the operation cannot be finished because the resolved tree fails build or tests."
+  ],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-verify", "clean-reviewer"]
+}

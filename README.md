@@ -7,7 +7,7 @@ Clean Code is an open-source (MIT) plugin for designing, building, testing, veri
 
 Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **immutable audit receipts**, plus a **full planning-to-PR skill pipeline**.
 
-**Twenty skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
+**Twenty-five skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
 
 **npm:** [@shashanksn/clean-code](https://www.npmjs.com/package/@shashanksn/clean-code) · CLI command: `clean-code`
 
@@ -118,7 +118,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 
 ---
 
-## Skill map (20 skills)
+## Skill map (25 skills)
 
 | Skill | Responsibility |
 | --- | --- |
@@ -142,6 +142,16 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 | `clean-learn` | Proposal-only policy learning |
 | `clean-compound` | `docs/solutions/` learnings |
 | `clean-worktree` | Isolated worktrees |
+
+### Specialist sub-agents
+
+| Agent | Responsibility |
+| --- | --- |
+| `clean-reviewer` | Independent evidence-based review, author not approver |
+| `clean-test-writer` | Independent test tracks that cannot mirror the implementation |
+| `clean-auditor` | Immutable revision-bound receipt, decoupled from implementers |
+| `clean-merge-resolver` | Intent-traced conflict resolution that finishes merges, never aborts |
+| `clean-dispatcher` | Dispatch each delivery role to a dedicated isolated sub-agent |
 
 ---
 

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-test-writer",
+  "title": "clean-test-writer",
+  "description": "Independent test-track author that withholds implementation details to prevent oracle mirroring for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Independent tester",
+  "workflow_phase": "test",
+  "input": {
+    "required": ["requirements and public contracts"],
+    "optional": ["host capabilities", "prior handoff"]
+  },
+  "output": {
+    "required": ["test plan, independent tracks, and evidence locations"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "permissions": ["read_repository", "write_repository", "execute_commands"],
+  "stop_conditions": [
+    "Stop when required evidence is missing, stale, or contradicts completion.",
+    "Stop when given implementation internals that would bias the oracle; record the correlation and mark the evidence."
+  ],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-verify", "clean-reviewer"]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Writer"
+  short_description: "Independent test tracks that cannot mirror the implementation"
+  default_prompt: "Use $clean-test-writer to create independent unit, acceptance, integration, and UI/QA tracks from requirements."

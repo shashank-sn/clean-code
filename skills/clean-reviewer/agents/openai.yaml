@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reviewer"
+  short_description: "Independent evidence-based review, author not approver"
+  default_prompt: "Use $clean-reviewer to review this change and return only evidence-backed findings."

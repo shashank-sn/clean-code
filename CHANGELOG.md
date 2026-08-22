@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 - 2026-08-22
+
+- Add five specialist sub-agents (`clean-reviewer`, `clean-test-writer`, `clean-auditor`, `clean-merge-resolver`, `clean-dispatcher`) that enforce role independence, intent-traced conflict resolution, and isolated-context dispatch.
+
 ## 0.3.0 - Unreleased
 
 - Ship portable, model-neutral agent manifests for all Clean Code skills with host capability descriptors and CLI emitters.
