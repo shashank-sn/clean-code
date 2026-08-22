@@ -5,6 +5,7 @@
 - Ship portable, model-neutral agent manifests for all Clean Code skills with host capability descriptors and CLI emitters.
 - Add offline, trusted-policy provider contracts, an evidence-gated multi-role gauntlet, and architecture graph views with explicit coverage proof.
 - Pack README-linked documentation and benchmark fixtures, then test the extracted npm artifact in CI.
+- Add five specialist sub-agents (`clean-reviewer`, `clean-test-writer`, `clean-auditor`, `clean-merge-resolver`, `clean-dispatcher`) that enforce role independence, intent-traced conflict resolution, and isolated-context dispatch.
 
 ## 0.2.8 - 2026-08-18
 

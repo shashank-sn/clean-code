@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrator"
+  short_description: "Dispatch each delivery role to a dedicated isolated sub-agent"
+  default_prompt: "Use $clean-dispatcher to assign implementation, tests, review, and audit to their dedicated agents."

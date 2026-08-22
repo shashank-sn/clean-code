@@ -1,0 +1,4 @@
+interface:
+  display_name: "Auditor"
+  short_description: "Immutable revision-bound receipt, decoupled from implementers"
+  default_prompt: "Use $clean-auditor to produce the immutable release receipt from the final evidence set."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Merge Conflict Resolver"
+  short_description: "Intent-traced conflict resolution that finishes merges, never aborts"
+  default_prompt: "Use $clean-merge-resolver to resolve the current merge or rebase conflicts by intent."
