@@ -1,6 +1,6 @@
 {
   "name": "@shashanksn/clean-code",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Language-neutral agent skills and CLI for designing, verifying, and shipping maintainable software.",
   "license": "MIT",
   "repository": {
