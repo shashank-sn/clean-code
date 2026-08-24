@@ -20,7 +20,32 @@
     "calibration_fixture": { "type": "string", "minLength": 1 },
     "proposer": { "type": "string", "minLength": 1 },
     "reviewer": { "type": "string" },
-    "status": { "enum": ["PROPOSED", "APPROVED", "REJECTED", "ROLLED_BACK"] }
+    "status": { "enum": ["PROPOSED", "APPROVED", "REJECTED", "ROLLED_BACK"] },
+    "evidence_origin": { "enum": ["TOP_DOWN", "BOTTOM_UP"] },
+    "human_approver": { "type": "string", "minLength": 1 },
+    "eval_promotion": {
+      "type": "object",
+      "required": ["supporting_evidence_hashes", "clean_control_hash", "held_out_fixture", "held_out_evidence_hash", "held_out_status", "expected_false_positive_cost"],
+      "properties": {
+        "supporting_evidence_hashes": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" } },
+        "clean_control_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "held_out_fixture": { "type": "string", "minLength": 1 },
+        "held_out_evidence_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "held_out_status": { "const": "PASS" },
+        "expected_false_positive_cost": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "properties": { "evidence_origin": { "const": "BOTTOM_UP" } }, "required": ["evidence_origin"] },
+      "then": { "required": ["eval_promotion"] }
+    },
+    {
+      "if": { "properties": { "status": { "const": "APPROVED" } } },
+      "then": { "required": ["human_approver"] }
+    }
+  ]
 }

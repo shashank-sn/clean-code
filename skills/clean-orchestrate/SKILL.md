@@ -16,8 +16,9 @@ Assign clear ownership and make every completion claim traceable to evidence.
 5. Give review the diff, requirements, and evidence. Keep the change author separate from approval.
 6. Request human spot checks for configured requirement, acceptance, UI/QA, and code-sample boundaries.
 7. Reconcile contradictions from source evidence, rerun stale checks, and hand the complete evidence set to audit.
+8. After audit, route confirmed repeated outcomes to `clean-eval-discover` when evaluation discovery is warranted. Keep it conditional, preserve a held-out set, and send only calibrated candidates to `clean-learn` for separate approval.
 
-For end-to-end delivery to an open PR, prefer `clean-lfg`, which sequences brainstorm, plan, build, test, verify, review, simplify, ship, watch, audit, and compound. See `docs/shipping-pipeline.md`.
+For end-to-end delivery to an open PR, prefer `clean-lfg`, which sequences brainstorm, plan, build, test, verify, review, simplify, ship, watch, audit, conditional evaluation discovery, learn, and compound. See `docs/shipping-pipeline.md`.
 
 ## Host differences
 

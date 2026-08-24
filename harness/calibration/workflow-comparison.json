@@ -74,12 +74,13 @@
         "clean-ship",
         "clean-watch-pr",
         "clean-audit",
+        "clean-eval-discover",
         "clean-learn",
         "clean-compound",
         "clean-worktree",
         "clean-lfg"
       ],
-      "notes": "Deterministic evidence, architecture, audit, and calibration; full shipping pipeline via clean-lfg.",
+      "notes": "Deterministic evidence, architecture, audit, and conditional bottom-up evaluation discovery; full shipping pipeline via clean-lfg.",
       "scores": {
         "product_brainstorm": 0.95,
         "implementation_planning": 0.95,

@@ -22,5 +22,5 @@
     "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
     "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
   },
-  "handoff_to": ["clean-learn"]
+  "handoff_to": ["clean-eval-discover", "clean-learn"]
 }

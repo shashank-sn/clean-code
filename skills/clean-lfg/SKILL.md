@@ -5,7 +5,7 @@ description: Run the full autonomous shipping pipeline from planning through ver
 
 # Clean LFG
 
-Autonomous pipeline: plan → build → verify → review → simplify → ship → watch CI → audit.
+Autonomous pipeline: plan → build → verify → review → simplify → ship → watch CI → audit → conditional evaluation discovery.
 
 ## Stages (in order)
 
@@ -19,12 +19,15 @@ Autonomous pipeline: plan → build → verify → review → simplify → ship 
 8. **Ship** — Invoke `clean-ship` with `mode:pipeline` to commit, push, and open PR.
 9. **Watch** — Invoke `clean-watch-pr` until CI green or blocker.
 10. **Audit** — Invoke `clean-audit` to produce an immutable receipt for the shipped revision.
-11. **Compound** — Invoke `clean-compound` to capture durable learnings.
+11. **Evaluate (conditional)** — When confirmed outcomes, repeated human judgment, escaped defects, rejected outputs, or correct silence reveal a candidate rule, invoke `clean-eval-discover`. Preserve clean controls and an untouched held-out set; do not activate a rule in this stage.
+12. **Learn (conditional)** — Invoke `clean-learn` only for a reviewable proposal produced from calibrated evidence. Approval remains separate.
+13. **Compound** — Invoke `clean-compound` to capture durable learnings.
 
 ## Gates
 
 - Stop if mandatory verification fails, required human spot checks are absent, or review reports blocking defects unresolved.
 - Stop if `clean-verify` returns ERROR for a required check.
+- Skip evaluation discovery when there is no confirmed, bounded outcome to analyze; record that it was inapplicable rather than inventing a candidate.
 - Record procedural independence when the host cannot enforce separate agent contexts.
 
 ## Comparison to autonomous shipping pipelines

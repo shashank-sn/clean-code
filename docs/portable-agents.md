@@ -2,6 +2,8 @@
 
 Every `skills/clean-*/` directory contains a model-neutral `agent.json` beside its `SKILL.md`. The manifest is the portable contract; `SKILL.md` remains the instruction source. This lets a host generate native artifacts without changing the agent's evidence, permission, or stop rules.
 
+The CLI discovers these packages directly from `skills/`; a new valid package is automatically included by `clean-code agent list|validate|describe|emit`. Workflow manifests and handoffs remain explicit and are checked in the repository.
+
 ```bash
 clean-code agent list
 clean-code agent validate

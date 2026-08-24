@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/eval-case.schema.json",
+  "title": "Clean Code evaluation case",
+  "type": "object",
+  "required": ["schema_version", "id", "source_class", "split", "case_kind", "blinding", "input", "expected_judgment", "human_review", "evidence"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "source_class": { "enum": ["top_down", "bottom_up", "task_specific"] },
+    "requirement_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "observation_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "task_id": { "type": "string", "minLength": 1 },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "split": { "enum": ["calibration", "held_out"] },
+    "case_kind": { "enum": ["positive", "counterexample", "clean_control", "ambiguous"] },
+    "blinding": {
+      "type": "object",
+      "required": ["status", "label_visible_to_judge"],
+      "properties": {
+        "status": { "enum": ["BLINDED", "REVEALED"] },
+        "label_visible_to_judge": { "type": "boolean" },
+        "revealed_by": { "type": "string", "minLength": 1 },
+        "revealed_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "status": { "const": "BLINDED" } } }, "then": { "properties": { "label_visible_to_judge": { "const": false } } } },
+        { "if": { "properties": { "status": { "const": "REVEALED" } } }, "then": { "required": ["revealed_by", "revealed_at"], "properties": { "revealed_by": { "type": "string", "minLength": 1 }, "revealed_at": { "type": "string", "format": "date-time" } } } }
+      ]
+    },
+    "input": {
+      "type": "object",
+      "required": ["artifact_ref", "description"],
+      "properties": {
+        "artifact_ref": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "context_refs": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    },
+    "expected_judgment": { "enum": ["FINDING", "NO_FINDING", "ABSTAIN"] },
+    "human_review": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["PENDING", "CONFIRMED", "REJECTED", "NEEDS_CONTEXT", "SKIPPED"] },
+        "disposition": { "enum": ["TRUE_POSITIVE", "FALSE_POSITIVE", "FALSE_NEGATIVE", "TRUE_NEGATIVE", "AMBIGUOUS", "NOT_APPLICABLE"] },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "reviewed_at": { "type": "string", "format": "date-time" },
+        "rationale": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "status": { "enum": ["CONFIRMED", "REJECTED", "NEEDS_CONTEXT"] } } }, "then": { "required": ["disposition", "reviewer", "reviewed_at", "rationale"], "properties": { "disposition": { "enum": ["TRUE_POSITIVE", "FALSE_POSITIVE", "FALSE_NEGATIVE", "TRUE_NEGATIVE", "AMBIGUOUS", "NOT_APPLICABLE"] }, "reviewer": { "type": "string", "minLength": 1 }, "reviewed_at": { "type": "string", "format": "date-time" }, "rationale": { "type": "string", "minLength": 1 } } } }
+      ]
+    },
+    "evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    { "if": { "properties": { "source_class": { "const": "top_down" } } }, "then": { "required": ["requirement_ids"], "properties": { "requirement_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true } } } },
+    { "if": { "properties": { "source_class": { "const": "bottom_up" } } }, "then": { "required": ["observation_ids"], "properties": { "observation_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true } } } },
+    { "if": { "properties": { "source_class": { "const": "task_specific" } } }, "then": { "required": ["task_id", "expires_at"], "properties": { "task_id": { "type": "string", "minLength": 1 }, "expires_at": { "type": "string", "format": "date-time" } } } }
+  ]
+}

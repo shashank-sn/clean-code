@@ -9,3 +9,4 @@ Use the repository's own commands and conventions as the source of truth.
 5. Report `NOT_AVAILABLE`, `NOT_CONFIGURED`, `NOT_RUN`, and `ERROR` exactly. Never convert them to `PASS`.
 6. Require concrete evidence for review findings. A correct review may return zero findings.
 7. Record human spot checks for requirements, acceptance examples, UI/QA procedures, and sampled code.
+8. After an audit, use `clean-eval-discover` only for confirmed repeated outcomes or bounded human judgment. Preserve clean controls and an untouched held-out set; route policy proposals through `clean-learn` for separate approval.

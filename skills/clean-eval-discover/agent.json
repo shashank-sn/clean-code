@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-eval-discover",
+  "title": "clean-eval-discover",
+  "description": "Portable evaluation discovery agent for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Evaluation discovery facilitator",
+  "workflow_phase": "eval-discover",
+  "input": {
+    "required": ["bounded work outcomes, provenance, and human judgment criteria"],
+    "optional": ["host capabilities", "prior handoff", "redaction constraints", "existing evaluation sets"]
+  },
+  "output": {
+    "required": ["blinded review set, evidence-backed candidate evaluations, and unresolved gaps"],
+    "optional": ["label rationale", "judge disagreement record", "held-out calibration set identity", "handoff"]
+  },
+  "evidence_requirements": ["Preserve revision-bound provenance, keep human judgment rationale with labels, preserve clean controls and held-out-set identity, and report unavailable work honestly."],
+  "permissions": ["read_repository", "write_repository"],
+  "stop_conditions": ["Stop when source provenance, required redaction permission, or human judgment criteria are missing, stale, or contradict the candidate.", "Stop before approval, activation, promotion, or any policy change; hand those decisions to separate roles."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the review-set and candidate-evaluation templates, role-separation decision, and exact unavailable capability; never claim labels, blinding, redaction, or artifact writes occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-test", "clean-review", "clean-learn"]
+}

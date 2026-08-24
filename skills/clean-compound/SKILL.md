@@ -12,7 +12,7 @@ Capture knowledge while context is fresh so the next occurrence is faster.
 1. Identify the single solved problem for this run (one learning per invocation).
 2. Write a structured solution doc under `docs/solutions/` with YAML frontmatter: problem, root cause, fix, verification, and links.
 3. If `CONCEPTS.md` exists, add or refine domain terms introduced or clarified by this work.
-4. Cross-link to related solutions. Propose `clean-learn` policy updates only as proposals, never direct gate changes.
+4. Cross-link to related solutions. When confirmed outcomes show a repeatable candidate, route their evidence through `clean-eval-discover` before proposing `clean-learn` updates. Never make a direct gate change.
 5. In pipeline mode, run non-interactively and report filed paths.
 
 ## Safety

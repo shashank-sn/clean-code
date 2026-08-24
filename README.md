@@ -7,7 +7,7 @@ Clean Code is an open-source (MIT) plugin for designing, building, testing, veri
 
 Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **immutable audit receipts**, plus a **full planning-to-PR skill pipeline**.
 
-**Twenty-five skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
+**Twenty-six skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
 
 **npm:** [@shashanksn/clean-code](https://www.npmjs.com/package/@shashanksn/clean-code) · CLI command: `clean-code`
 
@@ -102,7 +102,7 @@ Default manual pipeline:
 clean-brainstorm → clean-plan
 clean-build + clean-test + clean-verify
 clean-review → clean-simplify → clean-ship → clean-watch-pr
-clean-audit + clean-compound
+clean-audit → clean-eval-discover? → clean-learn? + clean-compound
 ```
 
 | Phase | Skills | What happens |
@@ -110,15 +110,17 @@ clean-audit + clean-compound
 | **Plan** | `clean-brainstorm` → `clean-plan` | Scope and requirements, then implementation units and verification contract |
 | **Build** | `clean-build` + `clean-test` + `clean-verify` | Small verified changes, independent test tracks, deterministic checks |
 | **Ship** | `clean-review` → `clean-simplify` → `clean-ship` → `clean-watch-pr` | Evidence-based review, cleanup, PR, CI watch |
-| **Record** | `clean-audit` + `clean-compound` | Immutable audit receipt and durable learnings |
+| **Record** | `clean-audit` → `clean-eval-discover`? → `clean-learn`? + `clean-compound` | Immutable receipt and durable learnings; evaluate only confirmed repeated outcomes |
 
-Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-learn`, `clean-orchestrate`.
+Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-eval-discover`, `clean-learn`, `clean-orchestrate`.
+
+`clean-eval-discover` and `clean-learn` are conditional record-stage roles. They do not run for every feature, and neither can activate a policy change.
 
 Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 
 ---
 
-## Skill map (25 skills)
+## Skill map (26 skills)
 
 | Skill | Responsibility |
 | --- | --- |
@@ -139,6 +141,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 | `clean-orchestrate` | Multi-role coordination |
 | `clean-lfg` | Full autonomous pipeline |
 | `clean-audit` | Immutable release receipts |
+| `clean-eval-discover` | Blinded evaluation-set discovery and candidate calibration |
 | `clean-learn` | Proposal-only policy learning |
 | `clean-compound` | `docs/solutions/` learnings |
 | `clean-worktree` | Isolated worktrees |
