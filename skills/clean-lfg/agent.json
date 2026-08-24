@@ -22,5 +22,5 @@
     "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
     "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
   },
-  "handoff_to": ["clean-brainstorm", "clean-plan", "clean-build", "clean-test", "clean-verify", "clean-review", "clean-simplify", "clean-ship", "clean-watch-pr", "clean-audit", "clean-compound"]
+  "handoff_to": ["clean-brainstorm", "clean-plan", "clean-build", "clean-test", "clean-verify", "clean-review", "clean-simplify", "clean-ship", "clean-watch-pr", "clean-audit", "clean-eval-discover", "clean-learn", "clean-compound"]
 }

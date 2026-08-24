@@ -40,6 +40,92 @@ func TestLoadChangeProposalRejectsUnknownFields(t *testing.T) {
 	}
 }
 
+func TestBottomUpProposalRequiresInspectablePromotionEvidence(t *testing.T) {
+	proposal := validProposal()
+	proposal.EvidenceOrigin = "BOTTOM_UP"
+	proposal.EvalPromotion = &EvalPromotionEvidence{
+		SupportingEvidenceHashes: []string{
+			"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+			"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+		},
+		CleanControlHash:          "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+		HeldOutFixture:            "harness/calibration/held-out/eval-case.json",
+		HeldOutEvidenceHash:       "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+		HeldOutStatus:             "PASS",
+		ExpectedFalsePositiveCost: "An advisory warning adds one reviewer decision.",
+	}
+	if issues := ValidateChangeProposal(proposal); len(issues) != 0 {
+		t.Fatalf("expected valid bottom-up proposal, got %v", issues)
+	}
+}
+
+func TestBottomUpProposalRejectsInsufficientOrMissingPromotionEvidence(t *testing.T) {
+	proposal := validProposal()
+	proposal.EvidenceOrigin = "BOTTOM_UP"
+	proposal.EvalPromotion = &EvalPromotionEvidence{}
+	issues := ValidateChangeProposal(proposal)
+	for _, expected := range []string{
+		"eval_promotion requires at least two supporting evidence hashes",
+		"eval_promotion clean_control_hash is required",
+		"eval_promotion held_out_fixture is required",
+		"eval_promotion held_out_evidence_hash is required",
+		"eval_promotion held_out_status must be PASS",
+		"eval_promotion expected_false_positive_cost is required",
+	} {
+		if !containsIssue(issues, expected) {
+			t.Errorf("expected %q in %v", expected, issues)
+		}
+	}
+}
+
+func TestBottomUpProposalRejectsOverlappingPromotionEvidence(t *testing.T) {
+	proposal := validProposal()
+	proposal.EvidenceOrigin = "BOTTOM_UP"
+	proposal.EvalPromotion = &EvalPromotionEvidence{
+		SupportingEvidenceHashes: []string{
+			"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+			"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+		},
+		CleanControlHash:          "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+		HeldOutFixture:            "harness/calibration/held-out/eval-case.json",
+		HeldOutEvidenceHash:       "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+		HeldOutStatus:             "PASS",
+		ExpectedFalsePositiveCost: "A false positive interrupts a reviewer.",
+	}
+	issues := ValidateChangeProposal(proposal)
+	for _, expected := range []string{
+		"eval_promotion clean_control_hash must be distinct from supporting evidence",
+		"eval_promotion held_out_evidence_hash must be distinct from supporting evidence",
+		"eval_promotion clean_control_hash and held_out_evidence_hash must differ",
+	} {
+		if !containsIssue(issues, expected) {
+			t.Errorf("expected %q in %v", expected, issues)
+		}
+	}
+}
+
+func TestEvidenceOriginRejectsPromotionForTopDownProposal(t *testing.T) {
+	proposal := validProposal()
+	proposal.EvidenceOrigin = "TOP_DOWN"
+	proposal.EvalPromotion = &EvalPromotionEvidence{}
+	if !containsIssue(ValidateChangeProposal(proposal), "eval_promotion is only valid for BOTTOM_UP proposals") {
+		t.Fatal("expected top-down evidence rejection")
+	}
+}
+
+func TestApprovedProposalRequiresIndependentHumanApprover(t *testing.T) {
+	proposal := validProposal()
+	proposal.Status = "APPROVED"
+	proposal.Reviewer = "reviewer-a"
+	if !containsIssue(ValidateChangeProposal(proposal), "human_approver is required for approved proposals") {
+		t.Fatal("expected approved proposal to require human approver")
+	}
+	proposal.HumanApprover = proposal.Reviewer
+	if !containsIssue(ValidateChangeProposal(proposal), "human_approver must be independent of proposer and reviewer") {
+		t.Fatal("expected independent human approver rejection")
+	}
+}
+
 func validProposal() ChangeProposal {
 	return ChangeProposal{
 		SchemaVersion: "1.0.0", ID: "P1", SourceReceipt: "receipt.json",

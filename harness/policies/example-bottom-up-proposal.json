@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "id": "proposal-bottom-up-001",
+  "source_receipt": ".clean-code/receipts/revision.json",
+  "evidence_hashes": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+  "kind": "rule",
+  "target_class": "quality",
+  "effect": "STRENGTHEN",
+  "scope": "review.findings.naming",
+  "change": "add an advisory judge for the repeated naming failure",
+  "benefit": "surface a confirmed recurring issue without blocking delivery",
+  "risks": ["a false positive can consume reviewer attention"],
+  "rollback": "remove the advisory judge and retain the calibration evidence",
+  "calibration_fixture": "harness/calibration/held-out/naming.json",
+  "proposer": "eval-discover-agent",
+  "status": "PROPOSED",
+  "evidence_origin": "BOTTOM_UP",
+  "eval_promotion": {
+    "supporting_evidence_hashes": [
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    ],
+    "clean_control_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "held_out_fixture": "harness/calibration/held-out/naming.json",
+    "held_out_evidence_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "held_out_status": "PASS",
+    "expected_false_positive_cost": "An advisory finding requires a reviewer to inspect one named behavior."
+  }
+}

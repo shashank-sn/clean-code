@@ -19,3 +19,5 @@ clean-code compare-workflows
 ## Shipping pipeline
 
 Run the full planning-to-PR pipeline with the `clean-lfg` skill or follow stages in `harness/workflow/shipping-pipeline.json`.
+
+After audit, use `clean-eval-discover` only when real outcomes justify a candidate evaluation. It prepares evidence for `clean-learn`; neither skill changes policy without independent approval.

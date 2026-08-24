@@ -24,6 +24,7 @@ Clean Code now ships a full planning-to-PR pipeline comparable to Compound Engin
 | --- | --- |
 | `clean-verify` / `clean-code verify` | Normalized deterministic checks |
 | `clean-audit` / `clean-code audit` | Immutable release receipts |
+| `clean-eval-discover` | Blinded, bottom-up evaluation discovery from confirmed outcomes; never activates a rule |
 | `clean-learn` | Proposal-only policy learning |
 | `clean-design` | Architecture policy + acceptance |
 | `clean-test` | Independent test tracks |
@@ -41,6 +42,6 @@ The manifest scores both workflows on eighteen dimensions from product brainstor
 
 ## Autonomous run
 
-Invoke the `clean-lfg` skill with a feature description when you want planning through PR without step-by-step check-ins.
+Invoke the `clean-lfg` skill with a feature description when you want planning through PR without step-by-step check-ins. After audit, it conditionally invokes `clean-eval-discover` only when confirmed outcomes or repeated human judgment support a candidate evaluation; `clean-learn` follows only with calibrated evidence and separate approval.
 
 Canonical stage order lives in `harness/workflow/shipping-pipeline.json`.

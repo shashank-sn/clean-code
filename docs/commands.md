@@ -16,6 +16,6 @@
 - `benchmark --manifest FILE`: report detection, false positives, misses, and correct silence.
 - `compare-workflows [--manifest FILE]`: score Clean Code vs Compound Engineering workflow coverage on a fixed rubric.
 - `benchmark-full-flow [--manifest FILE] [--repo ROOT]`: run full-flow code-quality benchmark on CE vs CC sample outcomes.
-- `learn --proposal FILE`: validate that a policy proposal is reversible, independently reviewed when decided, and unable to suppress protected gates.
+- `learn --proposal FILE`: validate that a policy proposal is reversible, independently reviewed when decided, and unable to suppress protected gates. Bottom-up proposals additionally require distinct supporting evidence, a clean control, passing held-out evidence, false-positive cost, rollback, and an independent human approver when approved.
 
 All report-producing commands write JSON to standard output and diagnostics to standard error. Usage errors return 2; failed checks or invalid input return 1.

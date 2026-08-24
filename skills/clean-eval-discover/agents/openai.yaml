@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Eval Discover"
+  short_description: "Discover reviewable eval candidates from real outcomes"
+  default_prompt: "Use $clean-eval-discover to turn these bounded outcomes and human judgments into blinded, reviewable evaluation candidates without approving or promoting any rule."

@@ -12,10 +12,11 @@ Propose narrow local improvements from confirmed outcomes.
 1. Start from a confirmed outcome: escaped defect, caught defect, false positive, correct silence, repeated exception, or accepted local convention.
 2. Link the source audit receipt, evidence hashes, affected rule or adapter, and observed consequence.
 3. Propose one reversible change with scope, expected benefit, risks, migration, rollback, and a calibration fixture.
-4. Compare the proposal with the currently trusted policy and flag every new command, permission, suppression, threshold change, and gate-status change.
-5. Send the proposal to a separate reviewer. Apply it only after explicit approval.
-6. Run existing and new calibration fixtures, then record measured detection and false-positive outcomes.
-7. Run `clean-code learn --proposal <proposal.json>` before sending the proposal for approval.
+4. For a bottom-up proposal, preserve at least two distinct supporting evidence hashes, a distinct clean control, an untouched held-out fixture with passing evidence, the expected false-positive cost, and rollback.
+5. Compare the proposal with the currently trusted policy and flag every new command, permission, suppression, threshold change, and gate-status change.
+6. Send the proposal to a separate reviewer. Apply it only after explicit approval from a human who is independent of both proposer and reviewer.
+7. Run existing and new calibration fixtures, then record measured detection and false-positive outcomes.
+8. Run `clean-code learn --proposal <proposal.json>` before sending the proposal for approval.
 
 ## Hard boundaries
 

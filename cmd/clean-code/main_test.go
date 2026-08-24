@@ -95,6 +95,17 @@ func TestRunLearnAcceptsReversibleProposal(t *testing.T) {
 	}
 }
 
+func TestRunLearnAcceptsCalibratedBottomUpProposal(t *testing.T) {
+	proposal := filepath.Join("..", "..", "harness", "policies", "example-bottom-up-proposal.json")
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"learn", "--proposal", proposal}, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected bottom-up proposal success, got %d: %s", code, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"status": "PASS"`)) {
+		t.Fatalf("unexpected proposal report: %s", stdout.String())
+	}
+}
+
 func TestRunDiscoverWritesJSON(t *testing.T) {
 	root := t.TempDir()
 	if err := os.WriteFile(root+"/go.mod", []byte("module sample\n"), 0o644); err != nil {

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/eval-proposal.schema.json",
+  "title": "Clean Code evaluation promotion proposal",
+  "type": "object",
+  "required": ["schema_version", "id", "eval_set_id", "source_class", "criterion", "scope", "supporting_case_ids", "counterexample_case_ids", "clean_control_case_ids", "false_positive_cost", "held_out_validation", "rollback", "promotion_target", "proposer", "status"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "eval_set_id": { "type": "string", "minLength": 1 },
+    "source_class": { "enum": ["top_down", "bottom_up", "task_specific"] },
+    "criterion": { "type": "string", "minLength": 1 },
+    "scope": { "type": "string", "minLength": 1 },
+    "supporting_case_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "counterexample_case_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "clean_control_case_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "false_positive_cost": {
+      "type": "object",
+      "required": ["level", "rationale"],
+      "properties": { "level": { "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] }, "rationale": { "type": "string", "minLength": 1 } },
+      "additionalProperties": false
+    },
+    "held_out_validation": {
+      "type": "object",
+      "required": ["case_ids", "baseline", "candidate", "result", "evidence"],
+      "properties": {
+        "case_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "baseline": { "$ref": "#/$defs/metrics" },
+        "candidate": { "$ref": "#/$defs/metrics" },
+        "result": { "enum": ["IMPROVED", "NO_CHANGE", "REGRESSED", "NOT_RUN"] },
+        "evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      },
+      "additionalProperties": false
+    },
+    "rollback": { "type": "string", "minLength": 1 },
+    "promotion_target": { "enum": ["hard_deterministic_gate", "advisory_llm_judge", "task_local_checklist", "reject_archive"] },
+    "proposer": { "type": "string", "minLength": 1 },
+    "approver": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["PROPOSED", "APPROVED", "REJECTED", "PROMOTED", "ROLLED_BACK"] }
+  },
+  "$defs": {
+    "metrics": {
+      "type": "object",
+      "required": ["true_positives", "false_positives", "false_negatives", "true_negatives", "abstentions"],
+      "properties": {
+        "true_positives": { "type": "integer", "minimum": 0 },
+        "false_positives": { "type": "integer", "minimum": 0 },
+        "false_negatives": { "type": "integer", "minimum": 0 },
+        "true_negatives": { "type": "integer", "minimum": 0 },
+        "abstentions": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    { "if": { "properties": { "status": { "enum": ["APPROVED", "PROMOTED", "REJECTED", "ROLLED_BACK"] } } }, "then": { "required": ["approver"], "properties": { "approver": { "type": "string", "minLength": 1 } } } },
+    { "if": { "properties": { "promotion_target": { "const": "task_local_checklist" } } }, "then": { "properties": { "source_class": { "const": "task_specific" } } } },
+    { "if": { "properties": { "promotion_target": { "enum": ["hard_deterministic_gate", "advisory_llm_judge"] } } }, "then": { "properties": { "held_out_validation": { "type": "object", "properties": { "result": { "const": "IMPROVED" } } } } } }
+  ]
+}

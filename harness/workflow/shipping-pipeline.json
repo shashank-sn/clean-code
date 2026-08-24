@@ -13,6 +13,7 @@
     {"id": "ship", "skill": "clean-ship", "ce_equivalent": "ce-commit-push-pr"},
     {"id": "watch", "skill": "clean-watch-pr", "ce_equivalent": "ce-babysit-pr"},
     {"id": "audit", "skill": "clean-audit", "ce_equivalent": null},
+    {"id": "eval-discover", "skill": "clean-eval-discover", "ce_equivalent": null, "when": "confirmed outcomes or repeated human judgment reveal a candidate evaluation"},
     {"id": "compound", "skill": "clean-compound", "ce_equivalent": "ce-compound"},
     {"id": "learn", "skill": "clean-learn", "ce_equivalent": "ce-compound"},
     {"id": "orchestrate", "skill": "clean-lfg", "ce_equivalent": "lfg"}
@@ -22,6 +23,7 @@
     "architecture_enforcement",
     "independent_testing",
     "audit_receipt",
+    "bottom_up_evaluation_discovery",
     "policy_learning",
     "human_gates",
     "host_neutrality"
