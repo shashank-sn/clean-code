@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1 - 2026-08-24
+
+- Add `clean-eval-discover`, a conditional post-audit workflow role that turns confirmed outcomes into blinded, evidence-backed evaluation candidates without activating policy.
+- Require bottom-up policy proposals to carry distinct supporting evidence, a clean control, held-out validation, false-positive cost, rollback, and independent human approval.
+- Add portable eval schemas, workflow wiring, and regression coverage that prevents workflow stages from referencing unregistered agents.
+
 ## 0.4.0 - 2026-08-22
 
 - Add five specialist sub-agents (`clean-reviewer`, `clean-test-writer`, `clean-auditor`, `clean-merge-resolver`, `clean-dispatcher`) that enforce role independence, intent-traced conflict resolution, and isolated-context dispatch.
