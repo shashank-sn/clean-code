@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2 - 2026-08-26
+
+- Add an evidence-based structural-simplification lens to `clean-review`, including code-judo-style questions about removable complexity, special-case growth, ownership boundaries, and decomposition.
+- Make 1,000 changed source lines a contextual decomposition prompt, not a universal policy failure; structural findings require a concrete consequence and bounded behavior-preserving alternative.
+- Run simplification before final verification and independent review so the review applies to the revision that is shipped.
+
 ## 0.4.1 - 2026-08-24
 
 - Add `clean-eval-discover`, a conditional post-audit workflow role that turns confirmed outcomes into blinded, evidence-backed evaluation candidates without activating policy.

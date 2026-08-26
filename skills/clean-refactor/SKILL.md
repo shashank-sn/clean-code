@@ -16,6 +16,10 @@ Improve one structural problem while preserving observable behavior.
 5. Keep temporary awkwardness only while it enables the next safe step. Delete obsolete maps, branches, adapters, comments, and compatibility paths once migration finishes.
 6. Separate any discovered behavior change into its own requirement and acceptance evidence.
 
+## Structural-review handoff
+
+When `clean-review` identifies a structural-simplification finding, preserve the cited behavior and state the review evidence, the concrete change cost, and the smallest reversible move before editing. A review finding is not authorization for a speculative redesign. Re-run verification and independent review after the refactor creates a new revision.
+
 ## Guardrails
 
 - Treat passing tests as refactoring confidence; design quality still requires review.
