@@ -100,16 +100,16 @@ Default manual pipeline:
 
 ```
 clean-brainstorm → clean-plan
-clean-build + clean-test + clean-verify
-clean-review → clean-simplify → clean-ship → clean-watch-pr
+clean-build + clean-test → clean-simplify
+clean-verify → clean-review → clean-ship → clean-watch-pr
 clean-audit → clean-eval-discover? → clean-learn? + clean-compound
 ```
 
 | Phase | Skills | What happens |
 | --- | --- | --- |
 | **Plan** | `clean-brainstorm` → `clean-plan` | Scope and requirements, then implementation units and verification contract |
-| **Build** | `clean-build` + `clean-test` + `clean-verify` | Small verified changes, independent test tracks, deterministic checks |
-| **Ship** | `clean-review` → `clean-simplify` → `clean-ship` → `clean-watch-pr` | Evidence-based review, cleanup, PR, CI watch |
+| **Build** | `clean-build` + `clean-test` → `clean-simplify` | Small changes, independent test tracks, behavior-preserving cleanup |
+| **Ship** | `clean-verify` → `clean-review` → `clean-ship` → `clean-watch-pr` | Final-revision evidence, review, PR, CI watch |
 | **Record** | `clean-audit` → `clean-eval-discover`? → `clean-learn`? + `clean-compound` | Immutable receipt and durable learnings; evaluate only confirmed repeated outcomes |
 
 Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-eval-discover`, `clean-learn`, `clean-orchestrate`.
@@ -134,7 +134,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 | `clean-debug` | Causal-chain debugging |
 | `clean-test` | Independent unit, acceptance, integration, UI/QA tracks |
 | `clean-verify` | Deterministic checks + normalized evidence |
-| `clean-review` | Evidence-based review; zero findings allowed |
+| `clean-review` | Evidence-based structural review; zero findings allowed |
 | `clean-simplify` | Behavior-preserving simplification |
 | `clean-ship` | Commit, push, PR |
 | `clean-watch-pr` | CI watch loop |
@@ -212,6 +212,7 @@ Host instructions for Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf,
 - Acceptance and UI/QA checked **independently** from implementation.
 - Human spot checks recorded explicitly.
 - Review findings require evidence; **zero findings is valid**.
+- Structural review seeks removable complexity in changed code, but a line-count threshold, metric, or reviewer preference is never a finding by itself.
 
 ---
 

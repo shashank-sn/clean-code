@@ -2,6 +2,8 @@
 
 Clean Code now ships a full planning-to-PR pipeline comparable to Compound Engineering, with stronger deterministic evidence gates.
 
+The final-change sequence is `clean-build` → `clean-test` → `clean-simplify` → `clean-verify` → `clean-review` → `clean-ship`. Any review fix starts a new revision and repeats verification and review.
+
 ## Skill map (CE → Clean Code)
 
 | Compound Engineering | Clean Code | Notes |

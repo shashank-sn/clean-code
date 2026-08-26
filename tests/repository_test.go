@@ -102,3 +102,67 @@ func TestCheckedInJSONExamplesParse(t *testing.T) {
 		}
 	}
 }
+
+func TestStructuralReviewSkillKeepsEvidenceBoundary(t *testing.T) {
+	root := filepath.Join("..")
+	body, err := os.ReadFile(filepath.Join(root, "skills", "clean-review", "SKILL.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, phrase := range []string{
+		"## Structural-simplification lens",
+		"non-trivial changed code",
+		"changed-scope evidence",
+		"1,000 lines",
+		"never a universal size limit",
+		"Do not turn an unconventional style, a metric alone, or an unproven preference into a finding.",
+		"hand it to `clean-refactor`",
+	} {
+		if !strings.Contains(string(body), phrase) {
+			t.Errorf("clean-review skill missing structural-review contract %q", phrase)
+		}
+	}
+}
+
+func TestPackageAndPluginVersionsMatch(t *testing.T) {
+	root := filepath.Join("..")
+	readVersion := func(path string) string {
+		body, err := os.ReadFile(filepath.Join(root, path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var manifest struct {
+			Version string `json:"version"`
+		}
+		if err := json.Unmarshal(body, &manifest); err != nil {
+			t.Fatal(err)
+		}
+		return manifest.Version
+	}
+	if packageVersion, pluginVersion := readVersion("package.json"), readVersion(filepath.Join(".codex-plugin", "plugin.json")); packageVersion == "" || packageVersion != pluginVersion {
+		t.Fatalf("package and plugin versions must match, got package=%q plugin=%q", packageVersion, pluginVersion)
+	}
+}
+
+func TestShippingPipelineSimplifiesBeforeFinalVerificationAndReview(t *testing.T) {
+	root := filepath.Join("..")
+	body, err := os.ReadFile(filepath.Join(root, "harness", "workflow", "shipping-pipeline.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pipeline struct {
+		Stages []struct {
+			ID string `json:"id"`
+		} `json:"stages"`
+	}
+	if err := json.Unmarshal(body, &pipeline); err != nil {
+		t.Fatal(err)
+	}
+	positions := map[string]int{"simplify": -1, "verify": -1, "review": -1}
+	for index, stage := range pipeline.Stages {
+		positions[stage.ID] = index
+	}
+	if positions["simplify"] == -1 || positions["verify"] == -1 || positions["review"] == -1 || positions["simplify"] >= positions["verify"] || positions["verify"] >= positions["review"] {
+		t.Fatalf("expected simplify before verify before review, got %#v", positions)
+	}
+}
