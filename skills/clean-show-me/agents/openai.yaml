@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Show Me"
+  short_description: "Explain code and flows with focused visuals"
+  default_prompt: "Use $clean-show-me to explain this system with the smallest useful visual."

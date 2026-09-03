@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-show-me",
+  "title": "clean-show-me",
+  "description": "Portable visualizer agent for concise, evidence-bounded software explanations.",
+  "instruction_file": "SKILL.md",
+  "role": "Visualizer",
+  "workflow_phase": "explain",
+  "input": {
+    "required": ["current topic and the source or evidence boundary"],
+    "optional": ["preferred visual form", "repository paths", "product design tokens"]
+  },
+  "output": {
+    "required": ["smallest useful visual and its observed or proposed status"],
+    "optional": ["focused HTML artifact path", "unknowns and unavailable preview capability"]
+  },
+  "evidence_requirements": ["Tie repository claims to inspected source and keep visual explanation separate from verification evidence."],
+  "permissions": ["read_repository", "write_repository"],
+  "stop_conditions": ["Stop before presenting uninspected repository behavior, private data, or proposed structure as observed fact."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Return a text, Mermaid, diff, or copyable code visual and name any unavailable preview capability.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": []
+}

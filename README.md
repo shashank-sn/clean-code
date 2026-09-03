@@ -7,7 +7,7 @@ Clean Code is an open-source (MIT) plugin for designing, building, testing, veri
 
 Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **immutable audit receipts**, plus a **full planning-to-PR skill pipeline**.
 
-**Twenty-six skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
+**Twenty-seven skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
 
 **npm:** [@shashanksn/clean-code](https://www.npmjs.com/package/@shashanksn/clean-code) · CLI command: `clean-code`
 
@@ -112,7 +112,7 @@ clean-audit → clean-eval-discover? → clean-learn? + clean-compound
 | **Ship** | `clean-verify` → `clean-review` → `clean-ship` → `clean-watch-pr` | Final-revision evidence, review, PR, CI watch |
 | **Record** | `clean-audit` → `clean-eval-discover`? → `clean-learn`? + `clean-compound` | Immutable receipt and durable learnings; evaluate only confirmed repeated outcomes |
 
-Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-eval-discover`, `clean-learn`, `clean-orchestrate`.
+Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-show-me`, `clean-eval-discover`, `clean-learn`, `clean-orchestrate`.
 
 `clean-eval-discover` and `clean-learn` are conditional record-stage roles. They do not run for every feature, and neither can activate a policy change.
 
@@ -120,7 +120,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 
 ---
 
-## Skill map (26 skills)
+## Skill map (27 skills)
 
 | Skill | Responsibility |
 | --- | --- |
@@ -129,6 +129,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 | `clean-plan` | Implementation-ready units + verification contract |
 | `clean-discover` | Read-only capability discovery |
 | `clean-design` | Use cases, boundaries, acceptance, architecture policy |
+| `clean-show-me` | Concise, evidence-bounded visual explanations |
 | `clean-build` | Small verified implementation steps |
 | `clean-refactor` | Behavior-preserving structure improvements |
 | `clean-debug` | Causal-chain debugging |
@@ -219,7 +220,7 @@ Host instructions for Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf,
 ## Repository layout
 
 ```text
-skills/           # 20 agent skills
+skills/           # 27 agent skills
 cmd/clean-code/   # CLI
 internal/         # Runner, verify, audit, benchmark
 harness/          # Schemas, adapters, calibration
