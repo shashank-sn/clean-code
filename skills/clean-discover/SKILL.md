@@ -21,5 +21,6 @@ Establish what a repository can verify before selecting tools or gates.
 
 - Discovery performs read-only inspection and skips project command execution.
 - Never install dependencies or access the network during discovery.
+- Run on the host-selected model. Model or provider availability is not a stop condition.
 - Keep adapter proposals outside executable policy until a separate trust decision approves them.
 - Keep executable and arguments separate. Shell mode requires explicit repository policy.

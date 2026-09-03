@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"clean-code/internal/hosts"
 )
 
 func TestLoadAllFindsEveryPortableSkillAgent(t *testing.T) {
@@ -42,6 +44,23 @@ func TestShowMeAgentIsPortableAndNativeInCodex(t *testing.T) {
 	for _, expected := range []string{"# Clean Show Me", "**Observed**", "**Proposed**", "A visual explains; it does not verify"} {
 		if !strings.Contains(prompt, expected) {
 			t.Fatalf("show-me prompt missing %q:\n%s", expected, prompt)
+		}
+	}
+}
+
+func TestDiscoverAgentIsModelNeutralAcrossHosts(t *testing.T) {
+	for _, host := range hosts.Catalog() {
+		prompt, err := EmitPrompt("clean-discover", host.ID)
+		if err != nil {
+			t.Fatalf("emit clean-discover for %s: %v", host.ID, err)
+		}
+		for _, forbidden := range []string{"composer", "grok", "model must stay", "stop if the runtime"} {
+			if strings.Contains(strings.ToLower(prompt), forbidden) {
+				t.Fatalf("clean-discover prompt for %s contains model gate %q:\n%s", host.ID, forbidden, prompt)
+			}
+		}
+		if !strings.Contains(prompt, "Run on the host-selected model") {
+			t.Fatalf("clean-discover prompt for %s omits the model-neutral contract:\n%s", host.ID, prompt)
 		}
 	}
 }
