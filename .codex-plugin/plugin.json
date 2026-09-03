@@ -1,17 +1,18 @@
 {
   "name": "clean-code",
   "version": "0.4.2",
-  "description": "Language-neutral skills and deterministic checks for clean code, architecture, testing, and agent review.",
+  "description": "Language-neutral skills for visualizing, designing, building, testing, and verifying maintainable software.",
   "author": "Clean Code contributors",
   "skills": "./skills/",
   "interface": {
     "displayName": "Clean Code",
     "shortDescription": "Build and verify maintainable software.",
-    "longDescription": "Clean Code combines software design guidance with deterministic verification, independent testing, architecture checks, and evidence-based review for repositories in any language.",
+    "longDescription": "Clean Code combines concise visual explanation and software design guidance with deterministic verification, independent testing, architecture checks, and evidence-based review for repositories in any language.",
     "developerName": "Local developer",
     "category": "Productivity",
     "capabilities": [
       "Software design",
+      "Visual software explanation",
       "Code quality verification",
       "Architecture review",
       "Test strategy"

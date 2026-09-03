@@ -25,8 +25,11 @@ func TestPackedNpmArtifactIncludesReferencedDocsAndBenchmark(t *testing.T) {
 
 	assertReadmeLinksResolve(t, packageRoot)
 	for _, path := range []string{
+		"THIRD_PARTY_NOTICES.md",
 		"skills/clean-build/SKILL.md",
 		"skills/clean-build/agent.json",
+		"skills/clean-show-me/SKILL.md",
+		"skills/clean-show-me/agent.json",
 		"examples/benchmark-flow/task.md",
 		"examples/benchmark-flow/outcomes/ce/slug/slug.go",
 		"examples/benchmark-flow/outcomes/cc/slug/slug.go",
@@ -50,6 +53,13 @@ func TestPackedNpmArtifactIncludesReferencedDocsAndBenchmark(t *testing.T) {
 	output, err = command.CombinedOutput()
 	if err != nil || !strings.Contains(string(output), "# Clean Build") {
 		t.Fatalf("packed npm CLI agent emit failed: %v\n%s", err, output)
+	}
+	command = exec.Command("node", "bin/clean-code.js", "agent", "emit", "clean-show-me", "--mode", "prompt", "--host", "codex")
+	command.Dir = packageRoot
+	command.Env = append(os.Environ(), "GOCACHE="+filepath.Join(temp, "go-cache"), "HOME="+filepath.Join(temp, "home"))
+	output, err = command.CombinedOutput()
+	if err != nil || !strings.Contains(string(output), "# Clean Show Me") {
+		t.Fatalf("packed npm CLI show-me emit failed: %v\n%s", err, output)
 	}
 	command = exec.Command("node", "bin/clean-code.js", "benchmark-full-flow")
 	command.Dir = packageRoot

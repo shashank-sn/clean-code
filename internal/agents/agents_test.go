@@ -12,10 +12,10 @@ func TestLoadAllFindsEveryPortableSkillAgent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(packages) != 26 {
-		t.Fatalf("expected 26 portable agents, got %d", len(packages))
+	if len(packages) != 27 {
+		t.Fatalf("expected 27 portable agents, got %d", len(packages))
 	}
-	for _, id := range []string{"clean-lfg", "clean-eval-discover", "clean-reviewer", "clean-test-writer", "clean-auditor", "clean-merge-resolver", "clean-dispatcher"} {
+	for _, id := range []string{"clean-lfg", "clean-eval-discover", "clean-reviewer", "clean-test-writer", "clean-auditor", "clean-merge-resolver", "clean-dispatcher", "clean-show-me"} {
 		if _, exists := packages[id]; !exists {
 			t.Fatalf("%s package is missing", id)
 		}
@@ -23,6 +23,25 @@ func TestLoadAllFindsEveryPortableSkillAgent(t *testing.T) {
 	for id, loaded := range packages {
 		if loaded.Descriptor.ID != id || strings.TrimSpace(loaded.Instructions) == "" {
 			t.Fatalf("invalid loaded package %q: %+v", id, loaded)
+		}
+	}
+}
+
+func TestShowMeAgentIsPortableAndNativeInCodex(t *testing.T) {
+	runtime, err := Describe("clean-show-me", "codex")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if runtime.ExecutionMode != "native" || runtime.Agent.Role != "Visualizer" || runtime.Agent.WorkflowPhase != "explain" {
+		t.Fatalf("unexpected show-me runtime: %+v", runtime)
+	}
+	prompt, err := EmitPrompt("clean-show-me", "codex")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, expected := range []string{"# Clean Show Me", "**Observed**", "**Proposed**", "A visual explains; it does not verify"} {
+		if !strings.Contains(prompt, expected) {
+			t.Fatalf("show-me prompt missing %q:\n%s", expected, prompt)
 		}
 	}
 }
