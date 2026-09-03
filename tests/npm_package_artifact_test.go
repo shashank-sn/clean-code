@@ -30,6 +30,7 @@ func TestPackedNpmArtifactIncludesReferencedDocsAndBenchmark(t *testing.T) {
 		"skills/clean-build/agent.json",
 		"skills/clean-show-me/SKILL.md",
 		"skills/clean-show-me/agent.json",
+		"skills/clean-show-me/agents/openai.yaml",
 		"examples/benchmark-flow/task.md",
 		"examples/benchmark-flow/outcomes/ce/slug/slug.go",
 		"examples/benchmark-flow/outcomes/cc/slug/slug.go",

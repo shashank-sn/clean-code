@@ -29,4 +29,13 @@ func TestShowMeSkillKeepsVisualAndEvidenceContract(t *testing.T) {
 			t.Errorf("clean-show-me skill missing contract %q", phrase)
 		}
 	}
+	metadata, err := os.ReadFile(filepath.Join("..", "skills", "clean-show-me", "agents", "openai.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, phrase := range []string{"display_name: \"Clean Show Me\"", "short_description:", "default_prompt:", "$clean-show-me"} {
+		if !strings.Contains(string(metadata), phrase) {
+			t.Errorf("clean-show-me metadata missing %q", phrase)
+		}
+	}
 }
