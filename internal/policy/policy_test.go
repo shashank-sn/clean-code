@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 func TestCompareReportsStableSortedDeltasWithoutValues(t *testing.T) {

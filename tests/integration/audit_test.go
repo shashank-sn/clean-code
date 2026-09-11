@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"clean-code/internal/audit"
+	"github.com/shashank-sn/clean-code/internal/audit"
 )
 
 func TestAuditFixtureProducesCompleteImmutableReceipt(t *testing.T) {

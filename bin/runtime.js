@@ -6,6 +6,7 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 const https = require("https");
 const http = require("http");
+const crypto = require("crypto");
 
 const GO_VERSION = "1.22.10";
 const NODE_VERSION = "20.18.0";
@@ -212,6 +213,81 @@ async function download(url, dest) {
   await downloadSync(url, dest);
 }
 
+function computeSha256(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    const stream = fs.createReadStream(filePath);
+    stream.on("error", reject);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => resolve(hash.digest("hex")));
+  });
+}
+
+async function verifyChecksum(archivePath, expectedHex, label) {
+  const expected = (expectedHex || "").trim().toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(expected)) {
+    throw new Error(
+      `invalid SHA-256 checksum for ${label} at ${archivePath}: expected a 64-character hex digest, got "${expectedHex}"`
+    );
+  }
+  const actual = await computeSha256(archivePath);
+  if (actual !== expected) {
+    throw new Error(
+      `checksum mismatch for ${label} at ${archivePath}: expected ${expected}, got ${actual}`
+    );
+  }
+  return actual;
+}
+
+function fetchChecksum(url) {
+  return new Promise((resolve, reject) => {
+    const lib = url.startsWith("https") ? https : http;
+    lib
+      .get(url, (response) => {
+        if (
+          response.statusCode &&
+          response.statusCode >= 300 &&
+          response.statusCode < 400 &&
+          response.headers.location
+        ) {
+          fetchChecksum(response.headers.location).then(resolve, reject);
+          return;
+        }
+        if (response.statusCode !== 200) {
+          reject(
+            new Error(`checksum fetch failed (${response.statusCode}): ${url}`)
+          );
+          return;
+        }
+        let body = "";
+        response.setEncoding("utf8");
+        response.on("data", (chunk) => (body += chunk));
+        response.on("end", () => resolve(body.trim()));
+      })
+      .on("error", reject);
+  });
+}
+
+function goChecksumFrom(body, archiveName) {
+  const fields = (body || "").trim().split(/\s+/).filter(Boolean);
+  if (fields.length === 0) {
+    throw new Error(`empty checksum response for ${archiveName} from go.dev/dl`);
+  }
+  return fields[0];
+}
+
+function nodeChecksumFrom(shasumsBody, archiveName) {
+  for (const line of (shasumsBody || "").split("\n")) {
+    const fields = line.trim().split(/\s+/).filter(Boolean);
+    if (fields.length >= 2 && fields[1] === archiveName) {
+      return fields[0];
+    }
+  }
+  throw new Error(
+    `no SHA-256 checksum listed for ${archiveName} in nodejs.org SHASUMS256.txt`
+  );
+}
+
 function runTar(args) {
   const result = spawnSync("tar", args, { encoding: "utf8" });
   if (result.status !== 0) {
@@ -273,6 +349,17 @@ async function installGo(verbose = true) {
   log(verbose, `Downloading Go ${GO_VERSION} for ${platform}-${arch}...`);
   await download(url, archivePath);
 
+  const checksumUrl = `https://go.dev/dl/${archiveName}.sha256`;
+  log(verbose, `Verifying SHA-256 checksum of ${archiveName}...`);
+  const checksumBody = await fetchChecksum(checksumUrl);
+  try {
+    const expected = goChecksumFrom(checksumBody, archiveName);
+    await verifyChecksum(archivePath, expected, "Go archive");
+  } catch (error) {
+    fs.rmSync(archivePath, { force: true });
+    throw error;
+  }
+
   const extractRoot = path.join(cacheDir, "extract-go");
   fs.rmSync(extractRoot, { recursive: true, force: true });
   ensureDir(extractRoot);
@@ -314,6 +401,17 @@ async function installNode(verbose = true) {
     `Downloading Node.js ${NODE_VERSION} for ${platform}-${arch}...`
   );
   await download(url, archivePath);
+
+  const checksumUrl = `https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt`;
+  log(verbose, `Verifying SHA-256 checksum of ${archiveName}...`);
+  const shasumsBody = await fetchChecksum(checksumUrl);
+  try {
+    const expected = nodeChecksumFrom(shasumsBody, archiveName);
+    await verifyChecksum(archivePath, expected, "Node.js archive");
+  } catch (error) {
+    fs.rmSync(archivePath, { force: true });
+    throw error;
+  }
 
   const extractRoot = path.join(cacheDir, "extract-node");
   fs.rmSync(extractRoot, { recursive: true, force: true });
@@ -418,4 +516,9 @@ module.exports = {
   goBinaryPath,
   managedGoBinary,
   managedNodeBinary,
+  computeSha256,
+  verifyChecksum,
+  fetchChecksum,
+  goChecksumFrom,
+  nodeChecksumFrom,
 };

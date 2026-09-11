@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 func TestLoadProviderFixtures(t *testing.T) {
@@ -82,7 +82,7 @@ func TestResultRequiresRevisionBoundArtifactEvidence(t *testing.T) {
 		SchemaVersion: providerSchemaVersion, ProviderID: "fixture-mutation", ProviderVersion: "fixture-1", Category: "mutation",
 		Revision: "abc123", Status: contracts.StatusPass, StartedAt: time.Now(), Evidence: contracts.Evidence{ArtifactDetails: []contracts.ArtifactProvenance{{
 			Path: "reports/mutation.json", SHA256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-			Schema: "clean-code/mutation-result/v1", Revision: "other", Fresh: true,
+			Schema: "github.com/shashank-sn/clean-code/mutation-result/v1", Revision: "other", Fresh: true,
 		}}},
 	}
 	if err := result.Validate(); err == nil {

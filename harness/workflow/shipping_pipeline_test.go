@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"clean-code/internal/agents"
+	"github.com/shashank-sn/clean-code/internal/agents"
 )
 
 type shippingPipeline struct {

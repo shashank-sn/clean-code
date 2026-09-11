@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"clean-code/internal/contracts"
-	"clean-code/internal/evidence"
-	"clean-code/internal/policy"
+	"github.com/shashank-sn/clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/evidence"
+	"github.com/shashank-sn/clean-code/internal/policy"
 )
 
 type CommandRunner interface {

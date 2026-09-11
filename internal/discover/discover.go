@@ -10,8 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	"clean-code/harness/adapters"
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/harness/adapters"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 type Result struct {

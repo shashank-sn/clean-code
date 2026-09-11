@@ -4,7 +4,6 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
-	"encoding/json"
 	"io"
 	"os"
 	"os/exec"
@@ -73,7 +72,7 @@ func TestPackedNpmArtifactIncludesReferencedDocsAndBenchmark(t *testing.T) {
 
 func packNpmArtifact(t *testing.T, repositoryRoot, temp string) string {
 	t.Helper()
-	command := exec.Command("npm", "pack", "--json", "--ignore-scripts", "--pack-destination", temp)
+	command := exec.Command("npm", "pack", "--ignore-scripts", "--pack-destination", temp)
 	command.Dir = repositoryRoot
 	command.Env = append(os.Environ(), "npm_config_cache="+filepath.Join(temp, "npm-cache"))
 	var stdout, stderr bytes.Buffer
@@ -83,16 +82,11 @@ func packNpmArtifact(t *testing.T, repositoryRoot, temp string) string {
 	if err != nil {
 		t.Fatalf("npm pack failed: %v\nstdout:\n%s\nstderr:\n%s", err, stdout.String(), stderr.String())
 	}
-	var packed []struct {
-		Filename string `json:"filename"`
+	archivePath, err := locateTgz(temp)
+	if err != nil {
+		t.Fatalf("locate npm pack tarball: %v", err)
 	}
-	if err := json.Unmarshal(stdout.Bytes(), &packed); err != nil {
-		t.Fatalf("parse npm pack stdout: %v\n%s", err, stdout.String())
-	}
-	if len(packed) != 1 || packed[0].Filename == "" {
-		t.Fatalf("unexpected npm pack stdout: %s", stdout.String())
-	}
-	return filepath.Join(temp, packed[0].Filename)
+	return archivePath
 }
 
 func extractNpmArtifact(t *testing.T, archivePath, destination string) string {

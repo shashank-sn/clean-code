@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"clean-code/internal/hosts"
+	"github.com/shashank-sn/clean-code/internal/hosts"
 )
 
 func TestLoadAllFindsEveryPortableSkillAgent(t *testing.T) {

@@ -35,7 +35,6 @@
     "examples",
     ".codex-plugin",
     "go.mod",
-    "go.sum",
     "LICENSE",
     "THIRD_PARTY_NOTICES.md",
     "CONTRIBUTING.md",

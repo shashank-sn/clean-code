@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 func TestSuccessfulRequiresCompleteRequiredPassingResults(t *testing.T) {

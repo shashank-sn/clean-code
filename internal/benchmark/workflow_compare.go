@@ -12,17 +12,17 @@ import (
 const maxWorkflowManifestBytes int64 = 2 << 20
 
 type WorkflowManifest struct {
-	SchemaVersion string `json:"schema_version"`
+	SchemaVersion string     `json:"schema_version"`
 	Workflows     []Workflow `json:"workflows"`
 	Dimensions    []string   `json:"dimensions"`
 }
 
 type Workflow struct {
-	ID      string             `json:"id"`
-	Name    string             `json:"name"`
-	Scores  map[string]float64 `json:"scores"`
-	Skills  []string           `json:"skills,omitempty"`
-	Notes   string             `json:"notes,omitempty"`
+	ID     string             `json:"id"`
+	Name   string             `json:"name"`
+	Scores map[string]float64 `json:"scores"`
+	Skills []string           `json:"skills,omitempty"`
+	Notes  string             `json:"notes,omitempty"`
 }
 
 type WorkflowComparison struct {
