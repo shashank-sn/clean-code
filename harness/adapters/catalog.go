@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 //go:embed *.yaml

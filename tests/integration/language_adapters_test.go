@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"clean-code/internal/discover"
+	"github.com/shashank-sn/clean-code/internal/discover"
 )
 
 func TestMaintainedLanguageFixturesProduceReadOnlyProposals(t *testing.T) {

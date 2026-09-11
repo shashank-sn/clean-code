@@ -1,6 +1,7 @@
 package audit
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -14,25 +15,26 @@ import (
 	"strings"
 	"time"
 
-	"clean-code/internal/evidence"
-	"clean-code/internal/review"
-	"clean-code/internal/trace"
+	"github.com/shashank-sn/clean-code/internal/evidence"
+	"github.com/shashank-sn/clean-code/internal/review"
+	"github.com/shashank-sn/clean-code/internal/trace"
 )
 
 const maxAuditFileBytes int64 = 20 << 20
 
 type Input struct {
-	SchemaVersion      string   `json:"schema_version"`
-	Repository         string   `json:"repository"`
-	Revision           string   `json:"revision"`
-	PolicyRevision     string   `json:"policy_revision"`
-	Verification       string   `json:"verification"`
-	TestPlan           string   `json:"test_plan"`
-	Review             string   `json:"review"`
-	SpotCheck          string   `json:"spot_check"`
-	SupportingEvidence []string `json:"supporting_evidence"`
-	MaxEvidenceAgeSec  int64    `json:"max_evidence_age_seconds,omitempty"`
-	Exceptions         []string `json:"exceptions,omitempty"`
+	SchemaVersion      string                `json:"schema_version"`
+	Repository         string                `json:"repository"`
+	Revision           string                `json:"revision"`
+	PolicyRevision     string                `json:"policy_revision"`
+	Verification       string                `json:"verification"`
+	TestPlan           string                `json:"test_plan"`
+	Review             string                `json:"review"`
+	SpotCheck          string                `json:"spot_check"`
+	SupportingEvidence []string              `json:"supporting_evidence"`
+	MaxEvidenceAgeSec  int64                 `json:"max_evidence_age_seconds,omitempty"`
+	Exceptions         []string              `json:"exceptions,omitempty"`
+	Signers            map[string]RoleSigner `json:"signers,omitempty"`
 }
 
 type SpotCheck struct {
@@ -58,15 +60,20 @@ type Artifact struct {
 }
 
 type Receipt struct {
-	SchemaVersion  string     `json:"schema_version"`
-	Repository     string     `json:"repository"`
-	Revision       string     `json:"revision"`
-	PolicyRevision string     `json:"policy_revision"`
-	CreatedAt      time.Time  `json:"created_at"`
-	Complete       bool       `json:"complete"`
-	Artifacts      []Artifact `json:"artifacts"`
-	Gaps           []string   `json:"gaps"`
-	Exceptions     []string   `json:"exceptions"`
+	SchemaVersion         string     `json:"schema_version"`
+	Repository            string     `json:"repository"`
+	Revision              string     `json:"revision"`
+	PolicyRevision        string     `json:"policy_revision"`
+	CreatedAt             time.Time  `json:"created_at"`
+	Complete              bool       `json:"complete"`
+	Artifacts             []Artifact `json:"artifacts"`
+	Gaps                  []string   `json:"gaps"`
+	Exceptions            []string   `json:"exceptions"`
+	SigningKeyFingerprint string     `json:"signing_key_fingerprint,omitempty"`
+	SignedPayloadSHA256   string     `json:"signed_payload_sha256,omitempty"`
+	Signature             string     `json:"signature,omitempty"`
+	SigningPublicKey      string     `json:"signing_public_key,omitempty"`
+	Signers               []Signer   `json:"signers,omitempty"`
 }
 
 func Build(inputPath string, now func() time.Time) (Receipt, error) {
@@ -105,21 +112,36 @@ func Build(inputPath string, now func() time.Time) (Receipt, error) {
 	if err != nil {
 		return Receipt{}, err
 	}
-	reviewInput, reviewReport, err := inspectReview(base, input.Review, input.Revision, &receipt)
+	reviewInput, reviewReport, reviewDigest, err := inspectReview(base, input.Review, input.Revision, &receipt)
 	if err != nil {
 		return Receipt{}, err
 	}
 	if reviewReport.Status != "PASS" {
 		receipt.Gaps = append(receipt.Gaps, "independent review is incomplete")
 	}
-	if err := inspectVerification(base, input.Verification, input, auditTime, &receipt); err != nil {
+	verificationDigest, err := inspectVerification(base, input.Verification, input, auditTime, &receipt)
+	if err != nil {
 		return Receipt{}, err
 	}
 	if err := inspectTestPlan(base, input.TestPlan, supporting, &receipt); err != nil {
 		return Receipt{}, err
 	}
-	if err := inspectSpotCheck(base, input.SpotCheck, input.Revision, reviewInput.ChangeAuthor, &receipt); err != nil {
+	spotCheckDigest, err := inspectSpotCheck(base, input.SpotCheck, input.Revision, reviewInput.ChangeAuthor, &receipt)
+	if err != nil {
 		return Receipt{}, err
+	}
+	if len(input.Signers) > 0 {
+		evidenceSHA256 := map[string]string{
+			"implementer":  verificationDigest,
+			"reviewer":     reviewDigest,
+			"spot_checker": spotCheckDigest,
+		}
+		verifiedSigners, signerErr := VerifyRoleSigners(input.Signers, input.Revision, evidenceSHA256)
+		if signerErr != nil {
+			receipt.Gaps = append(receipt.Gaps, signerErr.Error())
+		} else {
+			receipt.Signers = verifiedSigners
+		}
 	}
 	sort.Strings(receipt.Gaps)
 	receipt.Complete = len(receipt.Gaps) == 0
@@ -186,18 +208,35 @@ func Check(inputPath, receiptPath string) (Receipt, error) {
 	if err != nil {
 		return Receipt{}, err
 	}
+	if recorded.Signature != "" {
+		if err := VerifyReceipt(recorded); err != nil {
+			return Receipt{}, err
+		}
+		recordedPayload, err := canonicalPayload(recorded)
+		if err != nil {
+			return Receipt{}, fmt.Errorf("canonicalize recorded receipt: %w", err)
+		}
+		rebuiltPayload, err := canonicalPayload(rebuilt)
+		if err != nil {
+			return Receipt{}, fmt.Errorf("canonicalize rebuilt receipt: %w", err)
+		}
+		if !bytes.Equal(recordedPayload, rebuiltPayload) {
+			return Receipt{}, errors.New("audit receipt signature is valid but the evidence bundle no longer matches the signed payload")
+		}
+		return recorded, nil
+	}
 	if !reflect.DeepEqual(recorded, rebuilt) {
 		return Receipt{}, errors.New("audit receipt does not match the current evidence bundle")
 	}
 	return recorded, nil
 }
 
-func inspectVerification(base, configured string, input Input, now time.Time, receipt *Receipt) error {
+func inspectVerification(base, configured string, input Input, now time.Time, receipt *Receipt) (string, error) {
 	path := resolve(base, configured)
 	var report evidence.Report
 	digest, err := loadStrict(path, &report)
 	if err != nil {
-		return fmt.Errorf("load verification report: %w", err)
+		return "", fmt.Errorf("load verification report: %w", err)
 	}
 	receipt.Artifacts = append(receipt.Artifacts, Artifact{Kind: "verification", Path: configured, SHA256: digest})
 	if report.Repository != input.Repository {
@@ -223,7 +262,7 @@ func inspectVerification(base, configured string, input Input, now time.Time, re
 			receipt.Gaps = append(receipt.Gaps, fmt.Sprintf("verification result %q belongs to another revision", result.CheckID))
 		}
 	}
-	return nil
+	return digest, nil
 }
 
 func inspectTestPlan(base, configured string, supporting map[string]bool, receipt *Receipt) error {
@@ -266,26 +305,26 @@ func inspectSupporting(base string, configured []string, receipt *Receipt) (map[
 	return seen, nil
 }
 
-func inspectReview(base, configured, revision string, receipt *Receipt) (review.Input, review.Report, error) {
+func inspectReview(base, configured, revision string, receipt *Receipt) (review.Input, review.Report, string, error) {
 	path := resolve(base, configured)
 	var input review.Input
 	digest, err := loadStrict(path, &input)
 	if err != nil {
-		return review.Input{}, review.Report{}, fmt.Errorf("load review input: %w", err)
+		return review.Input{}, review.Report{}, "", fmt.Errorf("load review input: %w", err)
 	}
 	receipt.Artifacts = append(receipt.Artifacts, Artifact{Kind: "review", Path: configured, SHA256: digest})
 	if input.Revision != revision {
 		receipt.Gaps = append(receipt.Gaps, "review revision does not match audit revision")
 	}
-	return input, review.Evaluate(input), nil
+	return input, review.Evaluate(input), digest, nil
 }
 
-func inspectSpotCheck(base, configured, revision, changeAuthor string, receipt *Receipt) error {
+func inspectSpotCheck(base, configured, revision, changeAuthor string, receipt *Receipt) (string, error) {
 	path := resolve(base, configured)
 	var spot SpotCheck
 	digest, err := loadStrict(path, &spot)
 	if err != nil {
-		return fmt.Errorf("load spot check: %w", err)
+		return "", fmt.Errorf("load spot check: %w", err)
 	}
 	receipt.Artifacts = append(receipt.Artifacts, Artifact{Kind: "spot-check", Path: configured, SHA256: digest})
 	if spot.SchemaVersion != "1.0.0" || strings.TrimSpace(spot.Reviewer) == "" {
@@ -325,7 +364,7 @@ func inspectSpotCheck(base, configured, revision, changeAuthor string, receipt *
 			receipt.Gaps = append(receipt.Gaps, fmt.Sprintf("%s spot check is missing", kind))
 		}
 	}
-	return nil
+	return digest, nil
 }
 
 func resolve(base, configured string) string {

@@ -42,7 +42,7 @@ func TestCheckResultValidateAcceptsStaleStatusAndArtifactProvenance(t *testing.T
 		SchemaVersion: "1.0.0", CheckID: "provider.mutation", Category: "mutation", Provider: "fixture-mutation",
 		Status: StatusStale, Revision: "abc123", StartedAt: time.Now(), Evidence: Evidence{ArtifactDetails: []ArtifactProvenance{{
 			Path: "reports/mutation.json", SHA256: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-			Schema: "clean-code/mutation-result/v1", Revision: "abc123", Fresh: false,
+			Schema: "github.com/shashank-sn/clean-code/mutation-result/v1", Revision: "abc123", Fresh: false,
 		}}},
 	}
 	if err := result.Validate(); err != nil {

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"clean-code/internal/contracts"
-	"clean-code/internal/evidence"
+	"github.com/shashank-sn/clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/evidence"
 )
 
 func TestBuildCompleteReceiptHashesEveryEvidenceInput(t *testing.T) {

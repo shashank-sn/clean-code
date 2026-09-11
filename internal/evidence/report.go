@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 type Report struct {

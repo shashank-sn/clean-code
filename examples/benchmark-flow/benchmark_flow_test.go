@@ -3,8 +3,8 @@ package benchmarkflow_test
 import (
 	"testing"
 
-	slugcc "clean-code/examples/benchmark-flow/outcomes/cc/slug"
-	slugce "clean-code/examples/benchmark-flow/outcomes/ce/slug"
+	slugcc "github.com/shashank-sn/clean-code/examples/benchmark-flow/outcomes/cc/slug"
+	slugce "github.com/shashank-sn/clean-code/examples/benchmark-flow/outcomes/ce/slug"
 )
 
 func TestCEOutcomeCoreCases(t *testing.T) {
@@ -15,9 +15,9 @@ func TestCEOutcomeCoreCases(t *testing.T) {
 
 func TestCCOutcomeCoreCases(t *testing.T) {
 	cases := map[string]string{
-		"Hello World": "hello-world",
+		"Hello World":    "hello-world",
 		"  Foo__Bar!!  ": "foo-bar",
-		"---":         "",
+		"---":            "",
 	}
 	for input, want := range cases {
 		if got := slugcc.NormalizeSlug(input); got != want {

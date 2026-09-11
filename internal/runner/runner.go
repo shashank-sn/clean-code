@@ -16,8 +16,8 @@ import (
 	"sync"
 	"time"
 
-	"clean-code/internal/contracts"
-	"clean-code/internal/providers"
+	"github.com/shashank-sn/clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/providers"
 )
 
 const defaultTimeout = 5 * time.Minute

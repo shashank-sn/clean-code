@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 const providerSchemaVersion = "1.0.0"

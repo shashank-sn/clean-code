@@ -2,6 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -9,23 +14,24 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"clean-code/internal/agents"
-	"clean-code/internal/architecture"
-	"clean-code/internal/audit"
-	"clean-code/internal/benchmark"
-	"clean-code/internal/contracts"
-	"clean-code/internal/discover"
-	"clean-code/internal/evidence"
-	"clean-code/internal/gauntlet"
-	"clean-code/internal/hosts"
-	"clean-code/internal/policy"
-	"clean-code/internal/providers"
-	"clean-code/internal/repository"
-	"clean-code/internal/review"
-	"clean-code/internal/runner"
-	"clean-code/internal/trace"
-	"clean-code/internal/verify"
+	"github.com/shashank-sn/clean-code/internal/agents"
+	"github.com/shashank-sn/clean-code/internal/architecture"
+	"github.com/shashank-sn/clean-code/internal/audit"
+	"github.com/shashank-sn/clean-code/internal/benchmark"
+	"github.com/shashank-sn/clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/discover"
+	"github.com/shashank-sn/clean-code/internal/evidence"
+	"github.com/shashank-sn/clean-code/internal/gauntlet"
+	"github.com/shashank-sn/clean-code/internal/hosts"
+	"github.com/shashank-sn/clean-code/internal/policy"
+	"github.com/shashank-sn/clean-code/internal/providers"
+	"github.com/shashank-sn/clean-code/internal/repository"
+	"github.com/shashank-sn/clean-code/internal/review"
+	"github.com/shashank-sn/clean-code/internal/runner"
+	"github.com/shashank-sn/clean-code/internal/trace"
+	"github.com/shashank-sn/clean-code/internal/verify"
 )
 
 var version = "0.1.0-dev" // overridden via -ldflags in release and npm builds
@@ -157,6 +163,13 @@ func run(args []string, stdout, stderr io.Writer) int {
 		} else if !*allowRepositoryPolicy && len(discovery.Commands) > 0 {
 			trustedSource = "unapproved repository policy"
 		}
+		if *allowRepositoryPolicy && len(discovery.Commands) > 0 {
+			fmt.Fprintf(stderr,
+				"clean-code: WARNING: --allow-repository-policy is set; executing %d UNapproved command(s) declared by %s\n"+
+					"clean-code: WARNING: these repository-declared commands are NOT approved and running them can execute arbitrary code.\n"+
+					"clean-code: WARNING: only run verify on repositories you trust.\n",
+				len(discovery.Commands), filepath.Join(discovery.Root, ".clean-code.json"))
+		}
 		revision := repository.Revision(discovery.Root)
 		report := verify.Service{
 			Runner:          runner.Runner{Root: discovery.Root},
@@ -267,6 +280,9 @@ func run(args []string, stdout, stderr io.Writer) int {
 		inputPath := flags.String("input", "", "audit input JSON file")
 		outputPath := flags.String("output", "", "immutable audit receipt JSON file")
 		checkPath := flags.String("check", "", "existing receipt to verify against current evidence")
+		signingKey := flags.String("signing-key", "", "hex-encoded ed25519 private key seed for signing the receipt")
+		signingKeyFile := flags.String("signing-key-file", "", "file containing the hex-encoded ed25519 private key seed")
+		witnessFile := flags.String("witness-file", "", "external witness file binding the receipt hash (append on output, verify on check)")
 		if err := flags.Parse(args[1:]); err != nil {
 			return 2
 		}
@@ -280,16 +296,48 @@ func run(args []string, stdout, stderr io.Writer) int {
 				fmt.Fprintln(stderr, err)
 				return 1
 			}
+			if receipt.Signature != "" {
+				if err := audit.VerifyReceipt(receipt); err != nil {
+					fmt.Fprintln(stderr, err)
+					return 1
+				}
+				fmt.Fprintln(stderr, "audit receipt signature verified")
+			}
+			if *witnessFile != "" {
+				if err := verifyWitness(*witnessFile, *checkPath); err != nil {
+					fmt.Fprintln(stderr, err)
+					return 1
+				}
+				fmt.Fprintln(stderr, "audit receipt witness verified")
+			}
 			return writeJSON(stdout, stderr, receipt)
+		}
+		seed, err := resolveSigningSeed(*signingKey, *signingKeyFile)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
 		}
 		receipt, err := audit.Build(*inputPath, nil)
 		if err != nil {
 			fmt.Fprintln(stderr, err)
 			return 1
 		}
+		if len(seed) > 0 {
+			receipt, err = audit.SignReceipt(receipt, seed)
+			if err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+		}
 		if err := audit.Write(*outputPath, receipt); err != nil {
 			fmt.Fprintln(stderr, err)
 			return 1
+		}
+		if *witnessFile != "" {
+			if err := writeWitness(*witnessFile, *outputPath); err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
 		}
 		if code := writeJSON(stdout, stderr, receipt); code != 0 {
 			return code
@@ -298,6 +346,82 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "keygen":
+		flags := flag.NewFlagSet("keygen", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		output := flags.String("output", "", "optional directory to write the private seed and public key files")
+		if err := flags.Parse(args[1:]); err != nil || flags.NArg() != 0 {
+			fmt.Fprintln(stderr, "keygen accepts --output only")
+			return 2
+		}
+		seed, err := generateSigningSeed()
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		privateKey := ed25519.NewKeyFromSeed(seed)
+		publicKey := privateKey.Public().(ed25519.PublicKey)
+		fingerprint := sha256.Sum256(publicKey)
+		fmt.Fprintln(stdout, "ed25519 signing key generated")
+		fmt.Fprintln(stdout, "private seed (hex, 32 bytes):", hex.EncodeToString(seed))
+		fmt.Fprintln(stdout, "public key (base64):", base64.StdEncoding.EncodeToString(publicKey))
+		fmt.Fprintln(stdout, "key fingerprint (hex):", hex.EncodeToString(fingerprint[:]))
+		fmt.Fprintln(stdout, "keep the private seed secret; distribute the public key and fingerprint to verifiers.")
+		if *output != "" {
+			if err := os.MkdirAll(*output, 0o700); err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			seedPath := filepath.Join(*output, "signing-key.seed")
+			if err := os.WriteFile(seedPath, []byte(hex.EncodeToString(seed)+"\n"), 0o600); err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			pubPath := filepath.Join(*output, "signing-key.pub")
+			if err := os.WriteFile(pubPath, []byte(base64.StdEncoding.EncodeToString(publicKey)+"\n"), 0o644); err != nil {
+				fmt.Fprintln(stderr, err)
+				return 1
+			}
+			fmt.Fprintln(stderr, "wrote", seedPath, "and", pubPath)
+		}
+		return 0
+	case "sign-role":
+		flags := flag.NewFlagSet("sign-role", flag.ContinueOnError)
+		flags.SetOutput(stderr)
+		role := flags.String("role", "", "role to attest: implementer, reviewer, or spot_checker (the auditor attests by signing the receipt)")
+		revision := flags.String("revision", "", "audit revision being attested")
+		evidence := flags.String("evidence", "", "path to the role's evidence file")
+		signingKey := flags.String("signing-key", "", "hex-encoded ed25519 private key seed")
+		signingKeyFile := flags.String("signing-key-file", "", "file containing the hex-encoded ed25519 private key seed")
+		if err := flags.Parse(args[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 || *role == "" || *revision == "" || *evidence == "" {
+			fmt.Fprintln(stderr, "sign-role requires --role, --revision, and --evidence")
+			return 2
+		}
+		switch *role {
+		case "implementer", "reviewer", "spot_checker":
+		default:
+			fmt.Fprintln(stderr, "sign-role role must be implementer, reviewer, or spot_checker")
+			return 2
+		}
+		seed, err := resolveSigningSeed(*signingKey, *signingKeyFile)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if len(seed) == 0 {
+			fmt.Fprintln(stderr, "sign-role requires a signing key (--signing-key, --signing-key-file, or CLEAN_CODE_SIGNING_KEY)")
+			return 2
+		}
+		signer, err := audit.SignRole(*role, *revision, *evidence, seed)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		fmt.Fprintln(stderr, "role attestation signed; add it to the audit input under signers."+*role+" (key_id:", signer.KeyID+")")
+		return writeJSON(stdout, stderr, signer)
 	case "benchmark":
 		flags := flag.NewFlagSet("benchmark", flag.ContinueOnError)
 		flags.SetOutput(stderr)
@@ -397,7 +521,7 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <agent|provider|gauntlet|version|hosts|setup|discover|verify|architecture|trace|review|audit|benchmark|compare-workflows|benchmark-full-flow|learn>")
+	fmt.Fprintln(output, "usage: clean-code <agent|provider|gauntlet|version|hosts|setup|discover|verify|architecture|trace|review|audit|keygen|sign-role|benchmark|compare-workflows|benchmark-full-flow|learn>")
 }
 
 func runProvider(args []string, stdout, stderr io.Writer) int {
@@ -550,6 +674,7 @@ func runGauntlet(args []string, stdout, stderr io.Writer) int {
 	flags.SetOutput(stderr)
 	manifestPath := flags.String("manifest", "", "gauntlet manifest JSON file")
 	output := flags.String("output", "", "output directory")
+	repoRoot := flags.String("repo", ".", "repository root for artifact validation")
 	if (args[0] != "plan" && args[0] != "run") || flags.Parse(args[1:]) != nil || flags.NArg() != 0 || *manifestPath == "" || *output == "" {
 		fmt.Fprintln(stderr, "gauntlet plan|run requires --manifest and --output")
 		return 2
@@ -560,13 +685,14 @@ func runGauntlet(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 	if args[0] == "plan" {
-		if err := gauntlet.WritePackets(*output, gauntlet.Packets(manifest)); err != nil {
+		packets := gauntlet.Packets(manifest)
+		if err := gauntlet.WritePackets(*output, packets); err != nil {
 			fmt.Fprintln(stderr, err)
 			return 1
 		}
-		return writeJSON(stdout, stderr, map[string]any{"schema_version": "1.0.0", "revision": manifest.Revision, "packets": len(gauntlet.Packets(manifest)), "status": "PLANNED"})
+		return writeJSON(stdout, stderr, map[string]any{"schema_version": "1.0.0", "revision": manifest.Revision, "packets": len(packets), "status": "PLANNED"})
 	}
-	report := gauntlet.Evaluate(manifest)
+	report := gauntlet.ValidateArtifacts(manifest, *repoRoot)
 	if err := os.MkdirAll(*output, 0o755); err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
@@ -583,8 +709,33 @@ func runGauntlet(args []string, stdout, stderr io.Writer) int {
 	if code := writeJSON(stdout, stderr, report); code != 0 {
 		return code
 	}
-	fmt.Fprintln(stderr, "gauntlet stages are planned but not executed by the portable core; each stage is NOT_RUN")
-	return 1
+	passes, failures, notRuns := summarizeGauntlet(report)
+	if failures > 0 {
+		fmt.Fprintf(stderr, "gauntlet run: %d stage(s) FAILED artifact validation\n", failures)
+		return 1
+	}
+	if notRuns > 0 {
+		fmt.Fprintf(stderr, "gauntlet run: portable core validates artifacts only; %d stage(s) not validated — full execution requires a host adapter (see docs/gauntlet.md)\n", notRuns)
+		return 2
+	}
+	fmt.Fprintf(stderr, "gauntlet run: all %d stage(s) PASS artifact validation\n", passes)
+	return 0
+}
+
+func summarizeGauntlet(report gauntlet.Report) (passes, failures, notRuns int) {
+	for _, story := range report.Stories {
+		for _, stage := range story.Stages {
+			switch stage.Status {
+			case contracts.StatusPass:
+				passes++
+			case contracts.StatusFail:
+				failures++
+			default:
+				notRuns++
+			}
+		}
+	}
+	return passes, failures, notRuns
 }
 
 func runArchitectureView(args []string, stdout, stderr io.Writer) int {
@@ -643,4 +794,104 @@ func writeNewFile(path string, body []byte) error {
 	defer file.Close()
 	_, err = file.Write(body)
 	return err
+}
+
+// resolveSigningSeed returns the ed25519 private-key seed from --signing-key,
+// then --signing-key-file, then the CLEAN_CODE_SIGNING_KEY environment variable.
+// It returns nil when no source is configured.
+func resolveSigningSeed(signingKey, signingKeyFile string) ([]byte, error) {
+	var encoded string
+	switch {
+	case signingKey != "":
+		encoded = signingKey
+	case signingKeyFile != "":
+		body, err := os.ReadFile(signingKeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("read signing key file: %w", err)
+		}
+		encoded = strings.TrimSpace(string(body))
+	default:
+		encoded = strings.TrimSpace(os.Getenv("CLEAN_CODE_SIGNING_KEY"))
+	}
+	if encoded == "" {
+		return nil, nil
+	}
+	seed, err := hex.DecodeString(encoded)
+	if err != nil {
+		return nil, errors.New("signing key must be a hex-encoded ed25519 seed")
+	}
+	if len(seed) != ed25519.SeedSize {
+		return nil, fmt.Errorf("signing key seed must be %d bytes, got %d", ed25519.SeedSize, len(seed))
+	}
+	return seed, nil
+}
+
+// generateSigningSeed returns a fresh random ed25519 private-key seed.
+func generateSigningSeed() ([]byte, error) {
+	seed := make([]byte, ed25519.SeedSize)
+	if _, err := rand.Read(seed); err != nil {
+		return nil, fmt.Errorf("generate signing seed: %w", err)
+	}
+	return seed, nil
+}
+
+// sha256File returns the hex SHA-256 of a file's bytes.
+func sha256File(path string) (string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("read %q: %w", path, err)
+	}
+	digest := sha256.Sum256(content)
+	return hex.EncodeToString(digest[:]), nil
+}
+
+// writeWitness appends a "<sha256>  <path>" record for the receipt to the
+// witness file. The witness file is append-only by design so records accumulate
+// and regenerating a receipt leaves the old record visible as a mismatch.
+func writeWitness(witnessFile, receiptPath string) error {
+	digest, err := sha256File(receiptPath)
+	if err != nil {
+		return err
+	}
+	file, err := os.OpenFile(witnessFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		return fmt.Errorf("open witness file: %w", err)
+	}
+	defer file.Close()
+	if _, err := fmt.Fprintf(file, "%s  %s\n", digest, receiptPath); err != nil {
+		return fmt.Errorf("append to witness file: %w", err)
+	}
+	return nil
+}
+
+// verifyWitness confirms the on-disk receipt hash matches the most recent
+// witness record for that receipt path. A mismatch means the receipt was
+// regenerated or edited after it was witnessed. Records are
+// "<64-hex-digest>  <path>"; the path may itself contain spaces, so only the
+// fixed two-space separator after the digest is used to split.
+func verifyWitness(witnessFile, receiptPath string) error {
+	digest, err := sha256File(receiptPath)
+	if err != nil {
+		return err
+	}
+	body, err := os.ReadFile(witnessFile)
+	if err != nil {
+		return fmt.Errorf("read witness file: %w", err)
+	}
+	var found string
+	for _, line := range strings.Split(string(body), "\n") {
+		if len(line) < 66 || line[64:66] != "  " {
+			continue
+		}
+		if strings.TrimSpace(line[66:]) == receiptPath {
+			found = line[:64]
+		}
+	}
+	if found == "" {
+		return fmt.Errorf("audit witness: no record for %q in %s", receiptPath, witnessFile)
+	}
+	if found != digest {
+		return fmt.Errorf("audit witness: %q was regenerated or edited after witnessing (recorded %s, current %s)", receiptPath, found, digest)
+	}
+	return nil
 }

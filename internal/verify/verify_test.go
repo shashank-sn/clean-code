@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 type fakeRunner struct {

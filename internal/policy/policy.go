@@ -6,7 +6,7 @@ import (
 	"slices"
 	"sort"
 
-	"clean-code/internal/contracts"
+	"github.com/shashank-sn/clean-code/internal/contracts"
 )
 
 // Compare reports every executable policy difference without exposing values.

@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"clean-code/internal/trace"
+	"github.com/shashank-sn/clean-code/internal/trace"
 )
 
 func TestTraceFixturesDistinguishCompleteAndIncompletePlans(t *testing.T) {

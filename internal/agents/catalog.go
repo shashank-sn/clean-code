@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"clean-code/internal/hosts"
+	"github.com/shashank-sn/clean-code/internal/hosts"
 )
 
 const SchemaVersion = "1.0.0"

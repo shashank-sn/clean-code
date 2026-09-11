@@ -16,13 +16,13 @@ import (
 const maxFullFlowManifestBytes int64 = 2 << 20
 
 type FullFlowManifest struct {
-	SchemaVersion      string          `json:"schema_version"`
-	TaskID             string          `json:"task_id"`
-	TaskPath           string          `json:"task_path"`
-	Outcomes           []FullFlowEntry `json:"outcomes"`
-	Rubric             []RubricItem    `json:"rubric"`
-	ReviewerRubric     []RubricItem    `json:"reviewer_rubric,omitempty"`
-	Reviewer           *ReviewerInput  `json:"reviewer,omitempty"`
+	SchemaVersion  string          `json:"schema_version"`
+	TaskID         string          `json:"task_id"`
+	TaskPath       string          `json:"task_path"`
+	Outcomes       []FullFlowEntry `json:"outcomes"`
+	Rubric         []RubricItem    `json:"rubric"`
+	ReviewerRubric []RubricItem    `json:"reviewer_rubric,omitempty"`
+	Reviewer       *ReviewerInput  `json:"reviewer,omitempty"`
 }
 
 type FullFlowEntry struct {
@@ -45,14 +45,14 @@ type ReviewerInput struct {
 }
 
 type FullFlowReport struct {
-	SchemaVersion string              `json:"schema_version"`
-	TaskID        string              `json:"task_id"`
-	TaskPath      string              `json:"task_path"`
-	Outcomes      []FullFlowOutcome   `json:"outcomes"`
-	Rubric        []RubricItem        `json:"rubric"`
-	Winner        string              `json:"winner"`
-	Summary       string              `json:"summary"`
-	Reviewer      *ReviewerInput      `json:"reviewer,omitempty"`
+	SchemaVersion string            `json:"schema_version"`
+	TaskID        string            `json:"task_id"`
+	TaskPath      string            `json:"task_path"`
+	Outcomes      []FullFlowOutcome `json:"outcomes"`
+	Rubric        []RubricItem      `json:"rubric"`
+	Winner        string            `json:"winner"`
+	Summary       string            `json:"summary"`
+	Reviewer      *ReviewerInput    `json:"reviewer,omitempty"`
 }
 
 type FullFlowOutcome struct {
@@ -70,12 +70,12 @@ type FullFlowOutcome struct {
 }
 
 type CodeMetrics struct {
-	ProductionLines int `json:"production_lines"`
-	TestLines       int `json:"test_lines"`
-	TestFunctions   int `json:"test_functions"`
-	ProductionFuncs int `json:"production_funcs"`
-	MaxFuncLines    int `json:"max_func_lines"`
-	AvgFuncLines    int `json:"avg_func_lines"`
+	ProductionLines int  `json:"production_lines"`
+	TestLines       int  `json:"test_lines"`
+	TestFunctions   int  `json:"test_functions"`
+	ProductionFuncs int  `json:"production_funcs"`
+	MaxFuncLines    int  `json:"max_func_lines"`
+	AvgFuncLines    int  `json:"avg_func_lines"`
 	HasFuzzTest     bool `json:"has_fuzz_test"`
 }
 

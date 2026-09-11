@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"clean-code/internal/architecture"
+	"github.com/shashank-sn/clean-code/internal/architecture"
 )
 
 func TestArchitectureFixturesDistinguishCompliantAndViolatingGraphs(t *testing.T) {

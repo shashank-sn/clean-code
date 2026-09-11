@@ -22,11 +22,15 @@ function commandEnv() {
 
 function runGo() {
   const goCmd = goBinaryPath();
-  const result = spawnSync(goCmd, ["run", "./cmd/clean-code", ...args], {
-    cwd: packageRoot,
-    stdio: "inherit",
-    env: commandEnv(),
-  });
+  const result = spawnSync(
+    goCmd,
+    ["run", "-ldflags", goVersionLdflags(packageRoot), "./cmd/clean-code", ...args],
+    {
+      cwd: packageRoot,
+      stdio: "inherit",
+      env: commandEnv(),
+    }
+  );
   if (result.error) {
     console.error("clean-code: failed to run Go CLI:", result.error.message);
     console.error(

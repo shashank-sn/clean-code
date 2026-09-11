@@ -15,9 +15,9 @@ func TestNpmPackageManifest(t *testing.T) {
 		t.Fatal(err)
 	}
 	var manifest struct {
-		Name    string `json:"name"`
-		Version string `json:"version"`
-		License string `json:"license"`
+		Name    string            `json:"name"`
+		Version string            `json:"version"`
+		License string            `json:"license"`
 		Bin     map[string]string `json:"bin"`
 	}
 	if err := json.Unmarshal(body, &manifest); err != nil {

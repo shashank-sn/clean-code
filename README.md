@@ -5,7 +5,7 @@
 
 Clean Code is an open-source (MIT) plugin for designing, building, testing, verifying, and shipping maintainable software with coding agents. It works across Codex, Cursor, Claude Code, Copilot, terminal agents, CI pipelines, and a standalone CLI.
 
-Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **immutable audit receipts**, plus a **full planning-to-PR skill pipeline**.
+Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **tamper-evident, signed audit receipts**, plus a **full planning-to-PR skill pipeline**.
 
 **Twenty-seven skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
 
@@ -72,7 +72,7 @@ go build -o clean-code ./cmd/clean-code
 Bootstraps Node.js and Go when missing, then builds the CLI.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shashank-sn/clean-code/codex/initial-release/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shashank-sn/clean-code/v0.4.2/scripts/install.sh | bash
 export PATH="$HOME/.local/bin:$PATH"
 clean-code version
 ```
@@ -110,7 +110,7 @@ clean-audit → clean-eval-discover? → clean-learn? + clean-compound
 | **Plan** | `clean-brainstorm` → `clean-plan` | Scope and requirements, then implementation units and verification contract |
 | **Build** | `clean-build` + `clean-test` → `clean-simplify` | Small changes, independent test tracks, behavior-preserving cleanup |
 | **Ship** | `clean-verify` → `clean-review` → `clean-ship` → `clean-watch-pr` | Final-revision evidence, review, PR, CI watch |
-| **Record** | `clean-audit` → `clean-eval-discover`? → `clean-learn`? + `clean-compound` | Immutable receipt and durable learnings; evaluate only confirmed repeated outcomes |
+| **Record** | `clean-audit` → `clean-eval-discover`? → `clean-learn`? + `clean-compound` | Signed tamper-evident receipt, role-bound signers, external witness; evaluate only confirmed repeated outcomes |
 
 Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-show-me`, `clean-eval-discover`, `clean-learn`, `clean-orchestrate`.
 
@@ -169,7 +169,7 @@ clean-code agent describe clean-build --host codex
 clean-code agent emit clean-lfg --mode prompt --host generic
 clean-code provider validate --manifest harness/providers/mutation/provider.json
 clean-code gauntlet plan --manifest gauntlet.json --output .clean-code/packets
-clean-code gauntlet run --manifest gauntlet.json --output .clean-code/gauntlet
+clean-code gauntlet run --manifest gauntlet.json --repo . --output .clean-code/gauntlet
 clean-code setup --host codex [--output DIR]
 clean-code discover [REPO]
 clean-code verify [--trusted-policy FILE | --allow-repository-policy] [--output DIR] [REPO]
@@ -182,6 +182,8 @@ clean-code compare-workflows [--manifest FILE]
 clean-code benchmark-full-flow [--manifest FILE] [--repo ROOT]
 clean-code learn --proposal FILE
 ```
+
+`gauntlet plan` creates role packets; `gauntlet run` is a portable artifact and freshness validation check (exit `0` = all stages PASS, `1` = any stage FAILS, `2` = any stage NOT_RUN because the portable core cannot execute agent stages). Full multi-role execution requires a host adapter — see [agent-quality gauntlet](docs/gauntlet.md).
 
 See [commands](docs/commands.md), [configuration](docs/configuration.md), [portable agents](docs/portable-agents.md), [agent-quality gauntlet](docs/gauntlet.md), and [adapter authoring](docs/adapter-authoring.md).
 
@@ -214,6 +216,7 @@ Host instructions for Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf,
 - Human spot checks recorded explicitly.
 - Review findings require evidence; **zero findings is valid**.
 - Structural review seeks removable complexity in changed code, but a line-count threshold, metric, or reviewer preference is never a finding by itself.
+- Audit receipts are **tamper-evident, not tamper-proof**: an Ed25519 signature binds the receipt to a key you hold, role-bound signers make independence key-verifiable, and an external witness detects regeneration — but a party holding every key (or controlling the whole pipeline) can still produce a consistent-looking receipt. See `docs/commands.md` → *Audit receipts and the threat model* for the full trust boundary.
 
 ---
 

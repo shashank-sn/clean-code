@@ -50,6 +50,48 @@ download() {
   fi
 }
 
+# verify_sha256 fails closed: the archive is removed and the script exits
+# unless the local file's SHA-256 exactly matches the expected hex digest.
+verify_sha256() {
+  local archive_path="$1"
+  local expected_hex="$2"
+  local label="$3"
+  expected_hex="$(printf '%s' "$expected_hex" | tr '[:upper:]' '[:lower:]')"
+  if ! [[ "$expected_hex" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "clean-code: invalid or missing SHA-256 checksum for ${label}" >&2
+    rm -f "$archive_path"
+    exit 1
+  fi
+  local actual_hex
+  if command -v shasum >/dev/null 2>&1; then
+    actual_hex="$(shasum -a 256 "$archive_path" | awk '{print $1}')"
+  elif command -v sha256sum >/dev/null 2>&1; then
+    actual_hex="$(sha256sum "$archive_path" | awk '{print $1}')"
+  else
+    echo "clean-code: shasum or sha256sum is required to verify runtimes" >&2
+    rm -f "$archive_path"
+    exit 1
+  fi
+  if [[ "$actual_hex" != "$expected_hex" ]]; then
+    echo "clean-code: checksum mismatch for ${label}: expected ${expected_hex}, got ${actual_hex}" >&2
+    rm -f "$archive_path"
+    exit 1
+  fi
+}
+
+# download_checksum fetches a small checksum text file to stdout. On failure it
+# emits nothing and returns non-zero so callers fail closed via verify_sha256.
+download_checksum() {
+  local url="$1"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$url"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO- "$url"
+  else
+    return 1
+  fi
+}
+
 install_go() {
   if [[ -x "${RUNTIME_HOME}/go/bin/go" ]]; then
     return 0
@@ -73,6 +115,9 @@ install_go() {
 
   log "Downloading Go ${GO_VERSION}..."
   download "$url" "$archive_path"
+  local go_expected
+  go_expected="$(download_checksum "https://go.dev/dl/${archive}.sha256" 2>/dev/null | awk '{print $1}')"
+  verify_sha256 "$archive_path" "$go_expected" "Go ${archive}"
   rm -rf "$extract_root"
   ensure_dir "$extract_root"
   tar -xzf "$archive_path" -C "$extract_root"
@@ -102,6 +147,9 @@ install_node() {
 
   log "Downloading Node.js ${NODE_VERSION}..."
   download "$url" "$archive_path"
+  local node_expected
+  node_expected="$(download_checksum "https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt" 2>/dev/null | awk -v want="$archive" '$2 == want { print $1 }')"
+  verify_sha256 "$archive_path" "$node_expected" "Node.js ${archive}"
   rm -rf "$extract_root"
   ensure_dir "$extract_root"
   tar -xJf "$archive_path" -C "$extract_root"
