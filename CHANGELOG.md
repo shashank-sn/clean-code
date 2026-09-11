@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0 - 2026-09-11
+
+- Make audit receipts actually tamper-evident: Ed25519-signed with an embedded public key, so editing any signed field fails `audit --check`. Add `keygen` and `sign-role`.
+- Add role-bound signers so independence is machine-verifiable: implementer, reviewer, and spot-checker each attest their own evidence with their own key, and the receipt rejects two roles signed by the same key or an auditor key reused for a role.
+- Add an external witness (`audit --witness-file`) that binds the receipt hash to a channel outside the repo and catches even a correctly re-signed receipt whose bytes changed.
+- Make `gauntlet run` an honest portable artifact + freshness check with documented exit codes (0 all PASS, 1 any FAIL, 2 any NOT_RUN) and reject symlinked paths that escape the repository root.
+- Harden the npm-pack test so `go test ./...` passes regardless of installed npm version (no longer parses `npm pack --json` shape).
+- Fail closed on toolchain downloads: SHA-256 verification for Go and Node in both the Node runtime and the bash fallback; pin the one-line installer to a release tag instead of a mutable branch.
+- Report the real version on every launch path, drop the phantom `go.sum` from the npm package, and warn prominently before `verify --allow-repository-policy` executes repository-declared commands.
+- Canonicalize the Go module path to `github.com/shashank-sn/clean-code`.
+
 ## 0.4.2 - 2026-08-26
 
 - Add an evidence-based structural-simplification lens to `clean-review`, including code-judo-style questions about removable complexity, special-case growth, ownership boundaries, and decomposition.

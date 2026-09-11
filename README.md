@@ -72,7 +72,7 @@ go build -o clean-code ./cmd/clean-code
 Bootstraps Node.js and Go when missing, then builds the CLI.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shashank-sn/clean-code/v0.4.2/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shashank-sn/clean-code/v0.5.0/scripts/install.sh | bash
 export PATH="$HOME/.local/bin:$PATH"
 clean-code version
 ```
