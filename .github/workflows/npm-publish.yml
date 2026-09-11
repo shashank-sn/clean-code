@@ -30,6 +30,19 @@ jobs:
         id: pkg
         run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
+      # package.json and .codex-plugin/plugin.json must be bumped together;
+      # tests/repository_test.go (TestPackageAndPluginVersionsMatch) enforces it.
+      - name: Verify package and plugin versions match
+        run: |
+          pkg="$(node -p "require('./package.json').version")"
+          plugin="$(node -p "require('./.codex-plugin/plugin.json').version")"
+          if [ "$pkg" != "$plugin" ]; then
+            echo "package.json version $pkg does not match .codex-plugin/plugin.json version $plugin"
+            echo "bump both together (see TestPackageAndPluginVersionsMatch), then retag and re-release"
+            exit 1
+          fi
+          echo "package and plugin versions agree: $pkg"
+
       - name: Verify release tag matches package.json
         if: github.event_name == 'release'
         run: |
