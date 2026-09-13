@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Probe"
+  short_description: "Adversarial acceptance probes"
+  default_prompt: "Use $clean-probe for medium/high-risk adversarial acceptance probes before claiming success."

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-route",
+  "title": "clean-route",
+  "description": "Portable adaptive entry router for Clean Code workflow selection.",
+  "instruction_file": "SKILL.md",
+  "role": "Adaptive router",
+  "workflow_phase": "route",
+  "input": {
+    "required": ["task signals JSON"],
+    "optional": ["host capabilities", "authorization mode"]
+  },
+  "output": {
+    "required": ["route decision with roles, evidence, reasons, and fallback"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Deterministic route decision artifact; report unavailable host capabilities honestly."],
+  "permissions": ["read_repository"],
+  "stop_conditions": ["Stop when signals are invalid or a required capability would have to be invented."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision template and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-plan", "clean-design", "clean-arena", "clean-build", "clean-probe", "clean-orchestrate"]
+}

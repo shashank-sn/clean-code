@@ -103,6 +103,38 @@ func TestCheckedInJSONExamplesParse(t *testing.T) {
 	}
 }
 
+func TestShipSkillRequiresPlainEnglishBulletPR(t *testing.T) {
+	root := filepath.Join("..")
+	body, err := os.ReadFile(filepath.Join(root, "skills", "clean-ship", "SKILL.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, phrase := range []string{
+		"## PR description rules (required)",
+		"simple human-understandable English",
+		"**What changed**",
+		"**Why**",
+		"**How to verify**",
+		"**Gaps**",
+		"Do not claim checks passed without `clean-verify`",
+	} {
+		if !strings.Contains(string(body), phrase) {
+			t.Errorf("clean-ship skill missing PR description contract %q", phrase)
+		}
+	}
+}
+
+func TestAdaptivePlaybooksAreDiscoverable(t *testing.T) {
+	root := filepath.Join("..")
+	entries, err := os.ReadDir(filepath.Join(root, "harness", "playbooks"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) < 6 {
+		t.Fatalf("expected at least 6 playbooks, got %d", len(entries))
+	}
+}
+
 func TestStructuralReviewSkillKeepsEvidenceBoundary(t *testing.T) {
 	root := filepath.Join("..")
 	body, err := os.ReadFile(filepath.Join(root, "skills", "clean-review", "SKILL.md"))

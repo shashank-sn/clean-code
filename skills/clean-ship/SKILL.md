@@ -13,8 +13,27 @@ Ship verified work: conventional commits, push, and a PR body tied to requiremen
 2. If on default branch with changes, create a meaningful feature branch automatically.
 3. Stage related files per logical commit (avoid `git add -A`). Run project tests before each commit.
 4. Push to origin (or configured remote) with upstream set.
-5. Open or update PR. Include: summary, requirement links, verification summary, audit spot-check status, and known gaps.
+5. Open or update PR using the PR description rules below.
 6. Pass PR URL to `clean-watch-pr` when CI must reach green.
+
+## PR description rules (required)
+
+Write a **simple human-understandable English** PR body with **bullet points**. Reviewers should understand the change without decoding jargon walls.
+
+Required sections:
+
+- **What changed** — short bullets naming the concrete behavior or files/contracts touched
+- **Why** — short bullets for the user/system reason
+- **How to verify** — bullets for commands, fixtures, or evidence paths; link revision-bound verify/review/audit artifacts when they exist
+- **Gaps** — bullets for human spot checks, release gates, or checks not run (`NOT_RUN` / `NOT_AVAILABLE`)
+
+Style:
+
+- Plain English. Short sentences.
+- Prefer bullets over dense paragraphs.
+- No marketing fluff.
+- Do not claim checks passed without `clean-verify` or equivalent evidence when behavior changed.
+- Keep existing evidence-linking rules: name the revision and distinguish local checks, review, human checks, and release proof.
 
 ## Modes
 

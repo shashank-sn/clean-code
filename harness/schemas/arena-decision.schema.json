@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/arena-decision.schema.json",
+  "title": "Clean Code arena decision record",
+  "type": "object",
+  "required": ["schema_version", "revision", "owner", "decision_question", "candidates", "policy_change", "status"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "revision": { "type": "string", "minLength": 1 },
+    "owner": { "type": "string", "minLength": 1 },
+    "decision_question": { "type": "string", "minLength": 1 },
+    "constraints": { "type": "array", "items": { "type": "string" } },
+    "candidates": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "summary", "status"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "summary": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "risks": { "type": "array", "items": { "type": "string" } },
+          "tradeoffs": { "type": "array", "items": { "type": "string" } },
+          "status": { "enum": ["PASS", "FAIL", "NOT_RUN", "NOT_AVAILABLE", "BLOCKED"] },
+          "unavailable_reason": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "selected_option_id": { "type": "string" },
+    "selection_rationale": { "type": "string" },
+    "rejected_rationale": { "type": "object", "additionalProperties": { "type": "string" } },
+    "uncertainty": { "type": "array", "items": { "type": "string" } },
+    "unresolved_assumptions": { "type": "array", "items": { "type": "string" } },
+    "policy_change": { "const": "none" },
+    "status": { "enum": ["PASS", "FAIL", "NOT_RUN", "NOT_AVAILABLE", "BLOCKED"] }
+  },
+  "additionalProperties": false
+}

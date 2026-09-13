@@ -15,3 +15,5 @@ clean-code agent emit clean-build --mode json --host cursor --output clean-build
 The runtime descriptor declares context capacity, filesystem mode, network policy, browser/UI capability, subagent isolation, session reset support, and structured-output support. It reports capabilities rather than assuming a model can edit files, execute commands, create subagents, or open a PR. Prompt-only hosts get the full instruction contract and must return `NOT_AVAILABLE`, `NOT_CONFIGURED`, `NOT_RUN`, `STALE`, or `ERROR` for unavailable operations.
 
 The command never grants permissions. The host and repository policy remain the authority for file edits, commands, network access, Git writes, and PR creation.
+
+Adaptive workflow agents (`clean-route`, `clean-arena`, `clean-probe`) follow the same package rules. See [adaptive workflow](adaptive-workflow.md).

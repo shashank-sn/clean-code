@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add adaptive workflow contracts: deterministic entry routing, bounded competing-design arena records, adversarial acceptance probes (including strict calendar validity), parallel orchestration ownership records, and developer playbooks.
+- Expose `clean-code route|arena|probe|parallel|playbook` plus portable skills `clean-route`, `clean-arena`, and `clean-probe`.
+- Require `clean-ship` PR descriptions to use simple English bullets for what changed, why, how to verify, and gaps.
+
 ## 0.5.0 - 2026-09-11
 
 - Make audit receipts actually tamper-evident: Ed25519-signed with an embedded public key, so editing any signed field fails `audit --check`. Add `keygen` and `sign-role`.

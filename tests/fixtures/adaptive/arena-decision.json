@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "revision": "fixture-rev-arena",
+  "owner": "clean-arena",
+  "decision_question": "Where should calendar validation live for acceptance probes?",
+  "constraints": [
+    "model-neutral contracts",
+    "no automatic policy change",
+    "reject impossible YYYY-MM-DD values"
+  ],
+  "candidates": [
+    {
+      "id": "adaptive-package",
+      "summary": "Strict validator inside the adaptive probe package",
+      "evidence": ["portable unit tests", "CLI probe calendar subcommand"],
+      "risks": ["another package to discover"],
+      "tradeoffs": ["centralized rule vs per-language copies"],
+      "status": "PASS"
+    },
+    {
+      "id": "host-local-only",
+      "summary": "Leave validation to each host language Date API",
+      "evidence": ["native Date behavior notes"],
+      "risks": ["normalization accepts impossible dates"],
+      "tradeoffs": ["less code vs incorrect acceptance"],
+      "status": "PASS"
+    }
+  ],
+  "selected_option_id": "adaptive-package",
+  "selection_rationale": "Keeps a revision-bound, language-neutral rejection of impossible dates.",
+  "rejected_rationale": {
+    "host-local-only": "Native Date normalization can accept 2026-02-30 and hide the defect class."
+  },
+  "uncertainty": ["hosts may still need local wrappers"],
+  "unresolved_assumptions": ["callers invoke the probe before success claims"],
+  "policy_change": "none",
+  "status": "PASS"
+}

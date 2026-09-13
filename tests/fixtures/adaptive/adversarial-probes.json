@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "revision": "fixture-rev-probes",
+  "risk": "high",
+  "probes": [
+    {
+      "id": "calendar-validity",
+      "kind": "primary_acceptance",
+      "derived_from": "time_zones_dates",
+      "description": "Reject impossible YYYY-MM-DD values such as 2026-02-30",
+      "executable": true,
+      "status": "FAIL",
+      "evidence": "calendar date \"2026-02-30\" does not exist",
+      "human_judgment_required": false
+    },
+    {
+      "id": "malformed-inputs",
+      "kind": "primary_acceptance",
+      "derived_from": "requirement_contract",
+      "description": "Reject malformed inputs instead of coercing them into success",
+      "executable": true,
+      "status": "NOT_RUN",
+      "human_judgment_required": false
+    },
+    {
+      "id": "regression-history",
+      "kind": "post_hoc_diagnostic",
+      "derived_from": "regression_history",
+      "description": "Optional diagnostic; must not rewrite primary scores",
+      "executable": false,
+      "status": "NOT_RUN",
+      "human_judgment_required": true
+    }
+  ],
+  "repair_loop": "bounded_repair_reverify",
+  "status": "FAIL"
+}

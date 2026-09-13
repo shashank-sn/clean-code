@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Route"
+  short_description: "Adaptive workflow entry router"
+  default_prompt: "Use $clean-route to select a bounded workflow shape from task signals."

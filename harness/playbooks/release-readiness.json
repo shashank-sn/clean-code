@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "id": "release-readiness",
+  "title": "Release readiness",
+  "applies_when": [
+    "preparing a verified revision for PR or release evidence"
+  ],
+  "does_not_apply_when": [
+    "exploratory spikes",
+    "unverified drafts"
+  ],
+  "minimum_roles": [
+    "clean-verify",
+    "clean-review",
+    "clean-ship",
+    "clean-audit"
+  ],
+  "minimum_evidence": [
+    "verification-report",
+    "review-input",
+    "spot-check-or-gap",
+    "audit-receipt-or-NOT_RUN"
+  ],
+  "arena_warranted": "no",
+  "adversarial_probes_warranted": "yes for medium/high risk releases before success claims",
+  "parallel_guidance": "not for shared release mutations; keep ship/audit serialized",
+  "terminal_states": [
+    "PASS",
+    "FAIL",
+    "NOT_RUN",
+    "NOT_AVAILABLE",
+    "BLOCKED"
+  ]
+}

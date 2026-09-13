@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "change_type": "feature",
+  "risk": "medium",
+  "ambiguity": "low",
+  "affected_boundaries": ["cli"],
+  "evidence_needs": ["unit"],
+  "host_capabilities": {
+    "subagents": false,
+    "command_execution": false,
+    "file_edits": true,
+    "browser_automation": false,
+    "git_write": false,
+    "pull_request_write": false
+  },
+  "concurrency_budget": 2,
+  "authorization_mode": "advisory"
+}

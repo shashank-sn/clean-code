@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "id": "refactor",
+  "title": "Refactor",
+  "applies_when": [
+    "behavior-preserving structural cleanup"
+  ],
+  "does_not_apply_when": [
+    "features that change contracts",
+    "unverified rewrites"
+  ],
+  "minimum_roles": [
+    "clean-refactor",
+    "clean-simplify",
+    "clean-test",
+    "clean-verify",
+    "clean-review"
+  ],
+  "minimum_evidence": [
+    "behavior-preservation-notes",
+    "verification-report",
+    "review-input"
+  ],
+  "arena_warranted": "yes when choosing among competing structural approaches with boundary impact",
+  "adversarial_probes_warranted": "yes for medium/high risk refactors touching auth, dates, or idempotent APIs",
+  "parallel_guidance": "characterization tests may run beside planning; mutating refactors stay single-owner",
+  "terminal_states": [
+    "PASS",
+    "FAIL",
+    "NOT_RUN",
+    "NOT_AVAILABLE",
+    "BLOCKED"
+  ]
+}

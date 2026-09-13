@@ -24,6 +24,11 @@ The final-change sequence is `clean-build` → `clean-test` → `clean-simplify`
 
 | Skill / CLI | Purpose |
 | --- | --- |
+| `clean-route` / `clean-code route` | Adaptive playbook router from task signals (advisory) |
+| `clean-arena` / `clean-code arena` | Bounded competing-design decision records |
+| `clean-probe` / `clean-code probe` | Adversarial acceptance probes for medium/high risk |
+| `clean-code parallel` | Validate parallel orchestration ownership records |
+| `clean-code playbook` | Developer playbooks with terminal states |
 | `clean-verify` / `clean-code verify` | Normalized deterministic checks |
 | `clean-audit` / `clean-code audit` | Immutable release receipts |
 | `clean-eval-discover` | Blinded, bottom-up evaluation discovery from confirmed outcomes; never activates a rule |
@@ -32,6 +37,8 @@ The final-change sequence is `clean-build` → `clean-test` → `clean-simplify`
 | `clean-test` | Independent test tracks |
 | `clean-discover` | Read-only capability discovery |
 | `clean-setup` | Host-neutral integration |
+
+`clean-ship` must open PRs with plain-English bullet descriptions covering what changed, why, how to verify, and gaps. Do not claim checks passed without verify evidence.
 
 ## Compare workflows
 

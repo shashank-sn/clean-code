@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "revision": "fixture-rev-parallel",
+  "coordinator": "clean-orchestrate",
+  "why_parallel": "route allowed independent test support beside probe planning",
+  "max_concurrency": 2,
+  "children": [
+    {
+      "id": "unit-tests",
+      "role": "clean-test",
+      "owned_scope": ["internal/adaptive"],
+      "evidence_request": "go test ./internal/adaptive",
+      "mutation_boundary": "tests-only",
+      "status": "PASS",
+      "claimed_artifacts": ["evidence/adaptive-unit.txt"],
+      "verified_artifacts": ["evidence/adaptive-unit.txt"]
+    },
+    {
+      "id": "browser-qa",
+      "role": "clean-test",
+      "owned_scope": ["ui"],
+      "evidence_request": "browser QA procedure",
+      "mutation_boundary": "no production mutation",
+      "status": "NOT_AVAILABLE",
+      "failure_note": "NOT_AVAILABLE: host browser_automation is false"
+    }
+  ],
+  "synthesis_notes": [
+    "Did not treat the unavailable browser child as proof",
+    "Verified claimed unit-test artifact before synthesis"
+  ],
+  "human_approvals_held": ["release", "policy", "permissions", "external_actions"],
+  "status": "PASS"
+}

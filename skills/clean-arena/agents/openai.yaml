@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Arena"
+  short_description: "Bounded competing-design decisions"
+  default_prompt: "Use $clean-arena for a revision-bound competing-design decision record."

@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "id": "feature-delivery",
+  "title": "Feature delivery",
+  "applies_when": [
+    "new user-visible behavior",
+    "multi-file capability with acceptance criteria"
+  ],
+  "does_not_apply_when": [
+    "typo-only edits",
+    "docs-only changes without behavior"
+  ],
+  "minimum_roles": [
+    "clean-plan",
+    "clean-build",
+    "clean-test",
+    "clean-simplify",
+    "clean-verify",
+    "clean-review"
+  ],
+  "minimum_evidence": [
+    "requirements",
+    "verification-report",
+    "review-input"
+  ],
+  "arena_warranted": "yes when ambiguity is medium/high or two or more boundaries are affected",
+  "adversarial_probes_warranted": "yes for medium/high risk before claiming success",
+  "parallel_guidance": "test-writing and review prep may run in parallel; shared implementation stays serialized or worktree-isolated",
+  "terminal_states": [
+    "PASS",
+    "FAIL",
+    "NOT_RUN",
+    "NOT_AVAILABLE",
+    "BLOCKED"
+  ]
+}
