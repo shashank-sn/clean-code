@@ -2,9 +2,12 @@
 
 ## Unreleased
 
+## 0.6.0 - 2026-09-13
+
 - Add adaptive workflow contracts: deterministic entry routing, bounded competing-design arena records, adversarial acceptance probes (including strict calendar validity), parallel orchestration ownership records, and developer playbooks.
 - Expose `clean-code route|arena|probe|parallel|playbook` plus portable skills `clean-route`, `clean-arena`, and `clean-probe`.
 - Require `clean-ship` PR descriptions to use simple English bullets for what changed, why, how to verify, and gaps.
+- Publish signed release evidence under `evidence/releases/0.6.0/` for revision `8bd4041` (complete audit receipt with role signers and witness).
 
 ## 0.5.0 - 2026-09-11
 
