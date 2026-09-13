@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "id": "design-decision",
+  "title": "Design decision",
+  "applies_when": [
+    "consequential design choice with lasting boundary impact"
+  ],
+  "does_not_apply_when": [
+    "routine bugfixes",
+    "settled local refactors"
+  ],
+  "minimum_roles": [
+    "clean-design",
+    "clean-arena",
+    "clean-review"
+  ],
+  "minimum_evidence": [
+    "arena-decision-record",
+    "architecture-policy-or-NOT_CONFIGURED"
+  ],
+  "arena_warranted": "always for this playbook",
+  "adversarial_probes_warranted": "optional; use when the decision encodes acceptance-sensitive behavior",
+  "parallel_guidance": "candidate reasoning may run in parallel; synthesis is single-owner and serialized",
+  "terminal_states": [
+    "PASS",
+    "FAIL",
+    "NOT_RUN",
+    "NOT_AVAILABLE",
+    "BLOCKED"
+  ]
+}

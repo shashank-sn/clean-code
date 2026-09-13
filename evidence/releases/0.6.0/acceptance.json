@@ -1,0 +1,1 @@
+{"track":"acceptance","status":"PASS","checks":["calendar probe rejects 2026-02-30","route fixtures deterministic","arena validate","parallel validate","agent validate"],"revision":"8bd4041d459662ec2b11c3f3594fb2a3f614e37f"}

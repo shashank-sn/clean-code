@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "github.com/shashank-sn/clean-code",
+  "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+  "policy_revision": "harness/doctrine/clean-architecture.yaml",
+  "verification": "verification.json",
+  "test_plan": "test-plan.json",
+  "review": "review.json",
+  "spot_check": "spot-check.json",
+  "supporting_evidence": [
+    "unit.json",
+    "acceptance.json",
+    "integration.json"
+  ],
+  "exceptions": [],
+  "signers": {
+    "implementer": {
+      "key_id": "90723fd8356df7b86e152362a8b72cdb64ac7474a7ed33540a3305463eceae45",
+      "public_key": "fBTqzPHVp4wnCzWHsn/y+46/aQlkitik5KcCPp7Fp2Y=",
+      "signature": "Q1mShINxABK564wygcBTMo0U250bMfcVl4Bn1pAwcNhca/dmP+Vu5HOcx1B7nYWutQj+Rq+isqZz51kQIhKJBA==",
+      "payload_sha256": "fa50c8f377902bba66bbd1209e0a90d93c64b76acb0cbeb6167f5bf6f44738b1"
+    },
+    "reviewer": {
+      "key_id": "b4fd206effb2a8f053450a9a30ce653ddb4a9f62dd102e7c14ff858e2833e227",
+      "public_key": "6vE/4FRF27fNw7LQ9b5p1efCLKzeTigjJXep2GNIL0M=",
+      "signature": "rZbzTxQG99ZvJKHFz7ukJD4OmL3ffSiEO++eS3rz1DJLBDyXWVdgWGY3l+PPaiZsUeCE+oLrugxZt+KA3emgAA==",
+      "payload_sha256": "a0dc3f438675379ab05b5ec4728dac35e4b2b164511dab66cad8e9574afd3ab8"
+    },
+    "spot_checker": {
+      "key_id": "7e6a7ce45d8855eb31c5b44be4c40f426ec6f97833a283a3acea8ad0e6d4e8e7",
+      "public_key": "Q6ekLcauWQvHHNv1yC/nPvt6iNLaKCEbdXOr4tC1hkk=",
+      "signature": "uMcmBi7sWw0Louy78vEzK5eZfupNVLumi68nl/ILFh/io26EPXcW+nta0nnP0t2P6EbVAc0dE2kLBxuo6ws1CA==",
+      "payload_sha256": "db84b25c22aeefe3c2b19ea3822f6bb4108b22ba4474d59d3d1ad8e5e83b9d51"
+    }
+  }
+}

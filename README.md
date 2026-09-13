@@ -7,7 +7,7 @@ Clean Code is an open-source (MIT) plugin for designing, building, testing, veri
 
 Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **tamper-evident, signed audit receipts**, plus a **full planning-to-PR skill pipeline**.
 
-**Twenty-seven skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
+**Thirty skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
 
 **npm:** [@shashanksn/clean-code](https://www.npmjs.com/package/@shashanksn/clean-code) · CLI command: `clean-code`
 
@@ -112,7 +112,7 @@ clean-audit → clean-eval-discover? → clean-learn? + clean-compound
 | **Ship** | `clean-verify` → `clean-review` → `clean-ship` → `clean-watch-pr` | Final-revision evidence, review, PR, CI watch |
 | **Record** | `clean-audit` → `clean-eval-discover`? → `clean-learn`? + `clean-compound` | Signed tamper-evident receipt, role-bound signers, external witness; evaluate only confirmed repeated outcomes |
 
-Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-show-me`, `clean-eval-discover`, `clean-learn`, `clean-orchestrate`.
+Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-route`, `clean-arena`, `clean-probe`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-show-me`, `clean-eval-discover`, `clean-learn`, `clean-orchestrate`.
 
 `clean-eval-discover` and `clean-learn` are conditional record-stage roles. They do not run for every feature, and neither can activate a policy change.
 
@@ -120,7 +120,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 
 ---
 
-## Skill map (27 skills)
+## Skill map (30 skills)
 
 | Skill | Responsibility |
 | --- | --- |
@@ -129,6 +129,9 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 | `clean-plan` | Implementation-ready units + verification contract |
 | `clean-discover` | Read-only capability discovery |
 | `clean-design` | Use cases, boundaries, acceptance, architecture policy |
+| `clean-route` | Adaptive playbook selection from task signals |
+| `clean-arena` | Bounded competing-design decision records |
+| `clean-probe` | Adversarial acceptance probes for medium/high risk |
 | `clean-show-me` | Concise, evidence-bounded visual explanations |
 | `clean-build` | Small verified implementation steps |
 | `clean-refactor` | Behavior-preserving structure improvements |
@@ -137,7 +140,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 | `clean-verify` | Deterministic checks + normalized evidence |
 | `clean-review` | Evidence-based structural review; zero findings allowed |
 | `clean-simplify` | Behavior-preserving simplification |
-| `clean-ship` | Commit, push, PR |
+| `clean-ship` | Commit, push, plain-English bullet PR |
 | `clean-watch-pr` | CI watch loop |
 | `clean-orchestrate` | Multi-role coordination |
 | `clean-lfg` | Full autonomous pipeline |
@@ -223,7 +226,7 @@ Host instructions for Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf,
 ## Repository layout
 
 ```text
-skills/           # 27 agent skills
+skills/           # 30 agent skills
 cmd/clean-code/   # CLI
 internal/         # Runner, verify, audit, benchmark
 harness/          # Schemas, adapters, calibration

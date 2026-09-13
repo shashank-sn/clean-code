@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "github.com/shashank-sn/clean-code",
+  "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+  "policy_revision": "harness/doctrine/clean-architecture.yaml",
+  "created_at": "2026-09-13T12:34:24.166889Z",
+  "complete": true,
+  "artifacts": [
+    {
+      "kind": "supporting",
+      "path": "unit.json",
+      "sha256": "52c6c69c9d1e21904e34ec0e602877bea0f8b9df0733148772afb683e73348cc"
+    },
+    {
+      "kind": "supporting",
+      "path": "acceptance.json",
+      "sha256": "45b72f87e40243a0af5da1ce06c992f5a88bc66eb9ab2203f90dfc2bb2310b51"
+    },
+    {
+      "kind": "supporting",
+      "path": "integration.json",
+      "sha256": "e8c09273eed5ed4e077810cbb78db45748ddb47254ff1ef490a11b374b64fc50"
+    },
+    {
+      "kind": "review",
+      "path": "review.json",
+      "sha256": "5e451e1979edc14bff9fb16b12547b3bb0503312f5541fe0ebf06169cb1abdf3"
+    },
+    {
+      "kind": "verification",
+      "path": "verification.json",
+      "sha256": "d11cb2574e8c3e096db3d4f3a66f7cda0a1845a35d0c130474d6128f89afe1ae"
+    },
+    {
+      "kind": "test-plan",
+      "path": "test-plan.json",
+      "sha256": "dd9f1318b2048895e8f061b6203a32258ccdcafb11f6bebd0c4c9d2fa7347439"
+    },
+    {
+      "kind": "spot-check",
+      "path": "spot-check.json",
+      "sha256": "cbd620fd2677d336c2fb07d3c19a07f816daf6c14d3865b4ea2fb1cbde3e928f"
+    }
+  ],
+  "gaps": [],
+  "exceptions": [],
+  "signing_key_fingerprint": "4b5c5cb2493f1bb8ed8f1bc72de15c73b2730d52c4545a42049d6503d88c84d0",
+  "signed_payload_sha256": "cef5b06397b78c10b37f8260ceb017844cddf652f07c56d527af9edce74b53aa",
+  "signature": "1l504z50lxJA0hGxXEde1KqZovfsIHzw+eo5Qs/liRhr8Fro+qHzGZNnc9uBizs9bWR8u2uIi2IBs5XUUlgWDg==",
+  "signing_public_key": "rPDIShOR1GhitMPziuG1Eg9ySRKu+BhJB7YHGqIJzhc=",
+  "signers": [
+    {
+      "role": "implementer",
+      "key_id": "90723fd8356df7b86e152362a8b72cdb64ac7474a7ed33540a3305463eceae45",
+      "public_key": "fBTqzPHVp4wnCzWHsn/y+46/aQlkitik5KcCPp7Fp2Y=",
+      "signature": "Q1mShINxABK564wygcBTMo0U250bMfcVl4Bn1pAwcNhca/dmP+Vu5HOcx1B7nYWutQj+Rq+isqZz51kQIhKJBA==",
+      "payload_sha256": "fa50c8f377902bba66bbd1209e0a90d93c64b76acb0cbeb6167f5bf6f44738b1"
+    },
+    {
+      "role": "reviewer",
+      "key_id": "b4fd206effb2a8f053450a9a30ce653ddb4a9f62dd102e7c14ff858e2833e227",
+      "public_key": "6vE/4FRF27fNw7LQ9b5p1efCLKzeTigjJXep2GNIL0M=",
+      "signature": "rZbzTxQG99ZvJKHFz7ukJD4OmL3ffSiEO++eS3rz1DJLBDyXWVdgWGY3l+PPaiZsUeCE+oLrugxZt+KA3emgAA==",
+      "payload_sha256": "a0dc3f438675379ab05b5ec4728dac35e4b2b164511dab66cad8e9574afd3ab8"
+    },
+    {
+      "role": "spot_checker",
+      "key_id": "7e6a7ce45d8855eb31c5b44be4c40f426ec6f97833a283a3acea8ad0e6d4e8e7",
+      "public_key": "Q6ekLcauWQvHHNv1yC/nPvt6iNLaKCEbdXOr4tC1hkk=",
+      "signature": "uMcmBi7sWw0Louy78vEzK5eZfupNVLumi68nl/ILFh/io26EPXcW+nta0nnP0t2P6EbVAc0dE2kLBxuo6ws1CA==",
+      "payload_sha256": "db84b25c22aeefe3c2b19ea3822f6bb4108b22ba4474d59d3d1ad8e5e83b9d51"
+    }
+  ]
+}

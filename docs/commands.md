@@ -19,6 +19,11 @@
 - `compare-workflows [--manifest FILE]`: score Clean Code vs Compound Engineering workflow coverage on a fixed rubric.
 - `benchmark-full-flow [--manifest FILE] [--repo ROOT]`: run full-flow code-quality benchmark on CE vs CC sample outcomes.
 - `learn --proposal FILE`: validate that a policy proposal is reversible, independently reviewed when decided, and unable to suppress protected gates. Bottom-up proposals additionally require distinct supporting evidence, a clean control, passing held-out evidence, false-positive cost, rollback, and an independent human approver when approved.
+- `route --input FILE`: compute a deterministic adaptive route decision from task signals. Advisory unless a lifecycle contract authorizes execution; never selects a model by brand.
+- `arena validate --input FILE`: validate a competing-design decision record (two or more candidates, no automatic policy change).
+- `probe validate --input FILE` | `probe plan --revision REV [--risk medium|high] [--requirements IDS] [--calendar]` | `probe calendar --date YYYY-MM-DD`: plan or validate adversarial acceptance probes; calendar rejects impossible dates such as `2026-02-30`.
+- `parallel validate --input FILE`: validate a parallel orchestration record with owned scopes, mutation boundaries, and verified artifacts.
+- `playbook list|show ID`: inspect developer playbooks (bug, feature, design, refactor, review, release readiness).
 
 All report-producing commands write JSON to standard output and diagnostics to standard error. Usage errors return 2; failed checks or invalid input return 1.
 

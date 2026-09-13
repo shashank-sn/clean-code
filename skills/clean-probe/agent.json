@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-probe",
+  "title": "clean-probe",
+  "description": "Portable adversarial acceptance probe agent for medium/high-risk Clean Code work.",
+  "instruction_file": "SKILL.md",
+  "role": "Adversarial acceptance probe author",
+  "workflow_phase": "verify",
+  "input": {
+    "required": ["revision, risk, and requirement contract"],
+    "optional": ["route decision", "regression history", "host capabilities"]
+  },
+  "output": {
+    "required": ["adversarial probe plan and executable probe evidence"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Primary acceptance probes distinct from post-hoc diagnostics; calendar validity when dates apply."],
+  "permissions": ["read_repository", "execute_commands"],
+  "stop_conditions": ["Stop when risk is low, evidence would invent capability, or probes would mutate policy automatically."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the probe plan template and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-build", "clean-verify", "clean-review", "clean-orchestrate"]
+}

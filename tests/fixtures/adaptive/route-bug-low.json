@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "change_type": "bug",
+  "risk": "low",
+  "ambiguity": "low",
+  "affected_boundaries": [],
+  "evidence_needs": ["unit"],
+  "host_capabilities": {
+    "subagents": false,
+    "command_execution": true,
+    "file_edits": true,
+    "browser_automation": false,
+    "git_write": false,
+    "pull_request_write": false
+  },
+  "concurrency_budget": 1
+}

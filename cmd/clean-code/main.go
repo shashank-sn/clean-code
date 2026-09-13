@@ -503,6 +503,16 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 		return 0
+	case "route":
+		return runRoute(args[1:], stdout, stderr)
+	case "arena":
+		return runArena(args[1:], stdout, stderr)
+	case "probe":
+		return runProbe(args[1:], stdout, stderr)
+	case "parallel":
+		return runParallel(args[1:], stdout, stderr)
+	case "playbook":
+		return runPlaybook(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n", args[0])
 		printUsage(stderr)
@@ -521,7 +531,7 @@ func writeJSON(stdout, stderr io.Writer, value any) int {
 }
 
 func printUsage(output io.Writer) {
-	fmt.Fprintln(output, "usage: clean-code <agent|provider|gauntlet|version|hosts|setup|discover|verify|architecture|trace|review|audit|keygen|sign-role|benchmark|compare-workflows|benchmark-full-flow|learn>")
+	fmt.Fprintln(output, "usage: clean-code <agent|provider|gauntlet|version|hosts|setup|discover|verify|architecture|trace|review|audit|keygen|sign-role|benchmark|compare-workflows|benchmark-full-flow|learn|route|arena|probe|parallel|playbook>")
 }
 
 func runProvider(args []string, stdout, stderr io.Writer) int {

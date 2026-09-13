@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+  "reviewer": "shashank-sn",
+  "checks": [
+    {
+      "kind": "requirements",
+      "required": true,
+      "status": "CHECKED",
+      "scope": "issue #13 adaptive router/arena/probes/parallel/playbooks + clean-ship PR bullets",
+      "outcome": "requirements covered by contracts, fixtures, skills, and CI-green PR #14"
+    },
+    {
+      "kind": "acceptance",
+      "required": true,
+      "status": "CHECKED",
+      "scope": "calendar 2026-02-30 reject; agent validate; route/arena/parallel fixtures; CI matrix",
+      "outcome": "acceptance signals met on revision 8bd4041d459662ec2b11c3f3594fb2a3f614e37f"
+    },
+    {
+      "kind": "ui-qa",
+      "required": false,
+      "status": "INAPPLICABLE",
+      "reason": "no interactive UI in this change; CLI and agent skill surfaces only"
+    },
+    {
+      "kind": "code-sample",
+      "required": true,
+      "status": "CHECKED",
+      "scope": "skills/clean-ship/SKILL.md PR body rules; docs/adaptive-workflow.md; internal/adaptive/calendar.go",
+      "outcome": "readable, matches stated behavior, no banned competitive naming in tree"
+    }
+  ]
+}

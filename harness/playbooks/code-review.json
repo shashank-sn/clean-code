@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "id": "code-review",
+  "title": "Code review",
+  "applies_when": [
+    "independent review of a finished revision with evidence"
+  ],
+  "does_not_apply_when": [
+    "author self-approval",
+    "review without a revision and evidence bundle"
+  ],
+  "minimum_roles": [
+    "clean-review",
+    "clean-reviewer"
+  ],
+  "minimum_evidence": [
+    "diff",
+    "requirements",
+    "verification-report"
+  ],
+  "arena_warranted": "no",
+  "adversarial_probes_warranted": "review may request probes; it does not replace them",
+  "parallel_guidance": "multiple reviewers may read in parallel; blocking dispositions reconcile before ship",
+  "terminal_states": [
+    "PASS",
+    "FAIL",
+    "NOT_RUN",
+    "NOT_AVAILABLE",
+    "BLOCKED"
+  ]
+}

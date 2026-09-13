@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-arena",
+  "title": "clean-arena",
+  "description": "Portable competing-design arena agent for consequential Clean Code decisions.",
+  "instruction_file": "SKILL.md",
+  "role": "Design arena facilitator",
+  "workflow_phase": "design",
+  "input": {
+    "required": ["decision question, constraints, and revision"],
+    "optional": ["route decision", "host capabilities", "budget limits"]
+  },
+  "output": {
+    "required": ["arena decision record"],
+    "optional": ["remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Revision-bound decision record with independent candidates and explicit rejection rationales."],
+  "permissions": ["read_repository", "write_repository", "subagents"],
+  "stop_conditions": ["Stop for routine fixes below the arena trigger, or when policy would change automatically."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision record template and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-design", "clean-build", "clean-review", "clean-learn"]
+}

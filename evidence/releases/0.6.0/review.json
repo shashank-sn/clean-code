@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+  "change_author": "clean-lfg",
+  "reviewer": "clean-reviewer",
+  "scope": [
+    "internal/adaptive/",
+    "cmd/clean-code/adaptive_cmd.go",
+    "skills/clean-route/",
+    "skills/clean-arena/",
+    "skills/clean-probe/",
+    "skills/clean-ship/",
+    "harness/playbooks/",
+    "harness/schemas/adaptive-route.schema.json",
+    "docs/adaptive-workflow.md"
+  ],
+  "findings": []
+}

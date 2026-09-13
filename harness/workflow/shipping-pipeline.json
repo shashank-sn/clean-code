@@ -1,13 +1,16 @@
 {
   "schema_version": "1.0.0",
   "stages": [
+    {"id": "route", "skill": "clean-route", "cli": "clean-code route", "ce_equivalent": null, "when": "task signals justify adaptive playbook selection"},
     {"id": "brainstorm", "skill": "clean-brainstorm", "ce_equivalent": "ce-brainstorm"},
     {"id": "plan", "skill": "clean-plan", "ce_equivalent": "ce-plan"},
     {"id": "design", "skill": "clean-design", "ce_equivalent": "ce-plan"},
+    {"id": "arena", "skill": "clean-arena", "cli": "clean-code arena validate", "ce_equivalent": null, "when": "consequential competing-design choice"},
     {"id": "worktree", "skill": "clean-worktree", "ce_equivalent": "ce-worktree"},
     {"id": "build", "skill": "clean-build", "ce_equivalent": "ce-work"},
     {"id": "test", "skill": "clean-test", "ce_equivalent": "ce-test-browser"},
     {"id": "simplify", "skill": "clean-simplify", "ce_equivalent": "ce-simplify-code"},
+    {"id": "probe", "skill": "clean-probe", "cli": "clean-code probe", "ce_equivalent": null, "when": "medium/high-risk work before claiming success"},
     {"id": "verify", "skill": "clean-verify", "cli": "clean-code verify", "ce_equivalent": null},
     {"id": "review", "skill": "clean-review", "ce_equivalent": "ce-code-review"},
     {"id": "ship", "skill": "clean-ship", "ce_equivalent": "ce-commit-push-pr"},
@@ -26,6 +29,8 @@
     "bottom_up_evaluation_discovery",
     "policy_learning",
     "human_gates",
-    "host_neutrality"
+    "host_neutrality",
+    "adaptive_routing",
+    "adversarial_acceptance_probes"
   ]
 }

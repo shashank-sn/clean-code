@@ -11,10 +11,10 @@
     "optional": ["host capabilities", "prior handoff"]
   },
   "output": {
-    "required": ["commit, PR link, and evidence-linked PR description"],
+    "required": ["commit, PR link, and plain-English bullet PR description with verify evidence"],
     "optional": ["remaining risks", "handoff"]
   },
-  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly.", "PR body uses simple English bullets for what changed, why, how to verify, and gaps."],
   "permissions": ["read_repository", "write_repository", "execute_commands", "git_write", "pull_request_write"],
   "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion."],
   "tool_free_mode": {

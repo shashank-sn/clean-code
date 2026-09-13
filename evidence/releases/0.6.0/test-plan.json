@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "requirements": [
+    {"id": "R-route", "acceptance_examples": ["identical route inputs produce identical decisions", "missing host capability yields NOT_AVAILABLE or safe fallback"]},
+    {"id": "R-arena", "acceptance_examples": ["consequential design records 2+ candidates and a decision without policy_change"]},
+    {"id": "R-probe", "acceptance_examples": ["impossible YYYY-MM-DD 2026-02-30 is rejected before Date normalization"]},
+    {"id": "R-parallel", "acceptance_examples": ["children without verified artifacts cannot be treated as proof"]},
+    {"id": "R-playbook", "acceptance_examples": ["six playbooks listable via clean-code playbook list with terminal states"]},
+    {"id": "R-ship-pr", "acceptance_examples": ["clean-ship requires plain-English bullet PR sections"]}
+  ],
+  "tracks": [
+    {"kind": "unit", "requirement_ids": ["R-route", "R-arena", "R-probe", "R-parallel", "R-playbook", "R-ship-pr"], "status": "PASS", "owner": "unit", "evidence": "unit.json"},
+    {"kind": "acceptance", "requirement_ids": ["R-route", "R-arena", "R-probe", "R-parallel", "R-playbook", "R-ship-pr"], "status": "PASS", "owner": "acceptance", "evidence": "acceptance.json", "context_source": "requirements"},
+    {"kind": "integration", "requirement_ids": ["R-route", "R-arena", "R-probe", "R-parallel", "R-playbook", "R-ship-pr"], "status": "PASS", "owner": "integration", "evidence": "integration.json"},
+    {"kind": "ui-qa", "requirement_ids": ["R-route", "R-arena", "R-probe", "R-parallel", "R-playbook", "R-ship-pr"], "status": "INAPPLICABLE", "reason": "CLI and skill contracts only; no user interface surface", "context_source": "requirements"}
+  ]
+}

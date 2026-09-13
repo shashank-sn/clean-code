@@ -1,6 +1,6 @@
 {
   "name": "clean-code",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Language-neutral skills for visualizing, designing, building, testing, and verifying maintainable software.",
   "author": "Clean Code contributors",
   "skills": "./skills/",

@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "change_type": "feature",
+  "risk": "high",
+  "ambiguity": "medium",
+  "affected_boundaries": ["auth", "api"],
+  "evidence_needs": ["acceptance", "architecture"],
+  "host_capabilities": {
+    "subagents": true,
+    "command_execution": true,
+    "file_edits": true,
+    "browser_automation": false,
+    "git_write": true,
+    "pull_request_write": true
+  },
+  "concurrency_budget": 2
+}

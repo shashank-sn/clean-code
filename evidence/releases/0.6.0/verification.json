@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "repository": "github.com/shashank-sn/clean-code",
+  "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+  "policy_source": "harness/doctrine/clean-architecture.yaml",
+  "started_at": "2026-09-13T12:31:35Z",
+  "finished_at": "2026-09-13T12:33:35Z",
+  "complete": true,
+  "results": [
+    {
+      "schema_version": "1.0.0",
+      "check_id": "go-test",
+      "category": "unit-test",
+      "provider": "go-test",
+      "status": "PASS",
+      "required": true,
+      "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+      "started_at": "2026-09-13T12:31:35Z",
+      "duration_ms": 9000,
+      "exit_code": 0,
+      "evidence": {"summary": "go test ./... passed for adaptive workflow and existing packages"}
+    },
+    {
+      "schema_version": "1.0.0",
+      "check_id": "agent-validate",
+      "category": "contract",
+      "provider": "clean-code",
+      "status": "PASS",
+      "required": true,
+      "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+      "started_at": "2026-09-13T12:31:35Z",
+      "duration_ms": 200,
+      "exit_code": 0,
+      "evidence": {"summary": "clean-code agent validate PASS"}
+    },
+    {
+      "schema_version": "1.0.0",
+      "check_id": "calendar-probe",
+      "category": "acceptance",
+      "provider": "clean-code-probe",
+      "status": "PASS",
+      "required": true,
+      "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+      "started_at": "2026-09-13T12:31:35Z",
+      "duration_ms": 50,
+      "exit_code": 0,
+      "evidence": {"summary": "probe calendar --date 2026-02-30 returns FAIL as required primary acceptance"}
+    },
+    {
+      "schema_version": "1.0.0",
+      "check_id": "ci-test",
+      "category": "integration",
+      "provider": "github-actions",
+      "status": "PASS",
+      "required": true,
+      "revision": "8bd4041d459662ec2b11c3f3594fb2a3f614e37f",
+      "started_at": "2026-09-13T12:31:35Z",
+      "duration_ms": 62000,
+      "exit_code": 0,
+      "evidence": {"summary": "PR #14 CI test + cross-build matrix green"}
+    }
+  ]
+}

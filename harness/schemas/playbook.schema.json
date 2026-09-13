@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/playbook.schema.json",
+  "title": "Clean Code developer playbook",
+  "type": "object",
+  "required": ["schema_version", "id", "title", "applies_when", "does_not_apply_when", "minimum_roles", "minimum_evidence", "arena_warranted", "adversarial_probes_warranted", "parallel_guidance", "terminal_states"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "applies_when": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "does_not_apply_when": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "minimum_roles": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "minimum_evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "arena_warranted": { "type": "string", "minLength": 1 },
+    "adversarial_probes_warranted": { "type": "string", "minLength": 1 },
+    "parallel_guidance": { "type": "string", "minLength": 1 },
+    "terminal_states": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "enum": ["PASS", "FAIL", "NOT_RUN", "NOT_AVAILABLE", "BLOCKED"] }
+    }
+  },
+  "additionalProperties": false
+}
