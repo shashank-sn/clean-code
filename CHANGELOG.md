@@ -2,9 +2,13 @@
 
 ## Unreleased
 
+## 0.7.0 - 2026-09-16
+
 - Add `clean-prune`, a dead-code elimination stage that runs after simplification and before final verification: it lists detector candidates, records the reference search behind every deletion, deletes unused symbols, files, flags, and shims outright, and blocks ship while a candidate stays unresolved or a removal has no search behind it.
 - Wire `clean-prune` into the canonical shipping pipeline, `clean-lfg`, the feature-delivery, refactor, and release-readiness playbooks, and the workflow comparison rubric (new `dead_code_elimination` dimension).
 - Strengthen the `clean-ship` PR contract: one plain opening sentence, terms explained in everyday words on first use, real file and command names, a banned-word list, and a five-point self-check that must pass before a PR opens.
+- Flag unselected registry, route, and dispatch entries when pruning, and check them against the configuration and fixtures that select them. Found by running the agent against a fixture with planted dead code: the first version reported nothing for two handler entries that no code or config selected.
+- Point the one-line installer and README at the `v0.7.0` tag; both still referenced `v0.5.0`.
 
 ## 0.6.0 - 2026-09-13
 
