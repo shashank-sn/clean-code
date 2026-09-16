@@ -29,7 +29,7 @@ func TestSkillCatalog(t *testing.T) {
 	required := []string{
 		"clean-brainstorm", "clean-plan", "clean-debug", "clean-ship",
 		"clean-simplify", "clean-compound", "clean-worktree", "clean-watch-pr", "clean-lfg",
-		"clean-show-me", "clean-route", "clean-arena", "clean-probe",
+		"clean-show-me", "clean-route", "clean-arena", "clean-probe", "clean-prune",
 	}
 	for _, name := range required {
 		found := false

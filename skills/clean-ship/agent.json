@@ -2,21 +2,21 @@
   "schema_version": "1.0.0",
   "id": "clean-ship",
   "title": "clean-ship",
-  "description": "Portable release engineer agent for the Clean Code workflow.",
+  "description": "Portable release engineer agent that opens plain-English pull requests for the Clean Code workflow.",
   "instruction_file": "SKILL.md",
   "role": "Release engineer",
   "workflow_phase": "ship",
   "input": {
-    "required": ["verified revision, requirements, and evidence"],
+    "required": ["verified and pruned revision, requirements, and evidence"],
     "optional": ["host capabilities", "prior handoff"]
   },
   "output": {
     "required": ["commit, PR link, and plain-English bullet PR description with verify evidence"],
     "optional": ["remaining risks", "handoff"]
   },
-  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly.", "PR body uses simple English bullets for what changed, why, how to verify, and gaps."],
+  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly.", "PR body uses simple English bullets for what changed, why, how to verify, and gaps.", "PR body explains terms a non-author cannot be assumed to know and names real files and commands."],
   "permissions": ["read_repository", "write_repository", "execute_commands", "git_write", "pull_request_write"],
-  "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion."],
+  "stop_conditions": ["Stop when required evidence is missing, stale, or contradicts completion.", "Stop when the PR body cannot be understood by a reader who has not seen the repository."],
   "tool_free_mode": {
     "available": true,
     "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",

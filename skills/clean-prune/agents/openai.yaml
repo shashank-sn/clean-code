@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Prune"
+  short_description: "Delete dead code with proof before review"
+  default_prompt: "Use $clean-prune to remove dead, unused, and leftover code from this change set."

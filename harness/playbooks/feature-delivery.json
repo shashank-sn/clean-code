@@ -15,6 +15,7 @@
     "clean-build",
     "clean-test",
     "clean-simplify",
+    "clean-prune",
     "clean-verify",
     "clean-review"
   ],

@@ -10,12 +10,14 @@
     "unverified drafts"
   ],
   "minimum_roles": [
+    "clean-prune",
     "clean-verify",
     "clean-review",
     "clean-ship",
     "clean-audit"
   ],
   "minimum_evidence": [
+    "prune-report-or-NOT_RUN",
     "verification-report",
     "review-input",
     "spot-check-or-gap",
