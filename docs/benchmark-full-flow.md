@@ -30,7 +30,7 @@ Latest blind review winner: **Clean Code (Outcome B)** — decomposed functions 
 ## Reproduce a live comparison
 
 1. Run CE pipeline (`ce-brainstorm` → `ce-plan` → `ce-work` → `ce-ship`) on the task in an isolated worktree.
-2. Run Clean Code pipeline (`clean-brainstorm` → `clean-plan` → `clean-build` → `clean-test` → `clean-simplify` → `clean-verify` → `clean-review` → `clean-ship`) in another worktree.
+2. Run Clean Code pipeline (`clean-brainstorm` → `clean-plan` → `clean-build` → `clean-test` → `clean-simplify` → `clean-prune` → `clean-verify` → `clean-review` → `clean-ship`) in another worktree.
 3. Point `harness/calibration/full-flow-manifest.json` at both package directories.
 4. Invoke a different-model reviewer on both outcomes without revealing workflow labels.
 5. Run `benchmark-full-flow` to merge auto + reviewer scores.
