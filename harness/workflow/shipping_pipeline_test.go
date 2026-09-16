@@ -68,4 +68,25 @@ func TestShippingPipelineReferencesRegisteredAgents(t *testing.T) {
 	if !evalStageSeen {
 		t.Fatal("shipping pipeline must include the eval-discover stage")
 	}
+	position := map[string]int{}
+	for index, stage := range pipeline.Stages {
+		position[stage.ID] = index
+	}
+	pruneIndex, pruneSeen := position["prune"]
+	if !pruneSeen {
+		t.Fatal("shipping pipeline must include the prune stage")
+	}
+	prune := pipeline.Stages[pruneIndex]
+	if prune.Skill != "clean-prune" {
+		t.Fatalf("prune stage must run clean-prune: %+v", prune)
+	}
+	for _, after := range []string{"verify", "review", "ship"} {
+		index, exists := position[after]
+		if !exists {
+			t.Fatalf("shipping pipeline must include the %s stage", after)
+		}
+		if pruneIndex > index {
+			t.Fatalf("prune must run before %s so review and ship cover the pruned revision", after)
+		}
+	}
 }

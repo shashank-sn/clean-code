@@ -117,9 +117,46 @@ func TestShipSkillRequiresPlainEnglishBulletPR(t *testing.T) {
 		"**How to verify**",
 		"**Gaps**",
 		"Do not claim checks passed without `clean-verify`",
+		"## Self-check before opening the PR",
+		"no sentence needs a second reading",
+		"Explain a technical term the first time it appears",
+		"Never open a PR whose body only the change author can follow.",
+		"Confirm the change set was pruned (`clean-prune`)",
 	} {
 		if !strings.Contains(string(body), phrase) {
 			t.Errorf("clean-ship skill missing PR description contract %q", phrase)
+		}
+	}
+}
+
+func TestPruneSkillKeepsDeletionEvidenceContract(t *testing.T) {
+	root := filepath.Join("..")
+	body, err := os.ReadFile(filepath.Join(root, "skills", "clean-prune", "SKILL.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, phrase := range []string{
+		"name: clean-prune",
+		"## Candidate categories",
+		"## Gates",
+		"Treat detector output as a candidate list, not proof.",
+		"Block ship while an UNRESOLVED candidate remains in the change set.",
+		"Block any removal that has no recorded reference search.",
+		"Do not invent a dead-code score, threshold, or percentage.",
+		"never delete on a name heuristic alone",
+		"Keep behavior identical.",
+	} {
+		if !strings.Contains(string(body), phrase) {
+			t.Errorf("clean-prune skill missing deletion-evidence contract %q", phrase)
+		}
+	}
+	metadata, err := os.ReadFile(filepath.Join(root, "skills", "clean-prune", "agents", "openai.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, phrase := range []string{"display_name: \"Clean Prune\"", "short_description:", "default_prompt:", "$clean-prune"} {
+		if !strings.Contains(string(metadata), phrase) {
+			t.Errorf("clean-prune metadata missing %q", phrase)
 		}
 	}
 }

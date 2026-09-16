@@ -12,6 +12,7 @@
   "minimum_roles": [
     "clean-refactor",
     "clean-simplify",
+    "clean-prune",
     "clean-test",
     "clean-verify",
     "clean-review"

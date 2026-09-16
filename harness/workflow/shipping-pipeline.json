@@ -10,6 +10,7 @@
     {"id": "build", "skill": "clean-build", "ce_equivalent": "ce-work"},
     {"id": "test", "skill": "clean-test", "ce_equivalent": "ce-test-browser"},
     {"id": "simplify", "skill": "clean-simplify", "ce_equivalent": "ce-simplify-code"},
+    {"id": "prune", "skill": "clean-prune", "ce_equivalent": null},
     {"id": "probe", "skill": "clean-probe", "cli": "clean-code probe", "ce_equivalent": null, "when": "medium/high-risk work before claiming success"},
     {"id": "verify", "skill": "clean-verify", "cli": "clean-code verify", "ce_equivalent": null},
     {"id": "review", "skill": "clean-review", "ce_equivalent": "ce-code-review"},
@@ -31,6 +32,7 @@
     "human_gates",
     "host_neutrality",
     "adaptive_routing",
-    "adversarial_acceptance_probes"
+    "adversarial_acceptance_probes",
+    "dead_code_elimination"
   ]
 }

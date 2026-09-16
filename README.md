@@ -7,7 +7,7 @@ Clean Code is an open-source (MIT) plugin for designing, building, testing, veri
 
 Agents forget instructions, mirror mistakes in tests, and narrate success without proof. Clean Code pairs doctrine with **deterministic checks**, **independent test tracks**, **architecture constraints**, **evidence-based review**, **human spot checks**, and **tamper-evident, signed audit receipts**, plus a **full planning-to-PR skill pipeline**.
 
-**Thirty skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
+**Thirty-one skills**, a Go CLI, five language discovery adapters, generated host instructions, and calibration benchmarks ship in this repository.
 
 **npm:** [@shashanksn/clean-code](https://www.npmjs.com/package/@shashanksn/clean-code) · CLI command: `clean-code`
 
@@ -100,7 +100,7 @@ Default manual pipeline:
 
 ```
 clean-brainstorm → clean-plan
-clean-build + clean-test → clean-simplify
+clean-build + clean-test → clean-simplify → clean-prune
 clean-verify → clean-review → clean-ship → clean-watch-pr
 clean-audit → clean-eval-discover? → clean-learn? + clean-compound
 ```
@@ -108,8 +108,8 @@ clean-audit → clean-eval-discover? → clean-learn? + clean-compound
 | Phase | Skills | What happens |
 | --- | --- | --- |
 | **Plan** | `clean-brainstorm` → `clean-plan` | Scope and requirements, then implementation units and verification contract |
-| **Build** | `clean-build` + `clean-test` → `clean-simplify` | Small changes, independent test tracks, behavior-preserving cleanup |
-| **Ship** | `clean-verify` → `clean-review` → `clean-ship` → `clean-watch-pr` | Final-revision evidence, review, PR, CI watch |
+| **Build** | `clean-build` + `clean-test` → `clean-simplify` → `clean-prune` | Small changes, independent test tracks, behavior-preserving cleanup, then dead-code removal with a reference search behind every deletion |
+| **Ship** | `clean-verify` → `clean-review` → `clean-ship` → `clean-watch-pr` | Final-revision evidence, review, plain-English PR, CI watch |
 | **Record** | `clean-audit` → `clean-eval-discover`? → `clean-learn`? + `clean-compound` | Signed tamper-evident receipt, role-bound signers, external witness; evaluate only confirmed repeated outcomes |
 
 Optional: `clean-setup`, `clean-discover`, `clean-design`, `clean-route`, `clean-arena`, `clean-probe`, `clean-debug`, `clean-refactor`, `clean-worktree`, `clean-show-me`, `clean-eval-discover`, `clean-learn`, `clean-orchestrate`.
@@ -120,7 +120,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 
 ---
 
-## Skill map (30 skills)
+## Skill map (31 skills)
 
 | Skill | Responsibility |
 | --- | --- |
@@ -140,6 +140,7 @@ Autonomous end-to-end: invoke **`clean-lfg`** with your feature description.
 | `clean-verify` | Deterministic checks + normalized evidence |
 | `clean-review` | Evidence-based structural review; zero findings allowed |
 | `clean-simplify` | Behavior-preserving simplification |
+| `clean-prune` | Dead, unreachable, and leftover code removal before verification |
 | `clean-ship` | Commit, push, plain-English bullet PR |
 | `clean-watch-pr` | CI watch loop |
 | `clean-orchestrate` | Multi-role coordination |
@@ -214,6 +215,8 @@ Host instructions for Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf,
 ## Enforcement model
 
 - Build, test, requirement, and architecture failures can **block** completion when configured.
+- Dead code in the change set can **block** ship: `clean-prune` records the reference search behind every deletion and refuses to ship with an unresolved candidate.
+- PR bodies must be readable by someone who has never seen the repository; `clean-ship` runs a plain-English self-check before opening.
 - Mutation, complexity, duplication, and coverage stay **separate evidence** — no universal cleanliness score.
 - Acceptance and UI/QA checked **independently** from implementation.
 - Human spot checks recorded explicitly.
@@ -226,7 +229,7 @@ Host instructions for Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf,
 ## Repository layout
 
 ```text
-skills/           # 30 agent skills
+skills/           # 31 agent skills
 cmd/clean-code/   # CLI
 internal/         # Runner, verify, audit, benchmark
 harness/          # Schemas, adapters, calibration

@@ -14,10 +14,10 @@ func TestLoadAllFindsEveryPortableSkillAgent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(packages) != 30 {
-		t.Fatalf("expected 30 portable agents, got %d", len(packages))
+	if len(packages) != 31 {
+		t.Fatalf("expected 31 portable agents, got %d", len(packages))
 	}
-	for _, id := range []string{"clean-lfg", "clean-eval-discover", "clean-reviewer", "clean-test-writer", "clean-auditor", "clean-merge-resolver", "clean-dispatcher", "clean-show-me", "clean-route", "clean-arena", "clean-probe"} {
+	for _, id := range []string{"clean-lfg", "clean-eval-discover", "clean-reviewer", "clean-test-writer", "clean-auditor", "clean-merge-resolver", "clean-dispatcher", "clean-show-me", "clean-route", "clean-arena", "clean-probe", "clean-prune"} {
 		if _, exists := packages[id]; !exists {
 			t.Fatalf("%s package is missing", id)
 		}

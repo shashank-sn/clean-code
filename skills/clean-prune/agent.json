@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "id": "clean-prune",
+  "title": "clean-prune",
+  "description": "Portable dead-code elimination agent for the Clean Code workflow.",
+  "instruction_file": "SKILL.md",
+  "role": "Pruner",
+  "workflow_phase": "build",
+  "input": {
+    "required": ["branch diff and declared dead-code detectors"],
+    "optional": ["host capabilities", "prior handoff", "simplification notes"]
+  },
+  "output": {
+    "required": ["removal list with reference searches and check results"],
+    "optional": ["kept candidates with reasons", "remaining risks", "handoff"]
+  },
+  "evidence_requirements": ["Record the reference search behind every removal and report unavailable detectors honestly."],
+  "permissions": ["read_repository", "write_repository", "execute_commands"],
+  "stop_conditions": ["Stop when an unresolved dead-code candidate remains or a removal was made without a recorded reference search."],
+  "tool_free_mode": {
+    "available": true,
+    "behavior": "Provide the decision, artifact template, and exact unavailable capability; never claim a tool action occurred.",
+    "unavailable_statuses": ["NOT_AVAILABLE", "NOT_CONFIGURED", "NOT_RUN", "ERROR"]
+  },
+  "handoff_to": ["clean-verify", "clean-review"]
+}

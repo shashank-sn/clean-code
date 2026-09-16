@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add `clean-prune`, a dead-code elimination stage that runs after simplification and before final verification: it lists detector candidates, records the reference search behind every deletion, deletes unused symbols, files, flags, and shims outright, and blocks ship while a candidate stays unresolved or a removal has no search behind it.
+- Wire `clean-prune` into the canonical shipping pipeline, `clean-lfg`, the feature-delivery, refactor, and release-readiness playbooks, and the workflow comparison rubric (new `dead_code_elimination` dimension).
+- Strengthen the `clean-ship` PR contract: one plain opening sentence, terms explained in everyday words on first use, real file and command names, a banned-word list, and a five-point self-check that must pass before a PR opens.
+
 ## 0.6.0 - 2026-09-13
 
 - Add adaptive workflow contracts: deterministic entry routing, bounded competing-design arena records, adversarial acceptance probes (including strict calendar validity), parallel orchestration ownership records, and developer playbooks.
