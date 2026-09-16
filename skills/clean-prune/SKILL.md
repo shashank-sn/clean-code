@@ -24,6 +24,7 @@ Ship a change set with no dead weight. Delete code nothing uses.
 - Unused imports, variables, parameters, fields, and configuration keys.
 - Leftover scaffolding: debug prints, temporary flags, hardcoded probe values, empty stub bodies, and feature flags with no live reader.
 - Superseded implementations and duplicated helpers the change replaced.
+- Entries in string-keyed registries, handler maps, route tables, and dispatch tables that no caller, route, configuration, or fixture selects.
 - Orphaned files, fixtures, assets, and test helpers nothing imports or runs.
 - Unused dependencies and stale build or manifest entries.
 - Commented-out code and backward-compatibility shims with no remaining consumer.
@@ -52,6 +53,7 @@ Ship a change set with no dead weight. Delete code nothing uses.
 ## Safety
 
 - Search before deleting; never delete on a name heuristic alone.
+- Check registry and dispatch entries against the configuration and fixtures that select them. An entry nothing selects is a candidate even when a search finds its registration.
 - Keep deletions inside the reviewed scope. Flag dead code outside the change set instead of sweeping it.
 - Re-run affected tests when a removal touches a tested or executed path.
 - Report unavailable tooling as a gap rather than skipping it silently.

@@ -139,6 +139,7 @@ func TestPruneSkillKeepsDeletionEvidenceContract(t *testing.T) {
 		"name: clean-prune",
 		"## Candidate categories",
 		"## Gates",
+		"Entries in string-keyed registries, handler maps, route tables, and dispatch tables",
 		"Treat detector output as a candidate list, not proof.",
 		"Block ship while an UNRESOLVED candidate remains in the change set.",
 		"Block any removal that has no recorded reference search.",
