@@ -34,6 +34,9 @@ func TestPackedNpmArtifactIncludesReferencedDocsAndBenchmark(t *testing.T) {
 		"examples/benchmark-flow/outcomes/ce/slug/slug.go",
 		"examples/benchmark-flow/outcomes/cc/slug/slug.go",
 		"harness/calibration/full-flow-manifest.json",
+		"harness/review/protocol.md",
+		"harness/review-evals/runner.js",
+		"harness/examples/review-v2.json",
 	} {
 		if _, err := os.Stat(filepath.Join(packageRoot, path)); err != nil {
 			t.Fatalf("packed artifact is missing %s: %v", path, err)
@@ -60,6 +63,25 @@ func TestPackedNpmArtifactIncludesReferencedDocsAndBenchmark(t *testing.T) {
 	output, err = command.CombinedOutput()
 	if err != nil || !strings.Contains(string(output), "# Clean Show Me") {
 		t.Fatalf("packed npm CLI show-me emit failed: %v\n%s", err, output)
+	}
+	protocol, err := os.ReadFile(filepath.Join(packageRoot, "harness/review/protocol.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	start := bytes.Index(protocol, []byte("<!-- review-protocol:start -->"))
+	end := bytes.Index(protocol, []byte("<!-- review-protocol:end -->"))
+	if start < 0 || end <= start {
+		t.Fatal("packed review protocol markers are missing")
+	}
+	canonical := strings.TrimSpace(string(protocol[start+len("<!-- review-protocol:start -->") : end]))
+	for _, reviewer := range []string{"clean-review", "clean-reviewer"} {
+		command = exec.Command("node", "bin/clean-code.js", "agent", "emit", reviewer, "--mode", "prompt", "--host", "codex")
+		command.Dir = packageRoot
+		command.Env = append(os.Environ(), "GOCACHE="+filepath.Join(temp, "go-cache"), "HOME="+filepath.Join(temp, "home"))
+		output, err = command.CombinedOutput()
+		if err != nil || !strings.Contains(string(output), canonical) {
+			t.Fatalf("packed npm CLI %s lost the review protocol: %v\n%s", reviewer, err, output)
+		}
 	}
 	command = exec.Command("node", "bin/clean-code.js", "benchmark-full-flow")
 	command.Dir = packageRoot

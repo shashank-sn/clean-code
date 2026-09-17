@@ -1,0 +1,296 @@
+{
+  "cases": [
+    {
+      "case_id": "01",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Correctness, integration, and security fail because the changed lookup removes the authorization boundary. Failure and boundary behavior are directly traceable for foreign IDs; maintainability is otherwise unchanged. Tests: local go test compiles the candidate but there are no test files, so the cross-tenant scenario is unexecuted."
+      },
+      "findings": [
+        {
+          "finding_id": "amber-01-1",
+          "oracle_id": "case-01-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "tenant check removed from invoice lookup",
+          "severity": "blocking",
+          "file": "service.go",
+          "line": 9,
+          "explanation": "GetInvoice now returns any invoice found by ID without comparing inv.TenantID to the tenantID claim. A request authenticated for tenant A can therefore read tenant B's invoice, violating tenant isolation and the required not-found behavior for foreign invoices.",
+          "evidence": "candidate/service.go:8-10 looks up invoices[id] and returns inv,nil; the supplied handler passes req.Claims.TenantID into GetInvoice. The previous context implementation compared inv.TenantID != tenantID before returning success. Trigger: populate an invoice with TenantID=tenant-b, then call GetInvoice(ctx, \"tenant-a\", id).",
+          "raw_response": {
+            "title": "tenant check removed from invoice lookup",
+            "severity": "blocking",
+            "file": "service.go",
+            "line": 9,
+            "explanation": "GetInvoice now returns any invoice found by ID without comparing inv.TenantID to the tenantID claim. A request authenticated for tenant A can therefore read tenant B's invoice, violating tenant isolation and the required not-found behavior for foreign invoices.",
+            "evidence": "candidate/service.go:8-10 looks up invoices[id] and returns inv,nil; the supplied handler passes req.Claims.TenantID into GetInvoice. The previous context implementation compared inv.TenantID != tenantID before returning success. Trigger: populate an invoice with TenantID=tenant-b, then call GetInvoice(ctx, \"tenant-a\", id)."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the removed tenant equality check and the foreign-invoice path required by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "02",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot 81446bbbb09965af8c296f0a0921bbd9b3e66cccce2bc7bbc8cc79f48f3612a1. correctness=FAIL and failure_modes=FAIL due to the concurrent idempotency violation; integration=FAIL for Checkout callers; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE (no auth or tenant boundary in scope); maintainability=LIMITED because the shared mutable store is unsynchronized. Static causal review is complete; semantic test coverage is a known gap."
+      },
+      "findings": [
+        {
+          "finding_id": "amber-02-1",
+          "oracle_id": "case-02-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "concurrent retries can create duplicate payments",
+          "severity": "blocking",
+          "file": "candidate/service.go",
+          "line": 16,
+          "explanation": "CreatePayment reads seen without synchronization, yields, and then writes seen and increments charges. Two concurrent calls with the same idempotency key can both observe the key as absent and each create a different payment/charge; the concurrent map access is also a data race and may panic.",
+          "evidence": "candidate/service.go:16-21 removes the mutex-protected critical section shown in change.diff. The packet context provides a barrier before the yield, so two retries can be forced through the check before either write. This directly violates the requirement that concurrent retries return the original payment and create one charge.",
+          "raw_response": {
+            "title": "concurrent retries can create duplicate payments",
+            "severity": "blocking",
+            "file": "candidate/service.go",
+            "line": 16,
+            "explanation": "CreatePayment reads seen without synchronization, yields, and then writes seen and increments charges. Two concurrent calls with the same idempotency key can both observe the key as absent and each create a different payment/charge; the concurrent map access is also a data race and may panic.",
+            "evidence": "candidate/service.go:16-21 removes the mutex-protected critical section shown in change.diff. The packet context provides a barrier before the yield, so two retries can be forced through the check before either write. This directly violates the requirement that concurrent retries return the original payment and create one charge."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the unsynchronized idempotency check and duplicate-charge interleaving exercised by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "03",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Correctness and integration fail on partial-write error propagation. The failure path is explicit in the changed loop; no authorization or security behavior is involved. Tests: local go test compiles the candidate but there are no test files, so a failing destination scenario is unexecuted. Maintainability is otherwise unchanged."
+      },
+      "findings": [
+        {
+          "finding_id": "amber-03-1",
+          "oracle_id": "case-03-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "destination write errors are discarded",
+          "severity": "blocking",
+          "file": "writer.go",
+          "line": 5,
+          "explanation": "WriteBatch ignores every error returned by Destination.Put and unconditionally returns nil. When a destination fails after accepting an earlier record, Run reports a successful export even though the batch is partial, directly violating the failure contract.",
+          "evidence": "candidate/writer.go:5 assigns _ = dst.Put(record), and line 6 always returns nil. Context/export.go forwards Run directly to WriteBatch. Trigger: a Destination.Put implementation returns an error on the second record after accepting the first; the caller receives nil and cannot detect the partial export.",
+          "raw_response": {
+            "title": "destination write errors are discarded",
+            "severity": "blocking",
+            "file": "writer.go",
+            "line": 5,
+            "explanation": "WriteBatch ignores every error returned by Destination.Put and unconditionally returns nil. When a destination fails after accepting an earlier record, Run reports a successful export even though the batch is partial, directly violating the failure contract.",
+            "evidence": "candidate/writer.go:5 assigns _ = dst.Put(record), and line 6 always returns nil. Context/export.go forwards Run directly to WriteBatch. Trigger: a Destination.Put implementation returns an error on the second record after accepting the first; the caller receives nil and cannot detect the partial export."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies discarded destination errors and the required stop-on-error behavior exercised by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "04",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot 0a5ea06d1e912f7ce348c04828350c97a42ea90a43249a01ad31eadd39f20671. correctness=FAIL and integration=FAIL because Build forwards malformed arguments; failure_modes=FAIL for the documented comma input; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=LIMITED. Static causal review is complete with no semantic test suite supplied."
+      },
+      "findings": [
+        {
+          "finding_id": "amber-04-1",
+          "oracle_id": "case-04-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "comma-delimited forwarding values are no longer decoded",
+          "severity": "blocking",
+          "file": "candidate/flags.go",
+          "line": 5,
+          "explanation": "strings.Fields splits only on whitespace, so it does not treat commas as separators and leaves a comma attached to the preceding argument. For a value such as --region=us, --verbose, the child receives --region=us, instead of --region=us.",
+          "evidence": "candidate/flags.go:5 replaces strings.Split(raw, \",\") with strings.Fields(raw). The packet requirement and context/docs.md specify comma-delimited input and the existing caller example --region=us, --verbose; the changed implementation returns [--region=us,, --verbose] rather than two clean arguments.",
+          "raw_response": {
+            "title": "comma-delimited forwarding values are no longer decoded",
+            "severity": "blocking",
+            "file": "candidate/flags.go",
+            "line": 5,
+            "explanation": "strings.Fields splits only on whitespace, so it does not treat commas as separators and leaves a comma attached to the preceding argument. For a value such as --region=us, --verbose, the child receives --region=us, instead of --region=us.",
+            "evidence": "candidate/flags.go:5 replaces strings.Split(raw, \",\") with strings.Fields(raw). The packet requirement and context/docs.md specify comma-delimited input and the existing caller example --region=us, --verbose; the changed implementation returns [--region=us,, --verbose] rather than two clean arguments."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies whitespace splitting in place of comma splitting and the documented forwarding input."
+        }
+      ]
+    },
+    {
+      "case_id": "05",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Correctness and integration fail because the readiness predicate admits pending and failed resources. This is an availability boundary failure; no separate authorization or concurrency behavior is present in the packet. Tests: local go test passes only the happy-path visible test, leaving the required negative states uncovered. Maintainability is unchanged."
+      },
+      "findings": [
+        {
+          "finding_id": "amber-05-1",
+          "oracle_id": "case-05-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "non-ready statuses are treated as ready",
+          "severity": "blocking",
+          "file": "status.go",
+          "line": 3,
+          "explanation": "IsReady returns true for every status except disabled, so pending and failed resources are served. This reverses the allowlist requirement that only the exact ready status be available.",
+          "evidence": "candidate/status.go:3 implements status != \"disabled\"; Serveable delegates directly to IsReady in the supplied context. Trigger: Serveable(\"pending\") or Serveable(\"failed\") returns true. The changed visible test covers only ready and does not exercise the rejected states; the context explicitly identifies that gap.",
+          "raw_response": {
+            "title": "non-ready statuses are treated as ready",
+            "severity": "blocking",
+            "file": "status.go",
+            "line": 3,
+            "explanation": "IsReady returns true for every status except disabled, so pending and failed resources are served. This reverses the allowlist requirement that only the exact ready status be available.",
+            "evidence": "candidate/status.go:3 implements status != \"disabled\"; Serveable delegates directly to IsReady in the supplied context. Trigger: Serveable(\"pending\") or Serveable(\"failed\") returns true. The changed visible test covers only ready and does not exercise the rejected states; the context explicitly identifies that gap."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the non-ready allowlist violation for pending and failed statuses."
+        }
+      ]
+    },
+    {
+      "case_id": "06",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot 0b65292853a2bad7bd0d864186b5b74a1403fb60c7a22b37df63abf15a75b2a5. correctness=FAIL and integration=FAIL for Loader and migration consumers; failure_modes=FAIL on escaped separators; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=LIMITED. Static causal review is complete with semantic coverage gap recorded."
+      },
+      "findings": [
+        {
+          "finding_id": "amber-06-1",
+          "oracle_id": "case-06-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "escaped semicolons are split into separate rules",
+          "severity": "blocking",
+          "file": "candidate/parser.go",
+          "line": 5,
+          "explanation": "strings.Split treats every semicolon as a separator and does not honor a preceding backslash. A value containing an escaped semicolon is therefore broken into extra rules instead of retaining the literal separator in the first rule.",
+          "evidence": "candidate/parser.go:5 replaces the prior parser with strings.Split(raw, \";\"). For the required input name=alpha\\;beta;enabled=true, the candidate produces name=alpha\\, beta, and enabled=true, while the requirement requires name=alpha\\;beta and enabled=true.",
+          "raw_response": {
+            "title": "escaped semicolons are split into separate rules",
+            "severity": "blocking",
+            "file": "candidate/parser.go",
+            "line": 5,
+            "explanation": "strings.Split treats every semicolon as a separator and does not honor a preceding backslash. A value containing an escaped semicolon is therefore broken into extra rules instead of retaining the literal separator in the first rule.",
+            "evidence": "candidate/parser.go:5 replaces the prior parser with strings.Split(raw, \";\"). For the required input name=alpha\\;beta;enabled=true, the candidate produces name=alpha\\, beta, and enabled=true, while the requirement requires name=alpha\\;beta and enabled=true."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies unconditional semicolon splitting and the escaped-separator input in the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "07",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Correctness and access-control boundary behavior fail at the exact expiry instant. Integration tracing is direct through the supplied Authorize caller; no retry, persistence, or tenant behavior is exposed. Tests: local go test compiles the candidate but there are no test files, so the equality boundary is unexecuted. Maintainability is unchanged."
+      },
+      "findings": [
+        {
+          "finding_id": "amber-07-1",
+          "oracle_id": "case-07-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "expiry boundary is accepted",
+          "severity": "blocking",
+          "file": "link.go",
+          "line": 3,
+          "explanation": "ValidAt now returns true when now equals expires because !now.After(expires) includes the equality boundary. Links must be valid strictly before expiry, so an access request at the exact expiry instant is incorrectly authorized.",
+          "evidence": "candidate/link.go:3 uses !now.After(expires). The supplied caller delegates Authorize directly to ValidAt and says expiry is checked on every request without rounding. Trigger: ValidAt(expires, expires) returns true; the required result is rejection.",
+          "raw_response": {
+            "title": "expiry boundary is accepted",
+            "severity": "blocking",
+            "file": "link.go",
+            "line": 3,
+            "explanation": "ValidAt now returns true when now equals expires because !now.After(expires) includes the equality boundary. Links must be valid strictly before expiry, so an access request at the exact expiry instant is incorrectly authorized.",
+            "evidence": "candidate/link.go:3 uses !now.After(expires). The supplied caller delegates Authorize directly to ValidAt and says expiry is checked on every request without rounding. Trigger: ValidAt(expires, expires) returns true; the required result is rejection."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies equality being accepted at expiry, violating strict-before validity."
+        }
+      ]
+    },
+    {
+      "case_id": "08",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot c734669203ff64a8b0fcb060b425d5b175ad851b0fc0bb2528881ac24fed8dbe. correctness=FAIL and integration=FAIL for Command.Shutdown; failure_modes=FAIL because queued and in-flight jobs can be lost or unfinished; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=FAIL because the retained WaitGroup is no longer used to enforce the contract. Static causal review is complete with no runtime test suite supplied."
+      },
+      "findings": [
+        {
+          "finding_id": "amber-08-1",
+          "oracle_id": "case-08-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Stop returns before accepted jobs are handled",
+          "severity": "blocking",
+          "file": "candidate/queue.go",
+          "line": 8,
+          "explanation": "Stop only closes the stop channel and never waits for the worker. The worker's select can choose the stop case while jobs remain buffered, or Stop can return while a selected job is still running, so the shutdown caller can report success before an accepted audit job is observable.",
+          "evidence": "candidate/queue.go:6-8 leaves the input channel buffered, makes stop and input simultaneously selectable, and removes q.wg.Wait() from Stop. The requirement and context/usage.md require every accepted job to be handled before successful shutdown.",
+          "raw_response": {
+            "title": "Stop returns before accepted jobs are handled",
+            "severity": "blocking",
+            "file": "candidate/queue.go",
+            "line": 8,
+            "explanation": "Stop only closes the stop channel and never waits for the worker. The worker's select can choose the stop case while jobs remain buffered, or Stop can return while a selected job is still running, so the shutdown caller can report success before an accepted audit job is observable.",
+            "evidence": "candidate/queue.go:6-8 leaves the input channel buffered, makes stop and input simultaneously selectable, and removes q.wg.Wait() from Stop. The requirement and context/usage.md require every accepted job to be handled before successful shutdown."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies that Stop returns without waiting for an accepted job to complete."
+        }
+      ]
+    },
+    {
+      "case_id": "09",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No supported defect found in the examined scope. Correctness and integration satisfy tenant, resource, and token gating; the token uses crypto/subtle.ConstantTimeCompare rather than ordinary string equality. Failure and boundary behavior deny mismatched tenant/resource or token values. Security review found no changed-scope issue. Tests: local go test passes compilation only because the packet has no test files; runtime coverage is a limitation. Maintainability is unchanged."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "10",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot fe97ac745f1cab25f7665e6e1da0ec515a231abee31cd222073ade4c119532bf. No supported defect was found in the examined scope: Normalize copies caller input, sorts a stable canonical order, and removes duplicates. correctness=PASS; integration=PASS for Store.Replace; tests=LIMITED (build/vet pass, no test files); failure_modes=PASS for empty, duplicate, and reordered input by static trace; security=NOT_APPLICABLE; maintainability=PASS. The result is bounded by the absence of semantic tests."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "11",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No supported defect found in the examined scope. ParseAll independently attempts every input, retains successful values, and joins indexed errors for all failures; this matches the supplied Decoder caller. Correctness, integration, failure handling, and maintainability are supported by the static trace. No security or authorization behavior is present. Tests: local go test passes compilation only because the packet has no test files; mixed-validity and multiple-failure runtime coverage is a limitation."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "12",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot 3103fd80ba828e460027cf79b1c2d9f0e46498f64424b27eed10f89ac7697915. No supported defect was found in the examined scope: Resolve returns workspace values, falls back only when errors.Is reports ErrNotFound, and returns all other workspace errors unchanged. correctness=PASS; integration=PASS for Source callers; tests=LIMITED (build/vet pass, no test files); failure_modes=PASS by static trace for found, wrapped-not-found, and other errors; security=NOT_APPLICABLE; maintainability=PASS. The result is bounded by the absence of semantic tests."
+      },
+      "findings": []
+    }
+  ]
+}

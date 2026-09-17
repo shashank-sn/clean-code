@@ -1,0 +1,10 @@
+--- a/writer.go
++++ b/writer.go
+@@
+ func WriteBatch(records []string, dst Destination) error {
+ 	for _, record := range records {
+-		if err := dst.Put(record); err != nil { return err }
++		_ = dst.Put(record)
+ 	}
+ 	return nil
+ }

@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "slug-normalizer",
+  "task_path": "examples/benchmark-flow/task.md",
+  "outcomes": [
+    {
+      "workflow_id": "compound-engineering",
+      "label": "Outcome A",
+      "package_dir": "examples/benchmark-flow/outcomes/ce/slug",
+      "tests_passed": true,
+      "test_output": "ok  \tgithub.com/shashank-sn/clean-code/examples/benchmark-flow/outcomes/ce/slug\t(cached)\n",
+      "metrics": {
+        "production_lines": 43,
+        "test_lines": 10,
+        "test_functions": 1,
+        "production_funcs": 1,
+        "max_func_lines": 38,
+        "avg_func_lines": 38,
+        "has_fuzz_test": false
+      },
+      "auto_scores": {
+        "decomposition": 0.4,
+        "function_size": 0.3,
+        "safety_hardening": 0,
+        "simplicity": 0.7,
+        "test_coverage_breadth": 0.16666666666666666,
+        "tests_pass": 1
+      },
+      "reviewer_scores": {
+        "maintainability": 0.45,
+        "naming_clarity": 0.55,
+        "simplicity": 0.5,
+        "test_quality": 0.2
+      },
+      "auto_total": 0.47058823529411764,
+      "reviewer_total": 0.4,
+      "combined_score": 0.43529411764705883
+    },
+    {
+      "workflow_id": "clean-code",
+      "label": "Outcome B",
+      "package_dir": "examples/benchmark-flow/outcomes/cc/slug",
+      "tests_passed": true,
+      "test_output": "ok  \tgithub.com/shashank-sn/clean-code/examples/benchmark-flow/outcomes/cc/slug\t(cached)\n",
+      "metrics": {
+        "production_lines": 61,
+        "test_lines": 55,
+        "test_functions": 10,
+        "production_funcs": 4,
+        "max_func_lines": 19,
+        "avg_func_lines": 14,
+        "has_fuzz_test": true
+      },
+      "auto_scores": {
+        "decomposition": 1,
+        "function_size": 0.6,
+        "safety_hardening": 1,
+        "simplicity": 0.4,
+        "test_coverage_breadth": 1,
+        "tests_pass": 1
+      },
+      "reviewer_scores": {
+        "maintainability": 0.95,
+        "naming_clarity": 0.9,
+        "simplicity": 0.9,
+        "test_quality": 0.95
+      },
+      "auto_total": 0.8588235294117648,
+      "reviewer_total": 0.9277777777777777,
+      "combined_score": 0.8933006535947712
+    }
+  ],
+  "rubric": [
+    {
+      "id": "tests_pass",
+      "weight": 2,
+      "description": "All package tests pass under -race"
+    },
+    {
+      "id": "test_coverage_breadth",
+      "weight": 1.5,
+      "description": "Table tests cover edge cases"
+    },
+    {
+      "id": "function_size",
+      "weight": 1.5,
+      "description": "Small functions, low max line count"
+    },
+    {
+      "id": "decomposition",
+      "weight": 1.5,
+      "description": "Single responsibility per function"
+    },
+    {
+      "id": "simplicity",
+      "weight": 1,
+      "description": "Low production line count without hiding logic"
+    },
+    {
+      "id": "safety_hardening",
+      "weight": 1,
+      "description": "Fuzz or property tests for invariants"
+    }
+  ],
+  "winner": "clean-code",
+  "summary": "clean-code wins full-flow benchmark (0.89 vs 0.44). clean-code tests=true max_func_lines=19 tests=10; compound-engineering tests=true max_func_lines=38 tests=1.",
+  "reviewer": {
+    "model": "gemini-3.7-flash-high",
+    "scores": {
+      "clean-code.maintainability": 0.95,
+      "clean-code.naming_clarity": 0.9,
+      "clean-code.simplicity": 0.9,
+      "clean-code.test_quality": 0.95,
+      "compound-engineering.maintainability": 0.45,
+      "compound-engineering.naming_clarity": 0.55,
+      "compound-engineering.simplicity": 0.5,
+      "compound-engineering.test_quality": 0.2
+    },
+    "notes": "Independent reviewer scored blinded Outcome A vs B without workflow labels during review.",
+    "blinded": true
+  }
+}

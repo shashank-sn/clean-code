@@ -194,6 +194,50 @@ func TestStructuralReviewSkillKeepsEvidenceBoundary(t *testing.T) {
 	}
 }
 
+func TestReviewProtocolCopiesStaySynchronized(t *testing.T) {
+	root := filepath.Join("..")
+	canonical, err := os.ReadFile(filepath.Join(root, "harness", "review", "protocol.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := markedProtocol(string(canonical))
+	for _, path := range []string{
+		"skills/clean-review/SKILL.md",
+		"skills/clean-reviewer/SKILL.md",
+		"hosts/generic/AGENTS.md",
+	} {
+		body, err := os.ReadFile(filepath.Join(root, path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := markedProtocol(string(body)); got != want {
+			t.Errorf("%s diverges from canonical review protocol", path)
+		}
+	}
+}
+
+func TestDispatcherRequiresRevisionBoundReviewHandoff(t *testing.T) {
+	root := filepath.Join("..")
+	body, err := os.ReadFile(filepath.Join(root, "skills", "clean-dispatcher", "SKILL.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, phrase := range []string{
+		"base and head revisions",
+		"complete changed-file inventory and diff",
+		"original requirements",
+		"affected callers and call-path notes",
+		"actual check commands/results/skips and changed assertions",
+		"change-author and reviewer/context identities",
+		"known gaps",
+		"Agreement from another agent or model is not evidence",
+	} {
+		if !strings.Contains(string(body), phrase) {
+			t.Errorf("dispatcher review handoff missing %q", phrase)
+		}
+	}
+}
+
 func TestPackageAndPluginVersionsMatch(t *testing.T) {
 	root := filepath.Join("..")
 	readVersion := func(path string) string {
@@ -235,4 +279,15 @@ func TestShippingPipelineSimplifiesBeforeFinalVerificationAndReview(t *testing.T
 	if positions["simplify"] == -1 || positions["verify"] == -1 || positions["review"] == -1 || positions["simplify"] >= positions["verify"] || positions["verify"] >= positions["review"] {
 		t.Fatalf("expected simplify before verify before review, got %#v", positions)
 	}
+}
+
+func markedProtocol(body string) string {
+	const start = "<!-- review-protocol:start -->"
+	const end = "<!-- review-protocol:end -->"
+	from := strings.Index(body, start)
+	to := strings.Index(body, end)
+	if from < 0 || to < from {
+		return ""
+	}
+	return body[from : to+len(end)]
 }

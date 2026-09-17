@@ -1,0 +1,16 @@
+{
+  "cases": [
+    {"id":"01","before":"01/before","after":"01/after","oracle":"oracle/tests/01_test.go","kind":"defect"},
+    {"id":"02","before":"02/before","after":"02/after","oracle":"oracle/tests/02_test.go","kind":"defect"},
+    {"id":"03","before":"03/before","after":"03/after","oracle":"oracle/tests/03_test.go","kind":"defect"},
+    {"id":"04","before":"04/before","after":"04/after","oracle":"oracle/tests/04_test.go","kind":"defect"},
+    {"id":"05","before":"05/before","after":"05/after","oracle":"oracle/tests/05_test.go","kind":"defect"},
+    {"id":"06","before":"06/before","after":"06/after","oracle":"oracle/tests/06_test.go","kind":"defect"},
+    {"id":"07","before":"07/before","after":"07/after","oracle":"oracle/tests/07_test.go","kind":"defect"},
+    {"id":"08","before":"08/before","after":"08/after","oracle":"oracle/tests/08_test.go","kind":"defect"},
+    {"id":"09","before":"09/before","after":"09/after","oracle":"oracle/tests/09_test.go","kind":"clean"},
+    {"id":"10","before":"10/before","after":"10/after","oracle":"oracle/tests/10_test.go","kind":"clean"},
+    {"id":"11","before":"11/before","after":"11/after","oracle":"oracle/tests/11_test.go","kind":"clean"},
+    {"id":"12","before":"12/before","after":"12/after","oracle":"oracle/tests/12_test.go","kind":"clean"}
+  ]
+}

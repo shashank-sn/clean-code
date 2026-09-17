@@ -1,0 +1,7 @@
+--- a/link.go
++++ b/link.go
+@@
+ func ValidAt(now, expires time.Time) bool {
+-	return now.Before(expires)
++	return !now.After(expires)
+ }

@@ -80,10 +80,10 @@ func TestRoutePrefersUnavailableOverInventedCapability(t *testing.T) {
 func TestRouteNeverMentionsModelBrand(t *testing.T) {
 	for _, change := range []string{"bug", "feature", "design", "refactor", "review", "release"} {
 		decision, err := Route(TaskSignals{
-			SchemaVersion: SchemaVersion,
-			ChangeType:    change,
-			Risk:          "high",
-			Ambiguity:     "high",
+		SchemaVersion: SchemaVersion,
+		ChangeType:    change,
+		Risk:          "high",
+		Ambiguity:     "high",
 			HostCapabilities: HostCapabilityView{Subagents: true, CommandExecution: true},
 		})
 		if err != nil {
@@ -269,6 +269,26 @@ func TestPlaybooksCoverRequiredShapes(t *testing.T) {
 	}
 	if len(ListPlaybooks()) != 6 {
 		t.Fatalf("expected 6 playbooks, got %d", len(ListPlaybooks()))
+	}
+}
+
+func TestCodeReviewPlaybookJSONMatchesBuiltin(t *testing.T) {
+	builtin, err := GetPlaybook("code-review")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(filepath.Join("..", "..", "harness", "playbooks", "code-review.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var checkedIn Playbook
+	if err := json.Unmarshal(body, &checkedIn); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := json.Marshal(checkedIn)
+	want, _ := json.Marshal(builtin)
+	if string(got) != string(want) {
+		t.Fatalf("checked-in code-review playbook diverges\nwant %s\ngot %s", want, got)
 	}
 }
 

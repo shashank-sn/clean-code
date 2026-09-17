@@ -1,0 +1,104 @@
+[
+  {
+    "case_id": "02",
+    "findings": [
+      {
+        "title": "concurrent retries can create duplicate payments",
+        "severity": "blocking",
+        "file": "candidate/service.go",
+        "line": 16,
+        "explanation": "CreatePayment reads seen without synchronization, yields, and then writes seen and increments charges. Two concurrent calls with the same idempotency key can both observe the key as absent and each create a different payment/charge; the concurrent map access is also a data race and may panic.",
+        "evidence": "candidate/service.go:16-21 removes the mutex-protected critical section shown in change.diff. The packet context provides a barrier before the yield, so two retries can be forced through the check before either write. This directly violates the requirement that concurrent retries return the original payment and create one charge."
+      }
+    ],
+    "questions": [],
+    "summary": "Reviewed synthetic packet snapshot 81446bbbb09965af8c296f0a0921bbd9b3e66cccce2bc7bbc8cc79f48f3612a1. correctness=FAIL and failure_modes=FAIL due to the concurrent idempotency violation; integration=FAIL for Checkout callers; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE (no auth or tenant boundary in scope); maintainability=LIMITED because the shared mutable store is unsynchronized. Static causal review is complete; semantic test coverage is a known gap.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "fixture compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "04",
+    "findings": [
+      {
+        "title": "comma-delimited forwarding values are no longer decoded",
+        "severity": "blocking",
+        "file": "candidate/flags.go",
+        "line": 5,
+        "explanation": "strings.Fields splits only on whitespace, so it does not treat commas as separators and leaves a comma attached to the preceding argument. For a value such as --region=us, --verbose, the child receives --region=us, instead of --region=us.",
+        "evidence": "candidate/flags.go:5 replaces strings.Split(raw, \",\") with strings.Fields(raw). The packet requirement and context/docs.md specify comma-delimited input and the existing caller example --region=us, --verbose; the changed implementation returns [--region=us,, --verbose] rather than two clean arguments."
+      }
+    ],
+    "questions": [],
+    "summary": "Reviewed synthetic packet snapshot 0a5ea06d1e912f7ce348c04828350c97a42ea90a43249a01ad31eadd39f20671. correctness=FAIL and integration=FAIL because Build forwards malformed arguments; failure_modes=FAIL for the documented comma input; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=LIMITED. Static causal review is complete with no semantic test suite supplied.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "fixture compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "06",
+    "findings": [
+      {
+        "title": "escaped semicolons are split into separate rules",
+        "severity": "blocking",
+        "file": "candidate/parser.go",
+        "line": 5,
+        "explanation": "strings.Split treats every semicolon as a separator and does not honor a preceding backslash. A value containing an escaped semicolon is therefore broken into extra rules instead of retaining the literal separator in the first rule.",
+        "evidence": "candidate/parser.go:5 replaces the prior parser with strings.Split(raw, \";\"). For the required input name=alpha\\;beta;enabled=true, the candidate produces name=alpha\\, beta, and enabled=true, while the requirement requires name=alpha\\;beta and enabled=true."
+      }
+    ],
+    "questions": [],
+    "summary": "Reviewed synthetic packet snapshot 0b65292853a2bad7bd0d864186b5b74a1403fb60c7a22b37df63abf15a75b2a5. correctness=FAIL and integration=FAIL for Loader and migration consumers; failure_modes=FAIL on escaped separators; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=LIMITED. Static causal review is complete with semantic coverage gap recorded.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "fixture compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "08",
+    "findings": [
+      {
+        "title": "Stop returns before accepted jobs are handled",
+        "severity": "blocking",
+        "file": "candidate/queue.go",
+        "line": 8,
+        "explanation": "Stop only closes the stop channel and never waits for the worker. The worker's select can choose the stop case while jobs remain buffered, or Stop can return while a selected job is still running, so the shutdown caller can report success before an accepted audit job is observable.",
+        "evidence": "candidate/queue.go:6-8 leaves the input channel buffered, makes stop and input simultaneously selectable, and removes q.wg.Wait() from Stop. The requirement and context/usage.md require every accepted job to be handled before successful shutdown."
+      }
+    ],
+    "questions": [],
+    "summary": "Reviewed synthetic packet snapshot c734669203ff64a8b0fcb060b425d5b175ad851b0fc0bb2528881ac24fed8dbe. correctness=FAIL and integration=FAIL for Command.Shutdown; failure_modes=FAIL because queued and in-flight jobs can be lost or unfinished; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=FAIL because the retained WaitGroup is no longer used to enforce the contract. Static causal review is complete with no runtime test suite supplied.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "fixture compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "10",
+    "findings": [],
+    "questions": [],
+    "summary": "Reviewed synthetic packet snapshot fe97ac745f1cab25f7665e6e1da0ec515a231abee31cd222073ade4c119532bf. No supported defect was found in the examined scope: Normalize copies caller input, sorts a stable canonical order, and removes duplicates. correctness=PASS; integration=PASS for Store.Replace; tests=LIMITED (build/vet pass, no test files); failure_modes=PASS for empty, duplicate, and reordered input by static trace; security=NOT_APPLICABLE; maintainability=PASS. The result is bounded by the absence of semantic tests.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "fixture compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "12",
+    "findings": [],
+    "questions": [],
+    "summary": "Reviewed synthetic packet snapshot 3103fd80ba828e460027cf79b1c2d9f0e46498f64424b27eed10f89ac7697915. No supported defect was found in the examined scope: Resolve returns workspace values, falls back only when errors.Is reports ErrNotFound, and returns all other workspace errors unchanged. correctness=PASS; integration=PASS for Source callers; tests=LIMITED (build/vet pass, no test files); failure_modes=PASS by static trace for found, wrapped-not-found, and other errors; security=NOT_APPLICABLE; maintainability=PASS. The result is bounded by the absence of semantic tests.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "fixture compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  }
+]

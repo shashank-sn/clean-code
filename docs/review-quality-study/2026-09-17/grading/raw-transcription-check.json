@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "condition_records": 36,
+  "findings_matched_exactly": 24,
+  "raw_completion_preserved": true,
+  "scope": "exact preservation of raw findings and completion; causal agreement checked separately against fixed oracle tests"
+}

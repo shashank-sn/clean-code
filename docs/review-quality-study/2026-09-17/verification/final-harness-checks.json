@@ -1,0 +1,35 @@
+[
+  {
+    "name": "fixture-validation",
+    "command": "node harness/review-evals/runner.js",
+    "started_at": "2026-09-17T10:25:32.772278+00:00",
+    "finished_at": "2026-09-17T10:25:46.721996+00:00",
+    "duration_ms": 13950,
+    "exit_code": 0,
+    "status": "PASS",
+    "log": "final-fixture-validation.log",
+    "sha256": "a8148112ab32b74d8ea02af9c85bb8c314f3da1044059bf9e7b237d698575741"
+  },
+  {
+    "name": "runner-selftests",
+    "command": "node harness/review-evals/runner-tests.js",
+    "started_at": "2026-09-17T10:25:46.722750+00:00",
+    "finished_at": "2026-09-17T10:25:50.072092+00:00",
+    "duration_ms": 3350,
+    "exit_code": 0,
+    "status": "PASS",
+    "log": "final-runner-selftests.log",
+    "sha256": "7355e7f36d92f80e4878fcdae1695c8dd593d2df36e90e5602b4ccd307fd95b1"
+  },
+  {
+    "name": "scorer-selftests",
+    "command": "node harness/review-evals/scorer-tests.js",
+    "started_at": "2026-09-17T10:25:50.072829+00:00",
+    "finished_at": "2026-09-17T10:25:50.177325+00:00",
+    "duration_ms": 105,
+    "exit_code": 0,
+    "status": "PASS",
+    "log": "final-scorer-selftests.log",
+    "sha256": "fb505d396a4e49cccdf0acf50242bc7ccd7fe285f2c7afe650a9585ddb39cfec"
+  }
+]

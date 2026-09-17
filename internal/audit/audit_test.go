@@ -59,6 +59,47 @@ func TestBuildReportsExpiredVerification(t *testing.T) {
 	}
 }
 
+func TestBuildUsesStrictV2ReviewDecoding(t *testing.T) {
+	cases := map[string]func(map[string]any){
+		"missing required":     func(check map[string]any) { delete(check, "required") },
+		"null required":        func(check map[string]any) { check["required"] = nil },
+		"unknown nested field": func(check map[string]any) { check["unexpected"] = true },
+	}
+	for name, mutate := range cases {
+		t.Run(name, func(t *testing.T) {
+			manifest := writeAuditFixture(t, true, "abc")
+			reviewPath := filepath.Join(filepath.Dir(manifest), "review.json")
+			input := v2ReviewFixture()
+			checks := input["checks"].([]any)
+			check := checks[0].(map[string]any)
+			mutate(check)
+			writeJSON(t, reviewPath, input)
+			if _, err := Build(manifest, fixedNow); err == nil {
+				t.Fatalf("expected malformed v2 review to fail audit build")
+			}
+		})
+	}
+}
+
+func v2ReviewFixture() map[string]any {
+	dimensions := []any{}
+	for _, id := range []string{"correctness", "integration", "tests", "failure_modes", "security", "maintainability"} {
+		dimension := map[string]any{"id": id, "status": "PASS", "evidence": []string{"review:" + id}}
+		if id == "security" {
+			dimension = map[string]any{"id": id, "status": "NOT_APPLICABLE", "reason": "no security boundary"}
+		}
+		dimensions = append(dimensions, dimension)
+	}
+	return map[string]any{
+		"schema_version": "2.0.0", "base_revision": "base", "revision": "abc",
+		"change_author": "author", "reviewer": "reviewer", "scope": []string{"change.go"},
+		"requirements": []string{"R1"}, "dimensions": dimensions,
+		"coverage":    []any{map[string]any{"path": "change.go", "status": "REVIEWED", "evidence": "review"}},
+		"checks":      []any{map[string]any{"id": "verification", "kind": "test", "required": true, "status": "PASS", "revision": "abc", "source": "go test", "artifact": "report.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"}},
+		"limitations": []string{}, "completion": "COMPLETE", "findings": []any{},
+	}
+}
+
 func TestWriteCreatesImmutableOwnerOnlyReceipt(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "receipt.json")
 	receipt := Receipt{SchemaVersion: "1.0.0", Repository: "/repo", Revision: "abc", PolicyRevision: "policy", CreatedAt: fixedNow(), Artifacts: []Artifact{}, Gaps: []string{}, Exceptions: []string{}}

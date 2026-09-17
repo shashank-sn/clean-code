@@ -1,0 +1,15 @@
+--- a/queue.go
++++ b/queue.go
+@@
+-type Queue struct{ input chan func(); wg sync.WaitGroup }
++type Queue struct{ input chan func(); stop chan struct{}; wg sync.WaitGroup }
+-func New() *Queue { q := &Queue{input: make(chan func(), 8)}; q.wg.Add(1); go q.run(); return q }
+-func (q *Queue) run() { defer q.wg.Done(); for job := range q.input { job() } }
++func New() *Queue { q := &Queue{input: make(chan func(), 8), stop: make(chan struct{})}; q.wg.Add(1); go q.run(); return q }
++func (q *Queue) run() { defer q.wg.Done(); for { select { case job := <-q.input: job(); case <-q.stop: return } } }
+@@
+ func (q *Queue) Stop() {
+-	close(q.input)
+-	q.wg.Wait()
++	close(q.stop)
+ }

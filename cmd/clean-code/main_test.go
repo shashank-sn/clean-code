@@ -174,6 +174,17 @@ func TestRunReviewAcceptsIndependentZeroFindings(t *testing.T) {
 	}
 }
 
+func TestRunReviewAcceptsCompleteV2Example(t *testing.T) {
+	input := filepath.Join("..", "..", "harness", "examples", "review-v2.json")
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"review", "--input", input}, &stdout, &stderr); code != 0 {
+		t.Fatalf("expected complete v2 review success, got %d: %s\n%s", code, stderr.String(), stdout.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"completion": "COMPLETE"`)) || !bytes.Contains(stdout.Bytes(), []byte(`"validation_scope": "ARTIFACT_ONLY"`)) {
+		t.Fatalf("expected v2 completion and artifact-only scope, got %s", stdout.String())
+	}
+}
+
 func TestRunTraceReportsMissingTrack(t *testing.T) {
 	root := t.TempDir()
 	plan := root + "/test-plan.json"

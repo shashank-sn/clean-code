@@ -1,0 +1,13 @@
+--- a/flags.go
++++ b/flags.go
+@@
+ func DecodeFlags(raw string) []string {
+-	parts := strings.Split(raw, ",")
++	parts := strings.Fields(raw)
+ 	var out []string
+ 	for _, part := range parts {
+-		if item := strings.TrimSpace(part); item != "" { out = append(out, item) }
++		if part != "" { out = append(out, part) }
+ 	}
+ 	return out
+ }

@@ -1,0 +1,103 @@
+{
+  "status": "SCORED",
+  "acceptance": true,
+  "primary_recall": {
+    "found": 8,
+    "total": 8,
+    "ratio": 1
+  },
+  "high_impact_misses": [],
+  "unsupported_findings": 0,
+  "unsupported_blocking_findings": 0,
+  "control_silence": {
+    "silent": 4,
+    "total": 4
+  },
+  "incomplete_cases": 0,
+  "model_completion": [
+    {
+      "case_id": "01",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The change removes the tenant authorization condition from the invoice lookup. Requirement-to-call-path mapping is Handle -> GetInvoice; the missing and foreign invoice result contract is otherwise preserved, but confidentiality is broken for every existing cross-tenant ID. Dimensions: correctness FAIL; integration FAIL at the handler authorization boundary; tests INCOMPLETE because no candidate tests are supplied; failure_modes FAIL for foreign IDs; security FAIL; maintainability PASS. The finding is supported by a static causal trace and the supplied caller context."
+      }
+    },
+    {
+      "case_id": "02",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 81446bbbb09965af8c296f0a0921bbd9b3e66cccce2bc7bbc8cc79f48f3612a1. Requirement-to-call-path mapping covers Checkout -> CreatePayment and the shared seen/charges state; concurrent idempotency is violated. Dimensions: correctness FAIL; integration FAIL for retry callers; tests PASS for compile/vet only, with no concurrency tests supplied; failure_modes FAIL for concurrent interleaving and concurrent map access; security NOT_APPLICABLE; maintainability FAIL because shared mutable state has no guard. Packet has no separate packet-instructions file; this is recorded as a limitation."
+      }
+    },
+    {
+      "case_id": "03",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The export path masks partial-write failure. Requirement-to-call-path mapping is Run -> WriteBatch -> Destination.Put; no candidate tests exercise a failing destination. Dimensions: correctness FAIL; integration FAIL because Run forwards the false success; tests INCOMPLETE; failure_modes FAIL for any write error and partial batch; security NOT_APPLICABLE; maintainability PASS. The finding is supported by a static causal trace; rollback semantics are not specified and remain an evidence gap."
+      }
+    },
+    {
+      "case_id": "04",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 0a5ea06d1e912f7ce348c04828350c97a42ea90a43249a01ad31eadd39f20671. Requirement-to-call-path mapping covers DecodeFlags -> Build and child argument forwarding; comma-delimited input is violated. Dimensions: correctness FAIL; integration FAIL because Build forwards malformed child arguments; tests PASS for compile/vet only, with no decoder behavior tests supplied; failure_modes FAIL for documented comma input and items with internal spaces; security NOT_APPLICABLE; maintainability PASS aside from the wrong delimiter operation. Packet has no separate packet-instructions file; this is recorded as a limitation."
+      }
+    },
+    {
+      "case_id": "05",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The readiness gate is broadened to serve non-ready states. Requirement-to-call-path mapping is Serveable -> IsReady; the candidate's visible test covers only the happy path and the diff removes the pending negative assertion. Dimensions: correctness FAIL; integration FAIL for the supplied Serveable caller; tests FAIL because required negative coverage was removed; failure_modes FAIL for pending and failed states; security NOT_APPLICABLE; maintainability PASS. The finding is supported by direct boundary evaluation and the supplied caller context."
+      }
+    },
+    {
+      "case_id": "06",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 0b65292853a2bad7bd0d864186b5b74a1403fb60c7a22b37df63abf15a75b2a5. Requirement-to-call-path mapping covers Parse -> Loader.Load and the migration format; escaped separators are unsupported. Dimensions: correctness FAIL; integration FAIL for Loader consumers of escaped values; tests PASS for compile/vet only, with no parser behavior tests supplied; failure_modes FAIL for escaped separators, while empty-rule filtering remains present; security NOT_APPLICABLE; maintainability PASS for the small routine but behavior is incomplete. Packet has no separate packet-instructions file; this is recorded as a limitation."
+      }
+    },
+    {
+      "case_id": "07",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate violates the strict expiry invariant at the equality boundary. Requirement-to-call-path mapping is ValidAt -> Authorize; no candidate tests cover equality, before, or after boundaries. Dimensions: correctness FAIL; integration PASS for the supplied Authorize wrapper but behavior is wrong; tests INCOMPLETE; failure_modes FAIL at the expiry boundary; security PASS as a direct access-control concern; maintainability PASS. The finding is supported by a static causal trace; no external runtime evidence was provided."
+      }
+    },
+    {
+      "case_id": "08",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot c734669203ff64a8b0fcb060b425d5b175ad851b0fc0bb2528881ac24fed8dbe. Requirement-to-call-path mapping covers Enqueue -> run -> Command.Shutdown/Stop; the shutdown guarantee is violated. Dimensions: correctness FAIL; integration FAIL because Shutdown returns before its documented side effect; tests PASS for compile/vet only, with no shutdown behavior tests supplied; failure_modes FAIL for buffered accepted jobs and concurrent stop selection; security NOT_APPLICABLE; maintainability PASS aside from the missing synchronization. Packet has no separate packet-instructions file; this is recorded as a limitation."
+      }
+    },
+    {
+      "case_id": "09",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No supported defect found in the examined candidate scope. Requirement mapping: tenant and resource equality gate access, and the token uses crypto/subtle.ConstantTimeCompare rather than ordinary token string comparison; the packet supplies no downstream callers. Dimensions: correctness PASS; integration INCOMPLETE because only the capability type is supplied; tests INCOMPLETE because the candidate has no tests; failure_modes PASS for mismatch denial in the visible function, with no runtime boundary tests; security PASS for the stated token-comparison invariant; maintainability PASS. The review is bounded to the synthetic packet and does not establish correctness beyond it."
+      }
+    },
+    {
+      "case_id": "10",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, context/current.go, context/labels.go, and candidate tree at synthetic snapshot fe97ac745f1cab25f7665e6e1da0ec515a231abee31cd222073ade4c119532bf. Normalize copies caller input, sorts the copy, and removes adjacent duplicates; Store.Replace therefore gets a stable idempotent representation without mutating the caller slice. Dimensions: correctness PASS; integration PASS (Store.Replace contract is preserved); tests PASS for compile/vet only, with no behavior tests supplied; failure_modes PASS for empty and repeated labels by static trace; security NOT_APPLICABLE; maintainability PASS. Requirement-to-call-path mapping is complete for Normalize -> Store.Replace; behavioral test evidence is limited."
+      }
+    },
+    {
+      "case_id": "11",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No supported defect found in the examined candidate scope. Requirement mapping: ParseAll iterates every input, appends each successful conversion, and aggregates indexed failures before returning; no external caller or side effect is present in the packet. Dimensions: correctness PASS; integration PASS for the supplied Decoder wrapper; tests INCOMPLETE because the candidate has no tests; failure_modes PASS for invalid-item continuation as shown by the implementation, with runtime coverage limited; security NOT_APPLICABLE for this pure parser; maintainability PASS. The review is bounded to the synthetic packet and does not establish correctness beyond it."
+      }
+    },
+    {
+      "case_id": "12",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, context/config.go, and candidate tree at synthetic snapshot 3103fd80ba828e460027cf79b1c2d9f0e46498f64424b27eed10f89ac7697915. Resolve calls Workspace first, falls back only when errors.Is(err, ErrNotFound), and returns all other errors unchanged. Dimensions: correctness PASS; integration PASS (Source interface is preserved); tests PASS for compile/vet only, with no behavior tests supplied; failure_modes PASS for the specified lookup-error branches, with concurrency outside scope; security NOT_APPLICABLE; maintainability PASS. Requirement-to-call-path mapping is complete for Resolve; behavioral test evidence is limited."
+      }
+    }
+  ]
+}

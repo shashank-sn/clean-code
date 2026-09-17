@@ -1,0 +1,104 @@
+[
+  {
+    "case_id": "12",
+    "findings": [],
+    "questions": [],
+    "summary": "Reviewed requirement, complete supplied diff, context/config.go, and candidate tree at synthetic snapshot 3103fd80ba828e460027cf79b1c2d9f0e46498f64424b27eed10f89ac7697915. Resolve calls Workspace first, falls back only when errors.Is(err, ErrNotFound), and returns all other errors unchanged. Dimensions: correctness PASS; integration PASS (Source interface is preserved); tests PASS for compile/vet only, with no behavior tests supplied; failure_modes PASS for the specified lookup-error branches, with concurrency outside scope; security NOT_APPLICABLE; maintainability PASS. Requirement-to-call-path mapping is complete for Resolve; behavioral test evidence is limited.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "candidate compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "10",
+    "findings": [],
+    "questions": [],
+    "summary": "Reviewed requirement, complete supplied diff, context/current.go, context/labels.go, and candidate tree at synthetic snapshot fe97ac745f1cab25f7665e6e1da0ec515a231abee31cd222073ade4c119532bf. Normalize copies caller input, sorts the copy, and removes adjacent duplicates; Store.Replace therefore gets a stable idempotent representation without mutating the caller slice. Dimensions: correctness PASS; integration PASS (Store.Replace contract is preserved); tests PASS for compile/vet only, with no behavior tests supplied; failure_modes PASS for empty and repeated labels by static trace; security NOT_APPLICABLE; maintainability PASS. Requirement-to-call-path mapping is complete for Normalize -> Store.Replace; behavioral test evidence is limited.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "candidate compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "08",
+    "findings": [
+      {
+        "title": "Stop returns before accepted jobs are handled",
+        "severity": "blocking",
+        "file": "candidate/queue.go",
+        "line": 8,
+        "explanation": "Stop only closes stop and never waits on the worker WaitGroup. If Enqueue has accepted a buffered job, the worker can select the closed stop channel and return before reading that job, so Command.Shutdown can report success while the audit job was dropped.",
+        "evidence": "The requirement and usage context require Shutdown to wait for every accepted job. In run at line 6, once stop is closed both stop and input may be ready and select may choose stop; line 8 does not call q.wg.Wait. A concrete trigger is New, Enqueue(func(){record audit}), then Stop immediately: Stop returns without establishing that record ran. The bounded fix is to preserve draining semantics and wait for worker completion before Stop returns (and make repeated Stop behavior explicit if required)."
+      }
+    ],
+    "questions": [],
+    "summary": "Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot c734669203ff64a8b0fcb060b425d5b175ad851b0fc0bb2528881ac24fed8dbe. Requirement-to-call-path mapping covers Enqueue -> run -> Command.Shutdown/Stop; the shutdown guarantee is violated. Dimensions: correctness FAIL; integration FAIL because Shutdown returns before its documented side effect; tests PASS for compile/vet only, with no shutdown behavior tests supplied; failure_modes FAIL for buffered accepted jobs and concurrent stop selection; security NOT_APPLICABLE; maintainability PASS aside from the missing synchronization. Packet has no separate packet-instructions file; this is recorded as a limitation.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "candidate compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "06",
+    "findings": [
+      {
+        "title": "Parser discards escaped-separator semantics",
+        "severity": "blocking",
+        "file": "candidate/parser.go",
+        "line": 5,
+        "explanation": "strings.Split(raw, \";\") treats every semicolon as a rule separator, including a backslash-escaped one. The required input name=alpha\\;beta;enabled=true is therefore split into three pieces instead of two, changing the first value and violating the format consumed by the migration loader.",
+        "evidence": "The requirement explicitly says a backslash escapes the following separator, and context/format.md says values may contain literal semicolons. At line 5, Parse splits before line 6 can filter empty rules; no escape state or unescaping/preservation logic exists. Trigger: Parse(\"name=alpha\\\\;beta;enabled=true\") yields [\"name=alpha\\\\\", \"beta\", \"enabled=true\"] rather than [\"name=alpha\\\\;beta\", \"enabled=true\"]. The bounded fix is to scan raw while tracking backslash escape state, splitting only on unescaped semicolons and retaining the escaped separator in the value."
+      }
+    ],
+    "questions": [],
+    "summary": "Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 0b65292853a2bad7bd0d864186b5b74a1403fb60c7a22b37df63abf15a75b2a5. Requirement-to-call-path mapping covers Parse -> Loader.Load and the migration format; escaped separators are unsupported. Dimensions: correctness FAIL; integration FAIL for Loader consumers of escaped values; tests PASS for compile/vet only, with no parser behavior tests supplied; failure_modes FAIL for escaped separators, while empty-rule filtering remains present; security NOT_APPLICABLE; maintainability PASS for the small routine but behavior is incomplete. Packet has no separate packet-instructions file; this is recorded as a limitation.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "candidate compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "04",
+    "findings": [
+      {
+        "title": "Flag decoder no longer uses comma delimiters",
+        "severity": "blocking",
+        "file": "candidate/flags.go",
+        "line": 5,
+        "explanation": "strings.Fields splits on whitespace instead of commas and leaves commas attached to tokens. For the documented input --region=us, --verbose it returns [\"--region=us,\", \"--verbose\"], so the child receives a malformed first argument; an item containing internal spaces is also split into multiple arguments.",
+        "evidence": "The requirement and context/docs.md define a comma-delimited value with surrounding whitespace ignored per item. Line 5 uses strings.Fields, and line 7 only filters already-separated fields, so it cannot remove the delimiter or preserve item boundaries. Trigger: DecodeFlags(\"--region=us, --verbose\") produces a trailing comma in the first argument. The bounded fix is to split on comma, trim each item, and omit empty items."
+      }
+    ],
+    "questions": [],
+    "summary": "Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 0a5ea06d1e912f7ce348c04828350c97a42ea90a43249a01ad31eadd39f20671. Requirement-to-call-path mapping covers DecodeFlags -> Build and child argument forwarding; comma-delimited input is violated. Dimensions: correctness FAIL; integration FAIL because Build forwards malformed child arguments; tests PASS for compile/vet only, with no decoder behavior tests supplied; failure_modes FAIL for documented comma input and items with internal spaces; security NOT_APPLICABLE; maintainability PASS aside from the wrong delimiter operation. Packet has no separate packet-instructions file; this is recorded as a limitation.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "candidate compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  },
+  {
+    "case_id": "02",
+    "findings": [
+      {
+        "title": "Concurrent retries race and can create multiple charges",
+        "severity": "blocking",
+        "file": "candidate/service.go",
+        "line": 16,
+        "explanation": "The mutex protecting the idempotency check and charge creation was removed. Concurrent CreatePayment calls with the same key can both miss seen, compute different or duplicate payment IDs, write the shared map concurrently, and increment charges more than once; concurrent map access can also panic.",
+        "evidence": "The requirement requires concurrent retries with one original payment and one charge. Checkout forwards directly to CreatePayment, and lines 16 and 19-21 perform the check, ID allocation, map write, and charge increment without synchronization. Trigger: two goroutines call Checkout(\"k\", cents) at the same time (the supplied barrier hooks make the pre-write interleaving explicit); both pass line 16 before either writes line 20, so charges can become 2 and the two returned IDs need not match. The bounded fix is to restore a mutex or equivalent atomic critical section covering the check and creation, while retaining Reset for test-store reset."
+      }
+    ],
+    "questions": [],
+    "summary": "Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 81446bbbb09965af8c296f0a0921bbd9b3e66cccce2bc7bbc8cc79f48f3612a1. Requirement-to-call-path mapping covers Checkout -> CreatePayment and the shared seen/charges state; concurrent idempotency is violated. Dimensions: correctness FAIL; integration FAIL for retry callers; tests PASS for compile/vet only, with no concurrency tests supplied; failure_modes FAIL for concurrent interleaving and concurrent map access; security NOT_APPLICABLE; maintainability FAIL because shared mutable state has no guard. Packet has no separate packet-instructions file; this is recorded as a limitation.",
+    "completion": "COMPLETE",
+    "checks": [
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...", "status": "PASS", "evidence": "candidate compiled; no test files"},
+      {"command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go vet ./...", "status": "PASS", "evidence": "no vet findings"}
+    ]
+  }
+]

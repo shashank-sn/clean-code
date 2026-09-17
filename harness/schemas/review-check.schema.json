@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clean-code.local/schemas/review-check.schema.json",
+  "title": "Clean Code review check",
+  "type": "object",
+  "required": ["id", "kind", "required", "status", "source"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "kind": { "type": "string", "minLength": 1 },
+    "required": { "type": "boolean" },
+    "status": { "enum": ["PASS", "FAIL", "INCOMPLETE", "NOT_RUN", "NOT_AVAILABLE", "NOT_CONFIGURED", "STALE", "ERROR"] },
+    "revision": { "type": "string" },
+    "source": { "type": "string", "minLength": 1 },
+    "artifact": { "type": "string" },
+    "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+    "unavailable_reason": { "type": "string" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "enum": ["PASS", "FAIL"] } } },
+      "then": {
+        "required": ["revision", "artifact", "sha256"],
+        "properties": { "revision": { "minLength": 1 }, "artifact": { "minLength": 1 } }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

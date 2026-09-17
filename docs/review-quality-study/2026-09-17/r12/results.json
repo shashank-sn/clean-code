@@ -1,0 +1,122 @@
+[
+  {
+    "case_id": "02",
+    "findings": [
+      {
+        "title": "Concurrent retries race through the idempotency check",
+        "severity": "blocking",
+        "file": "candidate/service.go",
+        "line": 16,
+        "explanation": "CreatePayment performs the seen lookup and the charge creation without synchronization. Two concurrent calls with the same key can both miss the map, then create different payment IDs and increment charges twice; concurrent map access can also panic.",
+        "evidence": "The requirement requires concurrent retries with one original payment and one charge. Lines 16 and 19-21 have no mutex or other atomic guard, while the packet exposes SetTestBarrier to hold both callers after the miss and Reset to inspect the shared test store."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate compiles, but it removes the synchronization required to make the idempotency check and charge creation atomic under concurrent retries.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=work/review-study/r12/gocache go test ./... (candidate)",
+        "status": "PASS",
+        "evidence": "fixture compiled successfully; no test files were supplied."
+      }
+    ]
+  },
+  {
+    "case_id": "04",
+    "findings": [
+      {
+        "title": "Flag decoding no longer uses the comma delimiter",
+        "severity": "blocking",
+        "file": "candidate/flags.go",
+        "line": 5,
+        "explanation": "DecodeFlags calls strings.Fields, which splits only on whitespace and leaves commas attached or combines comma-delimited flags into one item. For example, --region=us, --verbose becomes [--region=us,, --verbose], and --a,--b remains one argument, so the child process receives incorrect arguments.",
+        "evidence": "The requirement says values are comma-delimited and trims whitespace around each item. The packet docs give --forward=--region=us, --verbose as an existing caller. strings.Fields(raw) at line 5 does not split on the comma."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate compiles, but it violates the established comma-delimited forwarding format for both adjacent and whitespace-separated items.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=work/review-study/r12/gocache go test ./... (candidate)",
+        "status": "PASS",
+        "evidence": "fixture compiled successfully; no test files were supplied."
+      }
+    ]
+  },
+  {
+    "case_id": "06",
+    "findings": [
+      {
+        "title": "Escaped semicolons are still treated as rule separators",
+        "severity": "blocking",
+        "file": "candidate/parser.go",
+        "line": 5,
+        "explanation": "Parse unconditionally splits on every semicolon, so a backslash-escaped separator is broken into separate rules. An input such as name=alpha\\;beta;enabled=true produces a separate beta fragment instead of retaining the escaped semicolon in the first rule.",
+        "evidence": "The requirement and format context explicitly allow a literal semicolon in a value by escaping it. strings.Split(raw, \";\") at line 5 has no escape-state handling; empty-rule filtering at line 6 cannot repair the incorrectly split value."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate compiles, but its parser discards the required escaped-separator semantics used by the config and migration command.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=work/review-study/r12/gocache go test ./... (candidate)",
+        "status": "PASS",
+        "evidence": "fixture compiled successfully; no test files were supplied."
+      }
+    ]
+  },
+  {
+    "case_id": "08",
+    "findings": [
+      {
+        "title": "Stop returns before accepted jobs finish",
+        "severity": "blocking",
+        "file": "candidate/queue.go",
+        "line": 8,
+        "explanation": "Stop closes the stop signal and returns without waiting on the worker or draining already accepted input. The select can choose the stop case while buffered jobs remain, and Stop can return while a job is executing, so shutdown can report success before an accepted audit job is observable or handled.",
+        "evidence": "The requirement says Stop must wait until every accepted job has been handled. New creates a buffered input channel and the worker has a WaitGroup, but Stop only calls close(q.stop); it never calls q.wg.Wait or otherwise drains q.input."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate compiles, but its shutdown path abandons the completion guarantee required by the caller before reporting successful shutdown.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=work/review-study/r12/gocache go test ./... (candidate)",
+        "status": "PASS",
+        "evidence": "fixture compiled successfully; no test files were supplied."
+      }
+    ]
+  },
+  {
+    "case_id": "10",
+    "findings": [],
+    "questions": [],
+    "summary": "No source-supported defect found. Normalize copies the input, sorts it, and removes adjacent duplicates, yielding a stable canonical representation without mutating caller-owned input.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=work/review-study/r12/gocache go test ./... (candidate)",
+        "status": "PASS",
+        "evidence": "fixture compiled successfully; no test files were supplied."
+      }
+    ]
+  },
+  {
+    "case_id": "12",
+    "findings": [],
+    "questions": [],
+    "summary": "No source-supported defect found. Resolve falls back only when errors.Is identifies ErrNotFound and returns the original workspace value and error for every other lookup error.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=work/review-study/r12/gocache go test ./... (candidate)",
+        "status": "PASS",
+        "evidence": "fixture compiled successfully; no test files were supplied."
+      }
+    ]
+  }
+]

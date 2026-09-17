@@ -1,0 +1,93 @@
+{
+  "scope": "original invalid-wave causal oracle manifest and tests compared to corrected pack",
+  "files": [
+    {
+      "path": "go.mod",
+      "original_present": false,
+      "unchanged": false,
+      "sha256": "36585d38a428e7cb69251b9b3f7f7761756657da1f56bc3c5fbf9bae0ba76e41"
+    },
+    {
+      "path": "manifest.json",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "33bb8fa96f5dbbaaa2ae4d5872fa46f639aab78efadf88bc80cf90eeb2e398e4"
+    },
+    {
+      "path": "tests/01_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "b0eb91f7b6c0b2a55ac5e517424c4ef0a26a6d1aa872a4c13deb1cf71df15f02"
+    },
+    {
+      "path": "tests/02_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "c72fc96922601b5c358576689c52bcdcf079f919380dbfcd19fecfb082404e13"
+    },
+    {
+      "path": "tests/03_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "1cce41d4097b73866e14e9380350d7fa7cd25d6fd18ac8d93a3f5c40d467d00a"
+    },
+    {
+      "path": "tests/04_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "e3401025f0497a60fe02b26a68b7246cb7fc7bc1934763aa9d676c7c9fad033d"
+    },
+    {
+      "path": "tests/05_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "4fdb11b8b7c7aff7ca3cf4b2ac80d3a8b0bf7fb9b461f1ae7d341ad1138094fd"
+    },
+    {
+      "path": "tests/06_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "a1611561fe6f92a3f615dfa9ed7cf59adbad6377ff37e926950a8e86f76c072d"
+    },
+    {
+      "path": "tests/07_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "a4b1a48cc6194e974cd3a9950e1b6a99397f864ad4e49103d71c55ad110c8ab8"
+    },
+    {
+      "path": "tests/08_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "7783523c778030b1620d122dcdd23b4d4837f0acfd7b2864721b9b372f65dd91"
+    },
+    {
+      "path": "tests/09_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "4e6fbe5d7b0151965a374e69bc97e9067a65903d2ac23d8cba28036c82b3ad71"
+    },
+    {
+      "path": "tests/10_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "84c1d3dc037b88c54e203d24905be4aa6874ad4f1c22974b6cbb8977c2f2c7a0"
+    },
+    {
+      "path": "tests/11_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "96bcb899ad83f829dc8350b0b559f6885b857ba1fded1d9ff4205e52bc5b74c1"
+    },
+    {
+      "path": "tests/12_test.go",
+      "original_present": true,
+      "unchanged": true,
+      "sha256": "8533d89d473c6a498c24747a864e321d9258c224ea416c3ad6ee41460b0ed482"
+    }
+  ],
+  "packaging_only_addition": {
+    "path": "go.mod",
+    "reason": "nested module boundary added to keep oracle tests outside root go test discovery"
+  }
+}

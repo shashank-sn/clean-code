@@ -1,0 +1,19 @@
+{
+  "frozen_at": "2026-09-17T10:02:42.766092+00:00",
+  "reason": "pre-score packaging-only correction; unchanged defect oracles, prompts, model/settings, grouping and thresholds",
+  "packet_inventory_sha256": "945f512ddcfe74e1e9688ca021654ca7b98ac0b4368d726c8cb0dd4a4981e647",
+  "runs": {
+    "baseline": [
+      "r11",
+      "r12"
+    ],
+    "candidate-trial-1": [
+      "r13",
+      "r14"
+    ],
+    "candidate-trial-2": [
+      "r15",
+      "r16"
+    ]
+  }
+}

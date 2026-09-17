@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "cases": 4,
+  "true_positives": 2,
+  "false_positives": 0,
+  "false_negatives": 0,
+  "clean_controls": 2,
+  "correct_silence": 2,
+  "precision": 1,
+  "recall": 1
+}

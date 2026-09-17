@@ -1,0 +1,12 @@
+--- a/status.go
++++ b/status.go
+@@
+ func IsReady(status string) bool {
+-	return status == "ready"
++	return status != "disabled"
+ }
+--- a/status_test.go
++++ b/status_test.go
+@@
+-	if IsReady("pending") { t.Fatal("pending resource served") }
+ 	if !IsReady("ready") { t.Fatal("ready resource unavailable") }

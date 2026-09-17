@@ -1,0 +1,7 @@
+--- a/service.go
++++ b/service.go
+@@
+ 	inv, ok := invoices[id]
+-	if !ok || inv.TenantID != tenantID { return Invoice{}, ErrNotFound }
++	if !ok { return Invoice{}, ErrNotFound }
+ 	return inv, nil

@@ -7,18 +7,32 @@
   "role": "Independent reviewer",
   "workflow_phase": "review",
   "input": {
-    "required": ["final diff, requirements, and revision-bound evidence"],
+    "required": [
+      "base and candidate revisions plus complete changed-file inventory and diff",
+      "original requirements and affected-call-path notes",
+      "actual check commands, results, skips, changed assertions, and known gaps",
+      "change-author and reviewer/context identities"
+    ],
     "optional": ["host capabilities", "prior handoff"]
   },
   "output": {
-    "required": ["evidence-backed findings or correct silence"],
+    "required": [
+      "v2 review record with reviewed scope, requirements, six dimension assessments, checks, limitations, and completion",
+      "requirement-to-call-path-and-test mapping or an explicit evidence gap",
+      "supported findings or no supported defect in examined scope"
+    ],
     "optional": ["remaining risks", "handoff"]
   },
-  "evidence_requirements": ["Preserve revision-bound evidence and report unavailable work honestly."],
-  "permissions": ["read_repository", "write_repository"],
+  "evidence_requirements": [
+    "Bind the complete diff, checks, findings, and completion to the exact candidate revision.",
+    "Verify agent completion claims through source and tool artifacts; another model's agreement is not proof.",
+    "Record unavailable, stale, unrun, or incomplete coverage honestly; zero findings never proves correctness."
+  ],
+  "permissions": ["read_repository", "execute_commands"],
   "stop_conditions": [
     "Stop when required evidence is missing, stale, or contradicts completion.",
-    "Stop when the change author and the approver share the same context."
+    "Stop when the change author and the approver share the same context.",
+    "Stop before any product-code write, publish, merge, permission change, or unsafe command."
   ],
   "tool_free_mode": {
     "available": true,

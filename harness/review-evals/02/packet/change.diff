@@ -1,0 +1,11 @@
+--- a/service.go
++++ b/service.go
+@@
+-import "sync"
+-var mu sync.Mutex
+ 
+ var seen = map[string]string{}
+@@
+ func CreatePayment(key string, cents int) (string, error) {
+-	mu.Lock(); defer mu.Unlock()
+ 	if id, ok := seen[key]; ok { return id, nil }

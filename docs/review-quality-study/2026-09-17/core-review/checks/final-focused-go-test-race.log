@@ -1,0 +1,5 @@
+ok  	github.com/shashank-sn/clean-code/tests	11.888s
+ok  	github.com/shashank-sn/clean-code/internal/review	1.097s
+ok  	github.com/shashank-sn/clean-code/internal/audit	1.174s
+ok  	github.com/shashank-sn/clean-code/internal/hosts	(cached)
+ok  	github.com/shashank-sn/clean-code/cmd/clean-code	1.344s
