@@ -37,6 +37,7 @@ const expectedBindings = {
   '11': ['3dd35b64cf40ac52f8521465d735eeaed55649bc9a4b5c4bdf296e269ca51983', '2fa81d5b787297b832ec672ceceaa9fa5b1296441d9320e9000a4a5e490661b1', '0e866d58a678faac58d6dc260c074ffcdfe0a26c1c4ee5e743f295917f3c31b9'],
   '12': ['cfd7ddd12d0058de55083305c527cfdb1909057747f09639f13b6aff59f4d8bb', 'cfd7ddd12d0058de55083305c527cfdb1909057747f09639f13b6aff59f4d8bb', 'd2bbdcbd61d0f0f25fc779fd298a241ae2227008adb059bfb63e4897f8acd9a5']
 };
+const FIXTURE_GOMAXPROCS = '1';
 
 function digestFile(file) { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); }
 function digestTree(dir) {
@@ -93,7 +94,12 @@ function runGo(sourceRel, oracleRel, opts) {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'review-eval-'));
   try {
     fs.cpSync(path.join(root, sourceRel), temp, {recursive: true}); fs.copyFileSync(path.join(root, oracleRel), path.join(temp, 'oracle_test.go'));
-    const result = cp.spawnSync(opts.command, ['test', '-json', './...'], {cwd: temp, encoding: 'utf8', timeout: opts.timeoutMs});
+    const result = cp.spawnSync(opts.command, ['test', '-json', './...'], {
+      cwd: temp,
+      encoding: 'utf8',
+      timeout: opts.timeoutMs,
+      env: {...process.env, GOMAXPROCS: FIXTURE_GOMAXPROCS}
+    });
     const output = `${result.stdout || ''}${result.stderr || ''}`; const events = parseEvents(output);
     if (result.error && result.error.code === 'ENOENT') return {status: 'command-missing', output};
     if (result.error && result.error.code === 'ETIMEDOUT') return {status: 'timeout', output};

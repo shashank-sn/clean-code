@@ -41,6 +41,27 @@ function testTimeoutRejected() {
 function testMissingCommandRejected() {
   const dir = copyPack(); try { const result = require(path.join(dir, 'runner.js')).runGo('01/after', 'oracle/tests/01_test.go', {command: 'review-eval-command-does-not-exist', timeoutMs: 30000}); assert(result.status === 'command-missing', `missing command was classified as ${result.status}`); } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 }
+function testFixtureChildGetsBoundedGomaxprocs() {
+  const dir = copyPack(); try {
+    const capture = path.join(dir, 'gomaxprocs.txt');
+    const command = path.join(dir, 'capture-gomaxprocs.js');
+    fs.writeFileSync(command, `#!/usr/bin/env node\nrequire('fs').writeFileSync(${JSON.stringify(capture)}, process.env.GOMAXPROCS || ''); process.stdout.write(JSON.stringify({Action: 'pass'}) + '\\n');\n`, {mode: 0o755});
+    const result = require(path.join(dir, 'runner.js')).runGo('01/after', 'oracle/tests/01_test.go', {command, timeoutMs: 30000});
+    assert(result.status === 'pass', `runtime contract probe was classified as ${result.status}`);
+    assert(fs.readFileSync(capture, 'utf8') === '1', 'fixture child did not receive GOMAXPROCS=1');
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+}
+function testConcurrentOracleIsStableUnderBoundedRuntime() {
+  const dir = copyPack(); try {
+    const runner = require(path.join(dir, 'runner.js'));
+    const before = runner.runGo('02/before', 'oracle/tests/02_test.go', {command: 'go', timeoutMs: 30000});
+    assert(before.status === 'pass', `case 02 before tree was classified as ${before.status}`);
+    for (let i = 0; i < 10; i++) {
+      const after = runner.runGo('02/after', 'oracle/tests/02_test.go', {command: 'go', timeoutMs: 30000});
+      assert(after.status === 'oracle-assertion-fail', `case 02 run ${i + 1} was classified as ${after.status}`);
+    }
+  } finally { fs.rmSync(dir, {recursive: true, force: true}); }
+}
 function testPublicTestFailureClassified() {
   const dir = copyPack(); try { fs.writeFileSync(path.join(dir, '09/after/public_test.go'), 'package access\nimport "testing"\nfunc TestPublicFailure(t *testing.T) { t.Fatal("public failure") }\n'); const result = require(path.join(dir, 'runner.js')).runGo('09/after', 'oracle/tests/09_test.go', {command: 'go', timeoutMs: 30000}); assert(result.status === 'public-test-fail', `public test failure was classified as ${result.status}`); } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 }
@@ -57,5 +78,5 @@ function testLiveIsExplicitlyNotRun() {
   const result = cp.spawnSync(process.execPath, [path.join(root, 'runner.js'), '--live'], {encoding: 'utf8'}); assert(result.status === 2, 'live mode did not return the NOT_RUN status code'); const parsed = JSON.parse(result.stdout); assert(parsed.status === 'NOT_RUN' && parsed.evaluated === false, 'live mode implied evaluation');
 }
 
-for (const test of [testChangedPacketRejected, testChangedPacketAndInventoryRejected, testOracleManifestMutationRejected, testOracleBytesMutationRejected, testChangedBeforeRejected, testCompileFailureRejected, testTimeoutRejected, testMissingCommandRejected, testPublicTestFailureClassified, testOraclePanicIsNotAssertion, testOracleFailWithoutDiagnostic, testOracleFailNowWithoutDiagnostic, testLiveIsExplicitlyNotRun]) test();
-console.log(JSON.stringify({status: 'PASS', tests: 13}));
+for (const test of [testChangedPacketRejected, testChangedPacketAndInventoryRejected, testOracleManifestMutationRejected, testOracleBytesMutationRejected, testChangedBeforeRejected, testCompileFailureRejected, testTimeoutRejected, testMissingCommandRejected, testFixtureChildGetsBoundedGomaxprocs, testConcurrentOracleIsStableUnderBoundedRuntime, testPublicTestFailureClassified, testOraclePanicIsNotAssertion, testOracleFailWithoutDiagnostic, testOracleFailNowWithoutDiagnostic, testLiveIsExplicitlyNotRun]) test();
+console.log(JSON.stringify({status: 'PASS', tests: 15}));

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_URL="${CLEAN_CODE_REPO:-https://github.com/shashank-sn/clean-code.git}"
-BRANCH="${CLEAN_CODE_BRANCH:-v0.7.0}"
+BRANCH="${CLEAN_CODE_BRANCH:-v0.8.0}"
 INSTALL_DIR="${CLEAN_CODE_INSTALL_DIR:-${HOME}/.clean-code-cli}"
 CLEAN_CODE_HOME="${CLEAN_CODE_HOME:-${INSTALL_DIR}}"
 

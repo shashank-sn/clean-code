@@ -23,8 +23,13 @@ does not prefill findings for a model.
 ## Validation
 
 Run `node runner.js` for fixture validation. It compiles and tests every before
-and after tree with the separate oracle tests. It does not contact a model or
-provider. Live model evaluation is a separate mode described in the manifest.
+and after tree with the separate oracle tests. Go fixture processes run with
+`GOMAXPROCS=1` as post-study release hardening: this bounds scheduler
+parallelism so intentionally unsynchronized fixtures reach their oracle
+assertions deterministically instead of sometimes dying in the runtime. It
+does not rewrite or reinterpret the frozen raw model observations. The runner
+does not contact a model or provider. Live model evaluation is a separate mode
+described in the manifest.
 
 The pack-level build boundary is checked with `go test -race ./...` from this
 directory. To validate one candidate packet, run `node runner.js --case=01`

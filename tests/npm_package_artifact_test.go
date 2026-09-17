@@ -4,6 +4,8 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -36,8 +38,18 @@ func TestPackedNpmArtifactIncludesReferencedDocsAndBenchmark(t *testing.T) {
 		"harness/calibration/full-flow-manifest.json",
 		"harness/review/protocol.md",
 		"harness/review-evals/runner.js",
+		"harness/review-evals/runner-tests.js",
+		"harness/review-evals/scorer.js",
+		"harness/review-evals/scorer-tests.js",
+		"harness/review-evals/oracle/manifest.json",
 		"harness/examples/review-v2.json",
 	} {
+		if _, err := os.Stat(filepath.Join(packageRoot, path)); err != nil {
+			t.Fatalf("packed artifact is missing %s: %v", path, err)
+		}
+	}
+	for i := 1; i <= 12; i++ {
+		path := filepath.Join("harness", "review-evals", "oracle", "tests", fmt.Sprintf("%02d_test.go", i))
 		if _, err := os.Stat(filepath.Join(packageRoot, path)); err != nil {
 			t.Fatalf("packed artifact is missing %s: %v", path, err)
 		}
@@ -89,6 +101,33 @@ func TestPackedNpmArtifactIncludesReferencedDocsAndBenchmark(t *testing.T) {
 	output, err = command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("packed npm CLI benchmark-full-flow failed: %v\n%s", err, output)
+	}
+	command = exec.Command("node", "harness/review-evals/runner.js")
+	command.Dir = packageRoot
+	command.Env = append(os.Environ(), "GOCACHE="+filepath.Join(temp, "go-cache"), "HOME="+filepath.Join(temp, "home"))
+	output, err = command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("packed review-evals runner failed: %v\n%s", err, output)
+	}
+	var fixtureResult struct {
+		Mode   string `json:"mode"`
+		Total  int    `json:"total"`
+		Failed int    `json:"failed"`
+	}
+	if err := json.Unmarshal(output, &fixtureResult); err != nil {
+		t.Fatalf("packed review-evals runner returned invalid JSON: %v\n%s", err, output)
+	}
+	if fixtureResult.Mode != "fixture_validation" || fixtureResult.Total != 12 || fixtureResult.Failed != 0 {
+		t.Fatalf("packed review-evals runner did not validate all 12 cases: %+v", fixtureResult)
+	}
+	for _, selfTest := range []string{"harness/review-evals/runner-tests.js", "harness/review-evals/scorer-tests.js"} {
+		command = exec.Command("node", selfTest)
+		command.Dir = packageRoot
+		command.Env = append(os.Environ(), "GOCACHE="+filepath.Join(temp, "go-cache"), "HOME="+filepath.Join(temp, "home"))
+		output, err = command.CombinedOutput()
+		if err != nil {
+			t.Fatalf("packed %s failed: %v\n%s", selfTest, err, output)
+		}
 	}
 }
 
