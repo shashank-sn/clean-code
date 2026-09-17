@@ -1,0 +1,6 @@
+--- a/decode.go
++++ b/decode.go
+@@
+ func ParseAll(values []string) ([]int, error) {
++	// Keep the first successful values while collecting every indexed failure.
+ 	var failures []error

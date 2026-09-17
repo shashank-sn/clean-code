@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "name": "review-evals",
+  "modes": {
+    "fixture_validation": {
+      "runner": "runner.js",
+      "command": "node runner.js",
+      "build_check": "go test -race ./...",
+      "self_tests": ["node runner-tests.js", "node scorer-tests.js"],
+      "candidate_source_pattern": "NN/packet/candidate",
+      "diff_pattern": "NN/packet/change.diff",
+      "network": false,
+      "purpose": "Compile and execute the independent before/after oracle tests."
+    },
+    "live_model_evaluation": {
+      "network": "external-to-this-pack",
+      "response_format": "response-format.md",
+      "scoring": "scoring.md",
+      "reviewer_packets": [
+        "01/packet",
+        "02/packet",
+        "03/packet",
+        "04/packet",
+        "05/packet",
+        "06/packet",
+        "07/packet",
+        "08/packet",
+        "09/packet",
+        "10/packet",
+        "11/packet",
+        "12/packet"
+      ],
+      "protocol_probes": ["protocol-probe/packet"],
+      "note": "The evaluator supplies observations; this pack does not run model/provider networking. The protocol probe is excluded from the 12-case score."
+    }
+  },
+  "cases": [
+    {"id":"01","packet":"01/packet"}, {"id":"02","packet":"02/packet"},
+    {"id":"03","packet":"03/packet"}, {"id":"04","packet":"04/packet"},
+    {"id":"05","packet":"05/packet"}, {"id":"06","packet":"06/packet"},
+    {"id":"07","packet":"07/packet"}, {"id":"08","packet":"08/packet"},
+    {"id":"09","packet":"09/packet"}, {"id":"10","packet":"10/packet"},
+    {"id":"11","packet":"11/packet"}, {"id":"12","packet":"12/packet"}
+  ]
+}

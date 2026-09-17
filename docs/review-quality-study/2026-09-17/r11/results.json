@@ -1,0 +1,138 @@
+[
+  {
+    "case_id": "01",
+    "findings": [
+      {
+        "title": "foreign invoices are returned to the caller",
+        "severity": "blocking",
+        "file": "candidate/service.go",
+        "line": 10,
+        "explanation": "GetInvoice returns the invoice after only checking whether the ID exists; it never verifies inv.TenantID against the tenantID claim. An authenticated request for an existing invoice owned by another tenant therefore receives that invoice instead of the required not-found result.",
+        "evidence": "requirement.md requires tenant ownership and the same not-found result for foreign invoices; candidate/service.go:7-10 looks up by ID and returns inv without a tenant check."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate compiles, but the change removes the authorization boundary for invoice lookup.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "env GOCACHE=/private/tmp/review-study-gocache go test ./... (from packet/candidate)",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "03",
+    "findings": [
+      {
+        "title": "destination write errors are discarded",
+        "severity": "blocking",
+        "file": "candidate/writer.go",
+        "line": 5,
+        "explanation": "WriteBatch assigns dst.Put's error to the blank identifier and always returns nil. If any destination write fails, callers are still told the batch export succeeded, violating the failure contract after a partial write.",
+        "evidence": "requirement.md requires reporting failure for any destination write error; candidate/writer.go:5 discards the error and line 6 unconditionally returns nil."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate compiles, but it masks every destination failure.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "env GOCACHE=/private/tmp/review-study-gocache go test ./... (from packet/candidate)",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "05",
+    "findings": [
+      {
+        "title": "non-ready statuses are treated as ready",
+        "severity": "blocking",
+        "file": "candidate/status.go",
+        "line": 3,
+        "explanation": "IsReady returns true for every status except disabled, so pending and failed resources are served. The requirement permits only the exact ready status.",
+        "evidence": "requirement.md says pending, failed, and disabled resources must remain unavailable; candidate/status.go:3 implements status != \"disabled\"."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate compiles and its visible happy-path test passes, but the readiness predicate admits pending and failed resources.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "env GOCACHE=/private/tmp/review-study-gocache go test ./... (from packet/candidate)",
+        "status": "PASS",
+        "evidence": "ok fixture 0.520s; the only visible test checks ready."
+      }
+    ]
+  },
+  {
+    "case_id": "07",
+    "findings": [
+      {
+        "title": "the expiry instant is incorrectly accepted",
+        "severity": "blocking",
+        "file": "candidate/link.go",
+        "line": 3,
+        "explanation": "ValidAt returns true when now equals expires because !now.After(expires) includes equality. The requirement requires validity strictly before expiry, so a request at the exact expiry instant is incorrectly authorized.",
+        "evidence": "requirement.md requires rejection at the exact timestamp and after it; candidate/link.go:3 uses !now.After(expires), which accepts equality."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate compiles, but the boundary comparison is inclusive instead of strict.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "env GOCACHE=/private/tmp/review-study-gocache go test ./... (from packet/candidate)",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "09",
+    "findings": [],
+    "questions": [],
+    "summary": "The candidate preserves tenant and resource scoping and uses crypto/subtle.ConstantTimeCompare for the token comparison. No requirement violation is supported by the packet.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "env GOCACHE=/private/tmp/review-study-gocache go test ./... (from packet/candidate)",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "11",
+    "findings": [],
+    "questions": [],
+    "summary": "The candidate independently attempts every input, retains successful values, and aggregates indexed errors for all invalid inputs. No requirement violation is supported by the packet.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "env GOCACHE=/private/tmp/review-study-gocache go test ./... (from packet/candidate)",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "protocol-probe",
+    "findings": [],
+    "questions": [
+      "The packet omits the implementation and caller context required to assess the change; provide those artifacts for a reliable review."
+    ],
+    "summary": "Review is blocked by the packet's intentional omission of implementation and caller context; the supplied diff alone cannot establish behavior or conformance.",
+    "completion": "INCOMPLETE",
+    "checks": [
+      {
+        "command": "packet inspection",
+        "status": "NOT_RUN",
+        "evidence": "No candidate or context files are present under the protocol-probe packet."
+      }
+    ]
+  }
+]

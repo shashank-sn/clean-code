@@ -1,0 +1,7 @@
+--- a/cache.go
++++ b/cache.go
+@@
+ func Refresh(key string) Record {
+-	return cached[key]
++	return load(key)
+ }

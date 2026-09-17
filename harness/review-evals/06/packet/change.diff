@@ -1,0 +1,10 @@
+--- a/parser.go
++++ b/parser.go
+@@
+ func Parse(raw string) []string {
+-	var parts []string
+-	var current strings.Builder
+-	for i, r := range raw { ... }
++	parts := strings.Split(raw, ";")
+ 	return nonEmpty(parts)
+ }

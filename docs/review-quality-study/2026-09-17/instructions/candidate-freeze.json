@@ -1,0 +1,5 @@
+{
+  "candidate_prompt_sha256": "34e39919cb245d8a79482efd711208f6a229d8fd87df9371c741f548e835e60b",
+  "frozen_at": "2026-09-17T09:47:41.450383+00:00",
+  "scope": "emitted clean-reviewer prompt; same immutable prompt for both candidate trials"
+}

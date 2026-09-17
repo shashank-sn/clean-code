@@ -1,0 +1,18 @@
+{
+  "recorded_at": "2026-09-17T10:22:38.809373+00:00",
+  "reviewer_instruction_scope": "all valid runs use their frozen assigned prompt; source permissions, assigned cases, model and reasoning setting unchanged",
+  "operational_messages": [
+    {
+      "run": "r13",
+      "message": "requested completed case count and remaining work only; no findings in progress messages"
+    },
+    {
+      "run": "r16",
+      "messages": [
+        "requested completed case count and remaining work only; no findings in progress messages",
+        "if a reproduction hangs, bound it with a timeout and record the outcome; finish from available evidence and report genuinely incomplete scope"
+      ]
+    }
+  ],
+  "evaluation_instrument_repairs": "before causal grading, independent harness review requested stronger frozen-inventory/oracle binding, legitimate t.Fail classification, and concrete finding-field validation; no packet, causal oracle, reviewer prompt, or acceptance-threshold changes"
+}

@@ -1,0 +1,7 @@
+--- a/capability.go
++++ b/capability.go
+@@
+-func CanRead(c Capability, tenant, resource, token string) bool { return c.Tenant == tenant && c.Resource == resource && c.Token == token }
++func CanRead(c Capability, tenant, resource, token string) bool {
++	return c.Tenant == tenant && c.Resource == resource && subtle.ConstantTimeCompare([]byte(c.Token), []byte(token)) == 1
++}

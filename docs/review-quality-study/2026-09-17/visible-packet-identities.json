@@ -1,0 +1,93 @@
+[
+  {
+    "case_id": "01",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/01/packet",
+    "snapshot_sha256": "72297fc088f7b4c5d629fbf2e154bbb015249f42a7d07d8bf79f55ac63530d04",
+    "files": 6,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "02",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/02/packet",
+    "snapshot_sha256": "81446bbbb09965af8c296f0a0921bbd9b3e66cccce2bc7bbc8cc79f48f3612a1",
+    "files": 7,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "03",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/03/packet",
+    "snapshot_sha256": "2c57125a47e20a5f4dd939c0fc68d8445dec475919f7aabe2b699f756f5259a4",
+    "files": 7,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "04",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/04/packet",
+    "snapshot_sha256": "0a5ea06d1e912f7ce348c04828350c97a42ea90a43249a01ad31eadd39f20671",
+    "files": 7,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "05",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/05/packet",
+    "snapshot_sha256": "7307f1d40af8dd188d19f8032ce4f6152796e1c8910acffaf2d2ae937d40407b",
+    "files": 8,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "06",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/06/packet",
+    "snapshot_sha256": "0b65292853a2bad7bd0d864186b5b74a1403fb60c7a22b37df63abf15a75b2a5",
+    "files": 7,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "07",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/07/packet",
+    "snapshot_sha256": "d32c25be37b0ceeda7e335f17f86b1987668baae7c86e7d6c5db581f156f6bc1",
+    "files": 7,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "08",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/08/packet",
+    "snapshot_sha256": "c734669203ff64a8b0fcb060b425d5b175ad851b0fc0bb2528881ac24fed8dbe",
+    "files": 7,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "09",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/09/packet",
+    "snapshot_sha256": "a18edc4cff300c05ec744a6fe7df879bf8db8c2644dca73e93c09fcf8b625059",
+    "files": 5,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "10",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/10/packet",
+    "snapshot_sha256": "fe97ac745f1cab25f7665e6e1da0ec515a231abee31cd222073ade4c119532bf",
+    "files": 6,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "11",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/11/packet",
+    "snapshot_sha256": "11ed1d9b20b07980eadb2357b4be0f1360be10e6d27f70c623e7b7b30bc2cf61",
+    "files": 6,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "12",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/12/packet",
+    "snapshot_sha256": "3103fd80ba828e460027cf79b1c2d9f0e46498f64424b27eed10f89ac7697915",
+    "files": 5,
+    "identity_kind": "synthetic review packet, not git commit"
+  },
+  {
+    "case_id": "protocol-probe",
+    "packet": "/Users/shashank/Documents/Codex/2026-09-17/how/work/clean-code/harness/review-evals/protocol-probe/packet",
+    "snapshot_sha256": "61e12accd1e8026ceee2bd7e1205c15e50419bea59a29fdd416ce2f8c64b4d80",
+    "files": 2,
+    "identity_kind": "synthetic review packet, not git commit"
+  }
+]

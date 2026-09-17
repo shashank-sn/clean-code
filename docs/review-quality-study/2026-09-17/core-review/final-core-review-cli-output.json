@@ -1,0 +1,321 @@
+{
+  "schema_version": "2.0.0",
+  "revision": "sha256:ee22363ad9c35c3a6f2395a6ff9da3723ec4463588b1eda3cfeada91befe3b27",
+  "status": "PASS",
+  "validation_scope": "ARTIFACT_ONLY",
+  "completion": "COMPLETE",
+  "base_revision": "ba97cb950b0cdc390f36706f6ed5c81533673faf",
+  "change_author": "implementation-context",
+  "reviewer": "independent-review-context",
+  "scope": [
+    ".github/workflows/ci.yml",
+    "README.md",
+    "cmd/clean-code/main_test.go",
+    "docs/benchmark-full-flow.md",
+    "docs/benchmark-method.md",
+    "docs/code-review.md",
+    "docs/commands.md",
+    "docs/plans/2026-09-17-001-evidence-driven-review-plan.md",
+    "harness/examples/review-v2.json",
+    "harness/playbooks/code-review.json",
+    "harness/review/protocol.md",
+    "harness/schemas/review-check.schema.json",
+    "harness/schemas/review-finding.schema.json",
+    "harness/schemas/review-input.schema.json",
+    "hosts/generic/AGENTS.md",
+    "internal/adaptive/adaptive_test.go",
+    "internal/adaptive/playbook.go",
+    "internal/agents/agents_test.go",
+    "internal/audit/audit.go",
+    "internal/audit/audit_test.go",
+    "internal/hosts/package.go",
+    "internal/hosts/package_test.go",
+    "internal/review/review.go",
+    "internal/review/review_test.go",
+    "skills/clean-dispatcher/SKILL.md",
+    "skills/clean-review/SKILL.md",
+    "skills/clean-review/agent.json",
+    "skills/clean-reviewer/SKILL.md",
+    "skills/clean-reviewer/agent.json",
+    "tests/npm_package_artifact_test.go",
+    "tests/repository_test.go"
+  ],
+  "requirements": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5",
+    "R6"
+  ],
+  "dimensions": [
+    {
+      "id": "correctness",
+      "status": "PASS",
+      "evidence": [
+        "final-probes/self-review-whitespace rejects identity collision",
+        "final-probes/line-zero rejects schema-invalid line"
+      ]
+    },
+    {
+      "id": "integration",
+      "status": "PASS",
+      "evidence": [
+        "internal/audit/audit_test.go strict v2 decoding",
+        "tests/npm_package_artifact_test.go packed reviewer emission"
+      ]
+    },
+    {
+      "id": "tests",
+      "status": "PASS",
+      "evidence": [
+        "checks/final-focused-go-test-race.log",
+        "checks/final-focused-go-vet.log"
+      ]
+    },
+    {
+      "id": "failure_modes",
+      "status": "PASS",
+      "evidence": [
+        "hostile identity and zero-line probes fail closed with explicit diagnostics"
+      ]
+    },
+    {
+      "id": "security",
+      "status": "PASS",
+      "evidence": [
+        "sameIdentity trims both identities before independence comparison"
+      ]
+    },
+    {
+      "id": "maintainability",
+      "status": "PASS",
+      "evidence": [
+        "canonical protocol parity and packed reviewer emission checks pass"
+      ]
+    }
+  ],
+  "coverage": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "status": "REVIEWED",
+      "evidence": "CI diff and command wiring"
+    },
+    {
+      "path": "README.md",
+      "status": "REVIEWED",
+      "evidence": "full scoped diff"
+    },
+    {
+      "path": "cmd/clean-code/main_test.go",
+      "status": "REVIEWED",
+      "evidence": "CLI test diff and focused run"
+    },
+    {
+      "path": "docs/benchmark-full-flow.md",
+      "status": "REVIEWED",
+      "evidence": "wording and claim-boundary diff"
+    },
+    {
+      "path": "docs/benchmark-method.md",
+      "status": "REVIEWED",
+      "evidence": "benchmark evidence-boundary diff"
+    },
+    {
+      "path": "docs/code-review.md",
+      "status": "REVIEWED",
+      "evidence": "protocol and contract guide"
+    },
+    {
+      "path": "docs/commands.md",
+      "status": "REVIEWED",
+      "evidence": "CLI contract documentation"
+    },
+    {
+      "path": "docs/plans/2026-09-17-001-evidence-driven-review-plan.md",
+      "status": "REVIEWED",
+      "evidence": "frozen requirements"
+    },
+    {
+      "path": "harness/examples/review-v2.json",
+      "status": "REVIEWED",
+      "evidence": "candidate CLI validation"
+    },
+    {
+      "path": "harness/playbooks/code-review.json",
+      "status": "REVIEWED",
+      "evidence": "review playbook diff"
+    },
+    {
+      "path": "harness/review/protocol.md",
+      "status": "REVIEWED",
+      "evidence": "canonical protocol"
+    },
+    {
+      "path": "harness/schemas/review-check.schema.json",
+      "status": "REVIEWED",
+      "evidence": "runtime/schema contract trace"
+    },
+    {
+      "path": "harness/schemas/review-finding.schema.json",
+      "status": "REVIEWED",
+      "evidence": "line constraint parity trace"
+    },
+    {
+      "path": "harness/schemas/review-input.schema.json",
+      "status": "REVIEWED",
+      "evidence": "v2 contract trace"
+    },
+    {
+      "path": "hosts/generic/AGENTS.md",
+      "status": "REVIEWED",
+      "evidence": "canonical protocol copy"
+    },
+    {
+      "path": "internal/adaptive/adaptive_test.go",
+      "status": "REVIEWED",
+      "evidence": "focused test run"
+    },
+    {
+      "path": "internal/adaptive/playbook.go",
+      "status": "REVIEWED",
+      "evidence": "review playbook diff"
+    },
+    {
+      "path": "internal/agents/agents_test.go",
+      "status": "REVIEWED",
+      "evidence": "focused test run"
+    },
+    {
+      "path": "internal/audit/audit.go",
+      "status": "REVIEWED",
+      "evidence": "review gate and exact-byte decode trace"
+    },
+    {
+      "path": "internal/audit/audit_test.go",
+      "status": "REVIEWED",
+      "evidence": "focused test run"
+    },
+    {
+      "path": "internal/hosts/package.go",
+      "status": "REVIEWED",
+      "evidence": "generated guidance trace"
+    },
+    {
+      "path": "internal/hosts/package_test.go",
+      "status": "REVIEWED",
+      "evidence": "focused test run"
+    },
+    {
+      "path": "internal/review/review.go",
+      "status": "REVIEWED",
+      "evidence": "repaired identity and line-boundary source trace"
+    },
+    {
+      "path": "internal/review/review_test.go",
+      "status": "REVIEWED",
+      "evidence": "new hostile-input tests and focused run"
+    },
+    {
+      "path": "skills/clean-dispatcher/SKILL.md",
+      "status": "REVIEWED",
+      "evidence": "review packet and independence guidance"
+    },
+    {
+      "path": "skills/clean-review/SKILL.md",
+      "status": "REVIEWED",
+      "evidence": "canonical protocol and structural lens"
+    },
+    {
+      "path": "skills/clean-review/agent.json",
+      "status": "REVIEWED",
+      "evidence": "permissions and output contract"
+    },
+    {
+      "path": "skills/clean-reviewer/SKILL.md",
+      "status": "REVIEWED",
+      "evidence": "canonical protocol and reviewer boundaries"
+    },
+    {
+      "path": "skills/clean-reviewer/agent.json",
+      "status": "REVIEWED",
+      "evidence": "permissions and output contract"
+    },
+    {
+      "path": "tests/npm_package_artifact_test.go",
+      "status": "REVIEWED",
+      "evidence": "packed artifact and reviewer emission test"
+    },
+    {
+      "path": "tests/repository_test.go",
+      "status": "REVIEWED",
+      "evidence": "focused test run"
+    }
+  ],
+  "checks": [
+    {
+      "id": "final-focused-go-test-race",
+      "kind": "test",
+      "required": true,
+      "status": "PASS",
+      "revision": "sha256:ee22363ad9c35c3a6f2395a6ff9da3723ec4463588b1eda3cfeada91befe3b27",
+      "source": "GOCACHE=work/review-final/gocache go test -race ./tests ./internal/review ./internal/audit ./internal/hosts ./cmd/clean-code",
+      "artifact": "work/review-final/checks/final-focused-go-test-race.log",
+      "sha256": "bb111d94902a45a1356fa21249ca9df0c9e15acf8518c1f0d12ff561aa770777",
+      "unavailable_reason": ""
+    },
+    {
+      "id": "final-focused-go-vet",
+      "kind": "static-analysis",
+      "required": true,
+      "status": "PASS",
+      "revision": "sha256:ee22363ad9c35c3a6f2395a6ff9da3723ec4463588b1eda3cfeada91befe3b27",
+      "source": "GOCACHE=work/review-final/gocache go vet ./tests ./internal/review ./internal/audit ./internal/hosts ./cmd/clean-code",
+      "artifact": "work/review-final/checks/final-focused-go-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unavailable_reason": ""
+    },
+    {
+      "id": "final-cli-example",
+      "kind": "contract-validation",
+      "required": true,
+      "status": "PASS",
+      "revision": "sha256:ee22363ad9c35c3a6f2395a6ff9da3723ec4463588b1eda3cfeada91befe3b27",
+      "source": "GOCACHE=work/review-final/gocache go run ./cmd/clean-code review --input harness/examples/review-v2.json",
+      "artifact": "work/review-final/checks/final-cli-example.json",
+      "sha256": "fc20aa35358c56d67ab3227e3ee5d079a6d4fe27f31c3adaa4f63eb5d52c9182",
+      "unavailable_reason": ""
+    },
+    {
+      "id": "repaired-self-review-probe",
+      "kind": "adversarial-probe",
+      "required": true,
+      "status": "PASS",
+      "revision": "sha256:ee22363ad9c35c3a6f2395a6ff9da3723ec4463588b1eda3cfeada91befe3b27",
+      "source": "go run ./cmd/clean-code review --input work/review-final/probes/self-review-whitespace.json; expected status FAIL",
+      "artifact": "work/review-final/final-probes/self-review-whitespace.out.json",
+      "sha256": "d2d56e9131c1e768796243e1eff11ad97053863ba9e874288eb594f867a9b5d3",
+      "unavailable_reason": ""
+    },
+    {
+      "id": "repaired-line-probe",
+      "kind": "adversarial-probe",
+      "required": true,
+      "status": "PASS",
+      "revision": "sha256:ee22363ad9c35c3a6f2395a6ff9da3723ec4463588b1eda3cfeada91befe3b27",
+      "source": "go run ./cmd/clean-code review --input work/review-final/probes/line-zero.json; expected parse failure",
+      "artifact": "work/review-final/final-probes/line-zero.stderr",
+      "sha256": "dab955940a05495730d4be5ed90bad962ef6aad862b481d01a47fdbe671b9ff3",
+      "unavailable_reason": ""
+    }
+  ],
+  "limitations": [
+    "reviewed exactly the 31 paths in work/review-final/core-final-snapshot.json; harness/review-evals/ content and live study responses were excluded by assignment",
+    "standards and specification passes were sequential in one reviewer context; no separate reviewer context was available",
+    "the CLI review check is ARTIFACT_ONLY and does not inspect code claims, execute declared check sources, open declared artifacts, or verify their hashes",
+    "focused checks were run locally; CI/GitHub checks, release, merge, and human approval remain outside this review",
+    "the default Go cache was sandbox-blocked; reported checks used the workspace-local cache under work/review-final"
+  ],
+  "findings": [],
+  "issues": []
+}

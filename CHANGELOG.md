@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.0 - 2026-09-17
+
+- Add v2 review records that require requirements, scope coverage, revision-bound checks, and explicit limitations. Teach reviewers to trace affected call paths and verify agent claims; retain legacy inputs with unassessed completion.
+- Add a portable 12-case review-evaluation pack with frozen reviewer bindings, independent before/after oracles, runner and scorer self-tests, and explicit separation between fixture validation and live model evaluation.
+- Record the matched study result honestly: baseline and candidate each recovered 8/8 primary defects with all 4 clean controls silent; the release makes no recall-gain claim.
+- Limit fixture Go execution to one processor so the concurrent-charge case reaches its expected assertion; retain runtime-panic rejection and the frozen study inputs.
+- Align the npm and Codex plugin metadata and pin the one-line installer to the `v0.8.0` GitHub release tag.
+
 ## 0.7.0 - 2026-09-16
 
 - Add `clean-prune`, a dead-code elimination stage that runs after simplification and before final verification: it lists detector candidates, records the reference search behind every deletion, deletes unused symbols, files, flags, and shims outright, and blocks ship while a candidate stays unresolved or a removal has no search behind it.

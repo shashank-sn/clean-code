@@ -1,0 +1,138 @@
+[
+  {
+    "case_id": "11",
+    "findings": [],
+    "questions": [],
+    "summary": "No supported defect found in the examined candidate scope. Requirement mapping: ParseAll iterates every input, appends each successful conversion, and aggregates indexed failures before returning; no external caller or side effect is present in the packet. Dimensions: correctness PASS; integration PASS for the supplied Decoder wrapper; tests INCOMPLETE because the candidate has no tests; failure_modes PASS for invalid-item continuation as shown by the implementation, with runtime coverage limited; security NOT_APPLICABLE for this pure parser; maintainability PASS. The review is bounded to the synthetic packet and does not establish correctness beyond it.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "candidate packet 11 exited 0; fixture reported no test files"
+      }
+    ]
+  },
+  {
+    "case_id": "09",
+    "findings": [],
+    "questions": [],
+    "summary": "No supported defect found in the examined candidate scope. Requirement mapping: tenant and resource equality gate access, and the token uses crypto/subtle.ConstantTimeCompare rather than ordinary token string comparison; the packet supplies no downstream callers. Dimensions: correctness PASS; integration INCOMPLETE because only the capability type is supplied; tests INCOMPLETE because the candidate has no tests; failure_modes PASS for mismatch denial in the visible function, with no runtime boundary tests; security PASS for the stated token-comparison invariant; maintainability PASS. The review is bounded to the synthetic packet and does not establish correctness beyond it.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "candidate packet 09 exited 0; fixture reported no test files"
+      }
+    ]
+  },
+  {
+    "case_id": "07",
+    "findings": [
+      {
+        "title": "expiry timestamp is accepted",
+        "severity": "blocking",
+        "file": "candidate/link.go",
+        "line": 3,
+        "explanation": "ValidAt returns true when now and expires are equal because !now.After(expires) is true. The requirement requires strict-before validity, so a request at the exact expiry instant is incorrectly authorized. Replace the predicate with now.Before(expires).",
+        "evidence": "The changed candidate line is candidate/link.go:3. For now := expires, time.Time.After returns false and the negation returns true; context/caller.go states the download handler checks this on every request without rounding."
+      }
+    ],
+    "questions": [],
+    "summary": "The candidate violates the strict expiry invariant at the equality boundary. Requirement-to-call-path mapping is ValidAt -> Authorize; no candidate tests cover equality, before, or after boundaries. Dimensions: correctness FAIL; integration PASS for the supplied Authorize wrapper but behavior is wrong; tests INCOMPLETE; failure_modes FAIL at the expiry boundary; security PASS as a direct access-control concern; maintainability PASS. The finding is supported by a static causal trace; no external runtime evidence was provided.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "candidate packet 07 exited 0; fixture reported no test files"
+      }
+    ]
+  },
+  {
+    "case_id": "05",
+    "findings": [
+      {
+        "title": "pending and failed resources are reported ready",
+        "severity": "blocking",
+        "file": "candidate/status.go",
+        "line": 3,
+        "explanation": "IsReady now returns true for every status except disabled. Therefore pending and failed resources pass the readiness gate and can be served, violating the requirement that only ready is serveable. Restore an exact status == \"ready\" check and retain negative tests for pending, failed, and disabled.",
+        "evidence": "The changed candidate/status.go:3 predicate is status != \"disabled\". The supplied caller status.go delegates Serveable to IsReady, and the candidate status_test.go only checks ready; the diff removed the pending negative assertion."
+      }
+    ],
+    "questions": [],
+    "summary": "The readiness gate is broadened to serve non-ready states. Requirement-to-call-path mapping is Serveable -> IsReady; the candidate's visible test covers only the happy path and the diff removes the pending negative assertion. Dimensions: correctness FAIL; integration FAIL for the supplied Serveable caller; tests FAIL because required negative coverage was removed; failure_modes FAIL for pending and failed states; security NOT_APPLICABLE; maintainability PASS. The finding is supported by direct boundary evaluation and the supplied caller context.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "candidate packet 05 exited 0; only TestVisible ready-path test ran"
+      }
+    ]
+  },
+  {
+    "case_id": "03",
+    "findings": [
+      {
+        "title": "destination write failures are discarded",
+        "severity": "blocking",
+        "file": "candidate/writer.go",
+        "line": 5,
+        "explanation": "WriteBatch ignores every Destination.Put error and unconditionally returns nil. If any destination write fails, callers are told the batch succeeded, violating the required failure signal after a partial write. Return a non-nil error when a write fails (while retaining already accepted records if that is the destination's behavior).",
+        "evidence": "The changed candidate/writer.go:5 assigns Put's error to _. candidate/context/destination.go explicitly says implementations can fail after accepting an earlier record, and candidate/context/export.go returns WriteBatch directly from Run, so the nil result reaches callers."
+      }
+    ],
+    "questions": [],
+    "summary": "The export path masks partial-write failure. Requirement-to-call-path mapping is Run -> WriteBatch -> Destination.Put; no candidate tests exercise a failing destination. Dimensions: correctness FAIL; integration FAIL because Run forwards the false success; tests INCOMPLETE; failure_modes FAIL for any write error and partial batch; security NOT_APPLICABLE; maintainability PASS. The finding is supported by a static causal trace; rollback semantics are not specified and remain an evidence gap.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "candidate packet 03 exited 0; fixture reported no test files"
+      }
+    ]
+  },
+  {
+    "case_id": "01",
+    "findings": [
+      {
+        "title": "foreign-tenant invoices are returned",
+        "severity": "blocking",
+        "file": "candidate/service.go",
+        "line": 10,
+        "explanation": "GetInvoice checks only whether the ID exists and returns the invoice without comparing inv.TenantID to the request tenantID. An authenticated caller can therefore read an existing invoice belonging to another tenant. Restore the tenant equality check and return ErrNotFound for both missing and foreign invoices so the handler contract stays unchanged.",
+        "evidence": "candidate/service.go:8-10 performs the map lookup and returns inv, nil with no tenant check. context/handler.go passes request Claims.TenantID into GetInvoice, so the omitted check is the authorization boundary; the requirement explicitly requires foreign IDs to have the same not-found result."
+      }
+    ],
+    "questions": [],
+    "summary": "The change removes the tenant authorization condition from the invoice lookup. Requirement-to-call-path mapping is Handle -> GetInvoice; the missing and foreign invoice result contract is otherwise preserved, but confidentiality is broken for every existing cross-tenant ID. Dimensions: correctness FAIL; integration FAIL at the handler authorization boundary; tests INCOMPLETE because no candidate tests are supplied; failure_modes FAIL for foreign IDs; security FAIL; maintainability PASS. The finding is supported by a static causal trace and the supplied caller context.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "candidate packet 01 exited 0; fixture reported no test files"
+      }
+    ]
+  },
+  {
+    "case_id": "protocol-probe",
+    "findings": [],
+    "questions": [
+      "Provide the omitted cache-refresh implementation and caller context so authorization preservation and visible-record behavior can be reviewed."
+    ],
+    "summary": "Reliable review is blocked by missing evidence. The packet contains only a diff and requirement; it omits the implementation, candidate tree, callers, and tests. Per the requirement, no defect judgment is made.",
+    "completion": "INCOMPLETE",
+    "checks": [
+      {
+        "command": "go test ./...",
+        "status": "NOT_RUN",
+        "evidence": "candidate implementation and go.mod are absent from the packet, so there is no runnable tree"
+      }
+    ]
+  }
+]

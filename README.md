@@ -72,7 +72,7 @@ go build -o clean-code ./cmd/clean-code
 Bootstraps Node.js and Go when missing, then builds the CLI.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/shashank-sn/clean-code/v0.7.0/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/shashank-sn/clean-code/v0.8.0/scripts/install.sh | bash
 export PATH="$HOME/.local/bin:$PATH"
 clean-code version
 ```
@@ -189,6 +189,8 @@ clean-code learn --proposal FILE
 
 `gauntlet plan` creates role packets; `gauntlet run` is a portable artifact and freshness validation check (exit `0` = all stages PASS, `1` = any stage FAILS, `2` = any stage NOT_RUN because the portable core cannot execute agent stages). Full multi-role execution requires a host adapter — see [agent-quality gauntlet](docs/gauntlet.md).
 
+Reviews now record requirements, affected call paths, scope coverage, and check provenance using the [v2 review contract](harness/examples/review-v2.json). The CLI validates that record; it does not inspect the code or certify the recorded claims. See the [code review guide](docs/code-review.md) for the investigation procedure, incomplete reviews, and legacy input compatibility.
+
 See [commands](docs/commands.md), [configuration](docs/configuration.md), [portable agents](docs/portable-agents.md), [agent-quality gauntlet](docs/gauntlet.md), and [adapter authoring](docs/adapter-authoring.md).
 
 ---
@@ -198,9 +200,12 @@ See [commands](docs/commands.md), [configuration](docs/configuration.md), [porta
 ```bash
 clean-code compare-workflows
 clean-code benchmark-full-flow
+node harness/review-evals/runner.js
 ```
 
 Details: [benchmark-full-flow](docs/benchmark-full-flow.md), [shipping pipeline](docs/shipping-pipeline.md).
+
+The [review evaluation pack](harness/review-evals/README.md) contains real before/after code, separate executable oracles, and clean controls. Its local runner checks fixture integrity and behavior. Measuring reviewer quality additionally requires fresh model observations and independent adjudication; fixture validation alone is not an agent performance result.
 
 ---
 

@@ -307,11 +307,16 @@ func inspectSupporting(base string, configured []string, receipt *Receipt) (map[
 
 func inspectReview(base, configured, revision string, receipt *Receipt) (review.Input, review.Report, string, error) {
 	path := resolve(base, configured)
-	var input review.Input
-	digest, err := loadStrict(path, &input)
+	content, err := readRegular(path)
 	if err != nil {
 		return review.Input{}, review.Report{}, "", fmt.Errorf("load review input: %w", err)
 	}
+	input, err := review.Decode(content)
+	if err != nil {
+		return review.Input{}, review.Report{}, "", fmt.Errorf("load review input: %w", err)
+	}
+	digestBytes := sha256.Sum256(content)
+	digest := hex.EncodeToString(digestBytes[:])
 	receipt.Artifacts = append(receipt.Artifacts, Artifact{Kind: "review", Path: configured, SHA256: digest})
 	if input.Revision != revision {
 		receipt.Gaps = append(receipt.Gaps, "review revision does not match audit revision")

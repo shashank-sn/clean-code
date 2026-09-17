@@ -97,6 +97,56 @@ func TestEmitPromptReportsUnavailableCapabilities(t *testing.T) {
 	}
 }
 
+func TestReviewerPackagesAreReadOnlyAndCarryCanonicalProtocol(t *testing.T) {
+	root := filepath.Join("..", "..")
+	canonical := mustRead(t, filepath.Join(root, "harness", "review", "protocol.md"))
+	for _, id := range []string{"clean-review", "clean-reviewer"} {
+		loaded, err := Load(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(strings.Join(loaded.Descriptor.Permissions, ","), "write_repository") {
+			t.Fatalf("%s grants product write access: %#v", id, loaded.Descriptor.Permissions)
+		}
+		if !contains(loaded.Descriptor.Permissions, "read_repository") || !contains(loaded.Descriptor.Permissions, "execute_commands") {
+			t.Fatalf("%s must declare read and conditional command capability: %#v", id, loaded.Descriptor.Permissions)
+		}
+		for _, required := range []string{
+			"base and candidate revisions plus complete changed-file inventory and diff",
+			"original requirements and affected-call-path notes",
+			"actual check commands, results, skips, changed assertions, and known gaps",
+			"change-author and reviewer/context identities",
+		} {
+			if !contains(loaded.Descriptor.Input.Required, required) {
+				t.Fatalf("%s input omits required review packet field %q: %#v", id, required, loaded.Descriptor.Input.Required)
+			}
+		}
+		for _, required := range []string{
+			"v2 review record with reviewed scope, requirements, six dimension assessments, checks, limitations, and completion",
+			"requirement-to-call-path-and-test mapping or an explicit evidence gap",
+		} {
+			if !contains(loaded.Descriptor.Output.Required, required) {
+				t.Fatalf("%s output omits required review evidence %q: %#v", id, required, loaded.Descriptor.Output.Required)
+			}
+		}
+		if got := markedSection(loaded.Instructions); got != markedSection(canonical) {
+			t.Fatalf("%s protocol diverged from canonical source", id)
+		}
+		for _, hostID := range []string{"generic", "codex"} {
+			prompt, err := EmitPrompt(id, hostID)
+			if err != nil {
+				t.Fatalf("emit %s/%s: %v", id, hostID, err)
+			}
+			if got := markedSection(prompt); got != markedSection(canonical) {
+				t.Fatalf("emitted %s/%s protocol diverged from canonical source", id, hostID)
+			}
+			if !strings.Contains(prompt, "product-code write") || !strings.Contains(prompt, "INCOMPLETE") {
+				t.Fatalf("emitted %s/%s prompt omitted review boundary or terminal state", id, hostID)
+			}
+		}
+	}
+}
+
 func TestDescribeUsesNativeModeOnlyWhenRequirementsAreSupported(t *testing.T) {
 	runtime, err := Describe("clean-orchestrate", "codex")
 	if err != nil {
@@ -137,4 +187,34 @@ func fixtureRoot(t *testing.T, suffix string) string {
 		t.Fatal(err)
 	}
 	return root
+}
+
+func mustRead(t *testing.T, path string) string {
+	t.Helper()
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(body)
+}
+
+func markedSection(body string) string {
+	const start = "<!-- review-protocol:start -->"
+	const end = "<!-- review-protocol:end -->"
+	from := strings.Index(body, start)
+	to := strings.Index(body, end)
+	if from < 0 || to < from {
+		return ""
+	}
+	to += len(end)
+	return body[from:to]
+}
+
+func contains(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }

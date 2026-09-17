@@ -1,0 +1,23 @@
+{
+  "baseline": {
+    "grading_alias": "juniper",
+    "runs": [
+      "r11",
+      "r12"
+    ]
+  },
+  "candidate-trial-1": {
+    "grading_alias": "amber",
+    "runs": [
+      "r13",
+      "r14"
+    ]
+  },
+  "candidate-trial-2": {
+    "grading_alias": "river",
+    "runs": [
+      "r15",
+      "r16"
+    ]
+  }
+}

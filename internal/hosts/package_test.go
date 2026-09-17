@@ -32,6 +32,20 @@ func TestEveryHostWritesPortableInstructions(t *testing.T) {
 	}
 }
 
+func TestGeneratedAndCheckedInHostGuidanceCarryCanonicalProtocol(t *testing.T) {
+	root := filepath.Join("..", "..")
+	canonical := readFile(t, filepath.Join(root, "harness", "review", "protocol.md"))
+	checkedIn := readFile(t, filepath.Join(root, "hosts", "generic", "AGENTS.md"))
+	if section(checkedIn) != section(canonical) {
+		t.Fatal("checked-in generic guidance diverges from canonical review protocol")
+	}
+	for _, hostID := range []string{"generic", "codex", "cursor", "windsurf"} {
+		if section(Instructions(hostID)) != section(canonical) {
+			t.Fatalf("generated %s guidance diverges from canonical review protocol", hostID)
+		}
+	}
+}
+
 func TestUnknownHostUsesGenericPackage(t *testing.T) {
 	if PackageTarget("future-host") != "AGENTS.md" || !strings.Contains(Instructions("future-host"), "Generic coding environment") {
 		t.Fatal("expected generic package fallback")
@@ -45,4 +59,24 @@ func TestRuleHostsReceiveAlwaysOnFrontmatter(t *testing.T) {
 	if !strings.HasPrefix(Instructions("windsurf"), "---\ntrigger: always_on") {
 		t.Fatal("windsurf package needs always-on rule metadata")
 	}
+}
+
+func readFile(t *testing.T, path string) string {
+	t.Helper()
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(body)
+}
+
+func section(body string) string {
+	const start = "<!-- review-protocol:start -->"
+	const end = "<!-- review-protocol:end -->"
+	from := strings.Index(body, start)
+	to := strings.Index(body, end)
+	if from < 0 || to < from {
+		return ""
+	}
+	return body[from : to+len(end)]
 }

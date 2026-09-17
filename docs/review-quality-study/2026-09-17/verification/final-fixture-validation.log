@@ -1,0 +1,91 @@
+{
+  "mode": "fixture_validation",
+  "total": 12,
+  "failed": 0,
+  "results": [
+    {
+      "id": "01",
+      "kind": "defect",
+      "before": "pass",
+      "after": "oracle-assertion-fail",
+      "expected": true
+    },
+    {
+      "id": "02",
+      "kind": "defect",
+      "before": "pass",
+      "after": "oracle-assertion-fail",
+      "expected": true
+    },
+    {
+      "id": "03",
+      "kind": "defect",
+      "before": "pass",
+      "after": "oracle-assertion-fail",
+      "expected": true
+    },
+    {
+      "id": "04",
+      "kind": "defect",
+      "before": "pass",
+      "after": "oracle-assertion-fail",
+      "expected": true
+    },
+    {
+      "id": "05",
+      "kind": "defect",
+      "before": "pass",
+      "after": "oracle-assertion-fail",
+      "expected": true
+    },
+    {
+      "id": "06",
+      "kind": "defect",
+      "before": "pass",
+      "after": "oracle-assertion-fail",
+      "expected": true
+    },
+    {
+      "id": "07",
+      "kind": "defect",
+      "before": "pass",
+      "after": "oracle-assertion-fail",
+      "expected": true
+    },
+    {
+      "id": "08",
+      "kind": "defect",
+      "before": "pass",
+      "after": "oracle-assertion-fail",
+      "expected": true
+    },
+    {
+      "id": "09",
+      "kind": "clean",
+      "before": "pass",
+      "after": "pass",
+      "expected": true
+    },
+    {
+      "id": "10",
+      "kind": "clean",
+      "before": "pass",
+      "after": "pass",
+      "expected": true
+    },
+    {
+      "id": "11",
+      "kind": "clean",
+      "before": "pass",
+      "after": "pass",
+      "expected": true
+    },
+    {
+      "id": "12",
+      "kind": "clean",
+      "before": "pass",
+      "after": "pass",
+      "expected": true
+    }
+  ]
+}

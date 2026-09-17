@@ -1,0 +1,103 @@
+{
+  "status": "SCORED",
+  "acceptance": true,
+  "primary_recall": {
+    "found": 8,
+    "total": 8,
+    "ratio": 1
+  },
+  "high_impact_misses": [],
+  "unsupported_findings": 0,
+  "unsupported_blocking_findings": 0,
+  "control_silence": {
+    "silent": 4,
+    "total": 4
+  },
+  "incomplete_cases": 0,
+  "model_completion": [
+    {
+      "case_id": "01",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Correctness, integration, and security fail because the changed lookup removes the authorization boundary. Failure and boundary behavior are directly traceable for foreign IDs; maintainability is otherwise unchanged. Tests: local go test compiles the candidate but there are no test files, so the cross-tenant scenario is unexecuted."
+      }
+    },
+    {
+      "case_id": "02",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot 81446bbbb09965af8c296f0a0921bbd9b3e66cccce2bc7bbc8cc79f48f3612a1. correctness=FAIL and failure_modes=FAIL due to the concurrent idempotency violation; integration=FAIL for Checkout callers; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE (no auth or tenant boundary in scope); maintainability=LIMITED because the shared mutable store is unsynchronized. Static causal review is complete; semantic test coverage is a known gap."
+      }
+    },
+    {
+      "case_id": "03",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Correctness and integration fail on partial-write error propagation. The failure path is explicit in the changed loop; no authorization or security behavior is involved. Tests: local go test compiles the candidate but there are no test files, so a failing destination scenario is unexecuted. Maintainability is otherwise unchanged."
+      }
+    },
+    {
+      "case_id": "04",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot 0a5ea06d1e912f7ce348c04828350c97a42ea90a43249a01ad31eadd39f20671. correctness=FAIL and integration=FAIL because Build forwards malformed arguments; failure_modes=FAIL for the documented comma input; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=LIMITED. Static causal review is complete with no semantic test suite supplied."
+      }
+    },
+    {
+      "case_id": "05",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Correctness and integration fail because the readiness predicate admits pending and failed resources. This is an availability boundary failure; no separate authorization or concurrency behavior is present in the packet. Tests: local go test passes only the happy-path visible test, leaving the required negative states uncovered. Maintainability is unchanged."
+      }
+    },
+    {
+      "case_id": "06",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot 0b65292853a2bad7bd0d864186b5b74a1403fb60c7a22b37df63abf15a75b2a5. correctness=FAIL and integration=FAIL for Loader and migration consumers; failure_modes=FAIL on escaped separators; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=LIMITED. Static causal review is complete with semantic coverage gap recorded."
+      }
+    },
+    {
+      "case_id": "07",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Correctness and access-control boundary behavior fail at the exact expiry instant. Integration tracing is direct through the supplied Authorize caller; no retry, persistence, or tenant behavior is exposed. Tests: local go test compiles the candidate but there are no test files, so the equality boundary is unexecuted. Maintainability is unchanged."
+      }
+    },
+    {
+      "case_id": "08",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot c734669203ff64a8b0fcb060b425d5b175ad851b0fc0bb2528881ac24fed8dbe. correctness=FAIL and integration=FAIL for Command.Shutdown; failure_modes=FAIL because queued and in-flight jobs can be lost or unfinished; tests=LIMITED (build/vet pass, no test files); security=NOT_APPLICABLE; maintainability=FAIL because the retained WaitGroup is no longer used to enforce the contract. Static causal review is complete with no runtime test suite supplied."
+      }
+    },
+    {
+      "case_id": "09",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No supported defect found in the examined scope. Correctness and integration satisfy tenant, resource, and token gating; the token uses crypto/subtle.ConstantTimeCompare rather than ordinary string equality. Failure and boundary behavior deny mismatched tenant/resource or token values. Security review found no changed-scope issue. Tests: local go test passes compilation only because the packet has no test files; runtime coverage is a limitation. Maintainability is unchanged."
+      }
+    },
+    {
+      "case_id": "10",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot fe97ac745f1cab25f7665e6e1da0ec515a231abee31cd222073ade4c119532bf. No supported defect was found in the examined scope: Normalize copies caller input, sorts a stable canonical order, and removes duplicates. correctness=PASS; integration=PASS for Store.Replace; tests=LIMITED (build/vet pass, no test files); failure_modes=PASS for empty, duplicate, and reordered input by static trace; security=NOT_APPLICABLE; maintainability=PASS. The result is bounded by the absence of semantic tests."
+      }
+    },
+    {
+      "case_id": "11",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No supported defect found in the examined scope. ParseAll independently attempts every input, retains successful values, and joins indexed errors for all failures; this matches the supplied Decoder caller. Correctness, integration, failure handling, and maintainability are supported by the static trace. No security or authorization behavior is present. Tests: local go test passes compilation only because the packet has no test files; mixed-validity and multiple-failure runtime coverage is a limitation."
+      }
+    },
+    {
+      "case_id": "12",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed synthetic packet snapshot 3103fd80ba828e460027cf79b1c2d9f0e46498f64424b27eed10f89ac7697915. No supported defect was found in the examined scope: Resolve returns workspace values, falls back only when errors.Is reports ErrNotFound, and returns all other workspace errors unchanged. correctness=PASS; integration=PASS for Source callers; tests=LIMITED (build/vet pass, no test files); failure_modes=PASS by static trace for found, wrapped-not-found, and other errors; security=NOT_APPLICABLE; maintainability=PASS. The result is bounded by the absence of semantic tests."
+      }
+    }
+  ]
+}

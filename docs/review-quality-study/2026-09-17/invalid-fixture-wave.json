@@ -1,0 +1,13 @@
+{
+  "status": "INVALID_FIXTURE_PACKAGING",
+  "recorded_at": "2026-09-17T09:51:49.211975+00:00",
+  "runs": [
+    "r01",
+    "r02",
+    "r03"
+  ],
+  "r03": "interrupted",
+  "reason": "packet/context included duplicate declarations and oracle/tests polluted root Go module discovery; discovered by independent repository test before model answers or oracle labels were read",
+  "scores": "NOT_SCORED",
+  "action": "preserve original evidence; repair packet packaging only; freeze corrected snapshots; repeat baseline and both candidate trials in fresh contexts with unchanged prompts/settings/scoring thresholds"
+}

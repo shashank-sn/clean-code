@@ -2,15 +2,92 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://clean-code.local/schemas/review-input.schema.json",
   "title": "Clean Code review input",
-  "type": "object",
-  "required": ["schema_version", "revision", "change_author", "reviewer", "scope", "findings"],
-  "properties": {
-    "schema_version": { "const": "1.0.0" },
-    "revision": { "type": "string", "minLength": 1 },
-    "change_author": { "type": "string", "minLength": 1 },
-    "reviewer": { "type": "string", "minLength": 1 },
-    "scope": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-    "findings": { "type": "array", "items": { "$ref": "review-finding.schema.json" } }
-  },
-  "additionalProperties": false
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["schema_version", "revision", "change_author", "reviewer", "scope", "findings"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "revision": { "type": "string", "minLength": 1 },
+        "change_author": { "type": "string", "minLength": 1 },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "scope": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "findings": { "type": "array", "items": { "$ref": "review-finding.schema.json" } }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["schema_version", "base_revision", "revision", "change_author", "reviewer", "scope", "requirements", "dimensions", "coverage", "checks", "limitations", "completion", "findings"],
+      "properties": {
+        "schema_version": { "const": "2.0.0" },
+        "base_revision": { "type": "string", "minLength": 1 },
+        "revision": { "type": "string", "minLength": 1 },
+        "change_author": { "type": "string", "minLength": 1 },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "scope": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "requirements": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "dimensions": {
+          "type": "array", "minItems": 6, "maxItems": 6,
+          "allOf": [
+            { "contains": { "type": "object", "required": ["id"], "properties": { "id": { "const": "correctness" } } } },
+            { "contains": { "type": "object", "required": ["id"], "properties": { "id": { "const": "integration" } } } },
+            { "contains": { "type": "object", "required": ["id"], "properties": { "id": { "const": "tests" } } } },
+            { "contains": { "type": "object", "required": ["id"], "properties": { "id": { "const": "failure_modes" } } } },
+            { "contains": { "type": "object", "required": ["id"], "properties": { "id": { "const": "security" } } } },
+            { "contains": { "type": "object", "required": ["id"], "properties": { "id": { "const": "maintainability" } } } }
+          ],
+          "items": {
+            "type": "object", "required": ["id", "status"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "status": { "enum": ["PASS", "FAIL", "INCOMPLETE", "NOT_RUN", "NOT_AVAILABLE", "NOT_CONFIGURED", "STALE", "ERROR", "NOT_APPLICABLE"] },
+              "evidence": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+              "limitation": { "type": "string" },
+              "reason": { "type": "string" }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "status": { "enum": ["PASS", "FAIL"] } } },
+                "then": { "required": ["evidence"], "properties": { "evidence": { "minItems": 1 } } }
+              },
+              {
+                "if": { "properties": { "status": { "enum": ["INCOMPLETE", "NOT_RUN", "NOT_AVAILABLE", "NOT_CONFIGURED", "STALE", "ERROR", "NOT_APPLICABLE"] } } },
+                "then": { "anyOf": [ { "required": ["limitation"], "properties": { "limitation": { "minLength": 1 } } }, { "required": ["reason"], "properties": { "reason": { "minLength": 1 } } } ] }
+              }
+            ],
+            "additionalProperties": false
+          }
+        },
+        "coverage": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "required": ["path", "status"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "status": { "enum": ["REVIEWED", "NOT_REVIEWED"] },
+              "evidence": { "type": "string" },
+              "reason": { "type": "string" }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "status": { "const": "REVIEWED" } } },
+                "then": { "required": ["evidence"], "properties": { "evidence": { "minLength": 1 } } }
+              },
+              {
+                "if": { "properties": { "status": { "const": "NOT_REVIEWED" } } },
+                "then": { "required": ["reason"], "properties": { "reason": { "minLength": 1 } } }
+              }
+            ],
+            "additionalProperties": false
+          }
+        },
+        "checks": { "type": "array", "minItems": 1, "items": { "$ref": "review-check.schema.json" } },
+        "limitations": { "type": "array", "items": { "type": "string" } },
+        "completion": { "enum": ["COMPLETE", "INCOMPLETE"] },
+        "findings": { "type": "array", "items": { "$ref": "review-finding.schema.json" } }
+      },
+      "additionalProperties": false
+    }
+  ]
 }

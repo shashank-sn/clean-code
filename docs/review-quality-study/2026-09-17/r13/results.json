@@ -1,0 +1,138 @@
+[
+  {
+    "case_id": "01",
+    "findings": [
+      {
+        "title": "tenant check removed from invoice lookup",
+        "severity": "blocking",
+        "file": "service.go",
+        "line": 9,
+        "explanation": "GetInvoice now returns any invoice found by ID without comparing inv.TenantID to the tenantID claim. A request authenticated for tenant A can therefore read tenant B's invoice, violating tenant isolation and the required not-found behavior for foreign invoices.",
+        "evidence": "candidate/service.go:8-10 looks up invoices[id] and returns inv,nil; the supplied handler passes req.Claims.TenantID into GetInvoice. The previous context implementation compared inv.TenantID != tenantID before returning success. Trigger: populate an invoice with TenantID=tenant-b, then call GetInvoice(ctx, \"tenant-a\", id)."
+      }
+    ],
+    "questions": [],
+    "summary": "Correctness, integration, and security fail because the changed lookup removes the authorization boundary. Failure and boundary behavior are directly traceable for foreign IDs; maintainability is otherwise unchanged. Tests: local go test compiles the candidate but there are no test files, so the cross-tenant scenario is unexecuted.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "cd work/clean-code/harness/review-evals/01/packet/candidate && GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "03",
+    "findings": [
+      {
+        "title": "destination write errors are discarded",
+        "severity": "blocking",
+        "file": "writer.go",
+        "line": 5,
+        "explanation": "WriteBatch ignores every error returned by Destination.Put and unconditionally returns nil. When a destination fails after accepting an earlier record, Run reports a successful export even though the batch is partial, directly violating the failure contract.",
+        "evidence": "candidate/writer.go:5 assigns _ = dst.Put(record), and line 6 always returns nil. Context/export.go forwards Run directly to WriteBatch. Trigger: a Destination.Put implementation returns an error on the second record after accepting the first; the caller receives nil and cannot detect the partial export."
+      }
+    ],
+    "questions": [],
+    "summary": "Correctness and integration fail on partial-write error propagation. The failure path is explicit in the changed loop; no authorization or security behavior is involved. Tests: local go test compiles the candidate but there are no test files, so a failing destination scenario is unexecuted. Maintainability is otherwise unchanged.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "cd work/clean-code/harness/review-evals/03/packet/candidate && GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "05",
+    "findings": [
+      {
+        "title": "non-ready statuses are treated as ready",
+        "severity": "blocking",
+        "file": "status.go",
+        "line": 3,
+        "explanation": "IsReady returns true for every status except disabled, so pending and failed resources are served. This reverses the allowlist requirement that only the exact ready status be available.",
+        "evidence": "candidate/status.go:3 implements status != \"disabled\"; Serveable delegates directly to IsReady in the supplied context. Trigger: Serveable(\"pending\") or Serveable(\"failed\") returns true. The changed visible test covers only ready and does not exercise the rejected states; the context explicitly identifies that gap."
+      }
+    ],
+    "questions": [],
+    "summary": "Correctness and integration fail because the readiness predicate admits pending and failed resources. This is an availability boundary failure; no separate authorization or concurrency behavior is present in the packet. Tests: local go test passes only the happy-path visible test, leaving the required negative states uncovered. Maintainability is unchanged.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "cd work/clean-code/harness/review-evals/05/packet/candidate && GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "ok fixture 0.081s"
+      }
+    ]
+  },
+  {
+    "case_id": "07",
+    "findings": [
+      {
+        "title": "expiry boundary is accepted",
+        "severity": "blocking",
+        "file": "link.go",
+        "line": 3,
+        "explanation": "ValidAt now returns true when now equals expires because !now.After(expires) includes the equality boundary. Links must be valid strictly before expiry, so an access request at the exact expiry instant is incorrectly authorized.",
+        "evidence": "candidate/link.go:3 uses !now.After(expires). The supplied caller delegates Authorize directly to ValidAt and says expiry is checked on every request without rounding. Trigger: ValidAt(expires, expires) returns true; the required result is rejection."
+      }
+    ],
+    "questions": [],
+    "summary": "Correctness and access-control boundary behavior fail at the exact expiry instant. Integration tracing is direct through the supplied Authorize caller; no retry, persistence, or tenant behavior is exposed. Tests: local go test compiles the candidate but there are no test files, so the equality boundary is unexecuted. Maintainability is unchanged.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "cd work/clean-code/harness/review-evals/07/packet/candidate && GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "09",
+    "findings": [],
+    "questions": [],
+    "summary": "No supported defect found in the examined scope. Correctness and integration satisfy tenant, resource, and token gating; the token uses crypto/subtle.ConstantTimeCompare rather than ordinary string equality. Failure and boundary behavior deny mismatched tenant/resource or token values. Security review found no changed-scope issue. Tests: local go test passes compilation only because the packet has no test files; runtime coverage is a limitation. Maintainability is unchanged.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "cd work/clean-code/harness/review-evals/09/packet/candidate && GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "11",
+    "findings": [],
+    "questions": [],
+    "summary": "No supported defect found in the examined scope. ParseAll independently attempts every input, retains successful values, and joins indexed errors for all failures; this matches the supplied Decoder caller. Correctness, integration, failure handling, and maintainability are supported by the static trace. No security or authorization behavior is present. Tests: local go test passes compilation only because the packet has no test files; mixed-validity and multiple-failure runtime coverage is a limitation.",
+    "completion": "COMPLETE",
+    "checks": [
+      {
+        "command": "cd work/clean-code/harness/review-evals/11/packet/candidate && GOCACHE=/private/tmp/clean-code-review-go-cache GOMODCACHE=/private/tmp/clean-code-review-go-mod-cache go test ./...",
+        "status": "PASS",
+        "evidence": "? fixture [no test files]"
+      }
+    ]
+  },
+  {
+    "case_id": "protocol-probe",
+    "findings": [],
+    "questions": [
+      "Provide the candidate implementation and the caller/authorization context needed to trace refresh behavior and verify that authorization and record identity are preserved."
+    ],
+    "summary": "Reliable review is blocked. The requirement explicitly says the packet omits the implementation and caller context, and the packet contains only requirement.md and change.diff. Correctness, integration, failure modes, security, tests, and maintainability cannot be assessed from the supplied evidence; no defect is asserted.",
+    "completion": "INCOMPLETE",
+    "checks": [
+      {
+        "command": "candidate/source and caller checks",
+        "status": "NOT_RUN",
+        "evidence": "The assigned packet contains no candidate/ directory or context/ files."
+      }
+    ]
+  }
+]

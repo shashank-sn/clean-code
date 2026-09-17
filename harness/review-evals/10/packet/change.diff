@@ -1,0 +1,8 @@
+--- a/labels.go
++++ b/labels.go
+@@
+ func Normalize(values []string) []string {
++	// Sort before deduplication so repeated writes have one canonical form.
+ 	sort.Strings(values)
+ 	return unique(values)
+ }

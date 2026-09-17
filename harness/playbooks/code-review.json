@@ -16,11 +16,13 @@
   "minimum_evidence": [
     "diff",
     "requirements",
-    "verification-report"
+    "verification-report",
+    "review-packet",
+    "requirement-call-path-test-matrix"
   ],
   "arena_warranted": "no",
   "adversarial_probes_warranted": "review may request probes; it does not replace them",
-  "parallel_guidance": "multiple reviewers may read in parallel; blocking dispositions reconcile before ship",
+  "parallel_guidance": "use separate reviewer contexts only when the host provides real isolation; otherwise run standards and spec passes sequentially in one context and record procedural separation plus the limitation; reconcile blocking dispositions before ship",
   "terminal_states": [
     "PASS",
     "FAIL",

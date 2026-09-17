@@ -1,0 +1,77 @@
+{
+  "schema_version": "2.0.0",
+  "base_revision": "base-sha",
+  "revision": "candidate-sha",
+  "change_author": "reviewer",
+  "reviewer": "reviewer ",
+  "scope": [
+    "internal/review/review.go"
+  ],
+  "requirements": [
+    "R2"
+  ],
+  "dimensions": [
+    {
+      "id": "correctness",
+      "status": "PASS",
+      "evidence": [
+        "review:correctness"
+      ]
+    },
+    {
+      "id": "integration",
+      "status": "PASS",
+      "evidence": [
+        "review:integration"
+      ]
+    },
+    {
+      "id": "tests",
+      "status": "PASS",
+      "evidence": [
+        "check:verification"
+      ]
+    },
+    {
+      "id": "failure_modes",
+      "status": "PASS",
+      "evidence": [
+        "review:failure-modes"
+      ]
+    },
+    {
+      "id": "security",
+      "status": "NOT_APPLICABLE",
+      "reason": "no security boundary changes"
+    },
+    {
+      "id": "maintainability",
+      "status": "PASS",
+      "evidence": [
+        "review:maintainability"
+      ]
+    }
+  ],
+  "coverage": [
+    {
+      "path": "internal/review/review.go",
+      "status": "REVIEWED",
+      "evidence": "review:scope"
+    }
+  ],
+  "checks": [
+    {
+      "id": "verification",
+      "kind": "test",
+      "required": true,
+      "status": "PASS",
+      "revision": "candidate-sha",
+      "source": "go test ./internal/review",
+      "artifact": "evidence/verification.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "limitations": [],
+  "completion": "COMPLETE",
+  "findings": []
+}

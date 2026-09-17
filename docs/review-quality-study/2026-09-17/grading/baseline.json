@@ -1,0 +1,296 @@
+{
+  "cases": [
+    {
+      "case_id": "01",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but the change removes the authorization boundary for invoice lookup."
+      },
+      "findings": [
+        {
+          "finding_id": "juniper-01-1",
+          "oracle_id": "case-01-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "foreign invoices are returned to the caller",
+          "severity": "blocking",
+          "file": "candidate/service.go",
+          "line": 10,
+          "explanation": "GetInvoice returns the invoice after only checking whether the ID exists; it never verifies inv.TenantID against the tenantID claim. An authenticated request for an existing invoice owned by another tenant therefore receives that invoice instead of the required not-found result.",
+          "evidence": "requirement.md requires tenant ownership and the same not-found result for foreign invoices; candidate/service.go:7-10 looks up by ID and returns inv without a tenant check.",
+          "raw_response": {
+            "title": "foreign invoices are returned to the caller",
+            "severity": "blocking",
+            "file": "candidate/service.go",
+            "line": 10,
+            "explanation": "GetInvoice returns the invoice after only checking whether the ID exists; it never verifies inv.TenantID against the tenantID claim. An authenticated request for an existing invoice owned by another tenant therefore receives that invoice instead of the required not-found result.",
+            "evidence": "requirement.md requires tenant ownership and the same not-found result for foreign invoices; candidate/service.go:7-10 looks up by ID and returns inv without a tenant check."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the removed tenant equality check and the foreign-invoice path required by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "02",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but it removes the synchronization required to make the idempotency check and charge creation atomic under concurrent retries."
+      },
+      "findings": [
+        {
+          "finding_id": "juniper-02-1",
+          "oracle_id": "case-02-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Concurrent retries race through the idempotency check",
+          "severity": "blocking",
+          "file": "candidate/service.go",
+          "line": 16,
+          "explanation": "CreatePayment performs the seen lookup and the charge creation without synchronization. Two concurrent calls with the same key can both miss the map, then create different payment IDs and increment charges twice; concurrent map access can also panic.",
+          "evidence": "The requirement requires concurrent retries with one original payment and one charge. Lines 16 and 19-21 have no mutex or other atomic guard, while the packet exposes SetTestBarrier to hold both callers after the miss and Reset to inspect the shared test store.",
+          "raw_response": {
+            "title": "Concurrent retries race through the idempotency check",
+            "severity": "blocking",
+            "file": "candidate/service.go",
+            "line": 16,
+            "explanation": "CreatePayment performs the seen lookup and the charge creation without synchronization. Two concurrent calls with the same key can both miss the map, then create different payment IDs and increment charges twice; concurrent map access can also panic.",
+            "evidence": "The requirement requires concurrent retries with one original payment and one charge. Lines 16 and 19-21 have no mutex or other atomic guard, while the packet exposes SetTestBarrier to hold both callers after the miss and Reset to inspect the shared test store."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the unsynchronized idempotency check and duplicate-charge interleaving exercised by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "03",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but it masks every destination failure."
+      },
+      "findings": [
+        {
+          "finding_id": "juniper-03-1",
+          "oracle_id": "case-03-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "destination write errors are discarded",
+          "severity": "blocking",
+          "file": "candidate/writer.go",
+          "line": 5,
+          "explanation": "WriteBatch assigns dst.Put's error to the blank identifier and always returns nil. If any destination write fails, callers are still told the batch export succeeded, violating the failure contract after a partial write.",
+          "evidence": "requirement.md requires reporting failure for any destination write error; candidate/writer.go:5 discards the error and line 6 unconditionally returns nil.",
+          "raw_response": {
+            "title": "destination write errors are discarded",
+            "severity": "blocking",
+            "file": "candidate/writer.go",
+            "line": 5,
+            "explanation": "WriteBatch assigns dst.Put's error to the blank identifier and always returns nil. If any destination write fails, callers are still told the batch export succeeded, violating the failure contract after a partial write.",
+            "evidence": "requirement.md requires reporting failure for any destination write error; candidate/writer.go:5 discards the error and line 6 unconditionally returns nil."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies discarded destination errors and the required stop-on-error behavior exercised by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "04",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but it violates the established comma-delimited forwarding format for both adjacent and whitespace-separated items."
+      },
+      "findings": [
+        {
+          "finding_id": "juniper-04-1",
+          "oracle_id": "case-04-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Flag decoding no longer uses the comma delimiter",
+          "severity": "blocking",
+          "file": "candidate/flags.go",
+          "line": 5,
+          "explanation": "DecodeFlags calls strings.Fields, which splits only on whitespace and leaves commas attached or combines comma-delimited flags into one item. For example, --region=us, --verbose becomes [--region=us,, --verbose], and --a,--b remains one argument, so the child process receives incorrect arguments.",
+          "evidence": "The requirement says values are comma-delimited and trims whitespace around each item. The packet docs give --forward=--region=us, --verbose as an existing caller. strings.Fields(raw) at line 5 does not split on the comma.",
+          "raw_response": {
+            "title": "Flag decoding no longer uses the comma delimiter",
+            "severity": "blocking",
+            "file": "candidate/flags.go",
+            "line": 5,
+            "explanation": "DecodeFlags calls strings.Fields, which splits only on whitespace and leaves commas attached or combines comma-delimited flags into one item. For example, --region=us, --verbose becomes [--region=us,, --verbose], and --a,--b remains one argument, so the child process receives incorrect arguments.",
+            "evidence": "The requirement says values are comma-delimited and trims whitespace around each item. The packet docs give --forward=--region=us, --verbose as an existing caller. strings.Fields(raw) at line 5 does not split on the comma."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies whitespace splitting in place of comma splitting and the documented forwarding input."
+        }
+      ]
+    },
+    {
+      "case_id": "05",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles and its visible happy-path test passes, but the readiness predicate admits pending and failed resources."
+      },
+      "findings": [
+        {
+          "finding_id": "juniper-05-1",
+          "oracle_id": "case-05-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "non-ready statuses are treated as ready",
+          "severity": "blocking",
+          "file": "candidate/status.go",
+          "line": 3,
+          "explanation": "IsReady returns true for every status except disabled, so pending and failed resources are served. The requirement permits only the exact ready status.",
+          "evidence": "requirement.md says pending, failed, and disabled resources must remain unavailable; candidate/status.go:3 implements status != \"disabled\".",
+          "raw_response": {
+            "title": "non-ready statuses are treated as ready",
+            "severity": "blocking",
+            "file": "candidate/status.go",
+            "line": 3,
+            "explanation": "IsReady returns true for every status except disabled, so pending and failed resources are served. The requirement permits only the exact ready status.",
+            "evidence": "requirement.md says pending, failed, and disabled resources must remain unavailable; candidate/status.go:3 implements status != \"disabled\"."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the non-ready allowlist violation for pending and failed statuses."
+        }
+      ]
+    },
+    {
+      "case_id": "06",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but its parser discards the required escaped-separator semantics used by the config and migration command."
+      },
+      "findings": [
+        {
+          "finding_id": "juniper-06-1",
+          "oracle_id": "case-06-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Escaped semicolons are still treated as rule separators",
+          "severity": "blocking",
+          "file": "candidate/parser.go",
+          "line": 5,
+          "explanation": "Parse unconditionally splits on every semicolon, so a backslash-escaped separator is broken into separate rules. An input such as name=alpha\\;beta;enabled=true produces a separate beta fragment instead of retaining the escaped semicolon in the first rule.",
+          "evidence": "The requirement and format context explicitly allow a literal semicolon in a value by escaping it. strings.Split(raw, \";\") at line 5 has no escape-state handling; empty-rule filtering at line 6 cannot repair the incorrectly split value.",
+          "raw_response": {
+            "title": "Escaped semicolons are still treated as rule separators",
+            "severity": "blocking",
+            "file": "candidate/parser.go",
+            "line": 5,
+            "explanation": "Parse unconditionally splits on every semicolon, so a backslash-escaped separator is broken into separate rules. An input such as name=alpha\\;beta;enabled=true produces a separate beta fragment instead of retaining the escaped semicolon in the first rule.",
+            "evidence": "The requirement and format context explicitly allow a literal semicolon in a value by escaping it. strings.Split(raw, \";\") at line 5 has no escape-state handling; empty-rule filtering at line 6 cannot repair the incorrectly split value."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies unconditional semicolon splitting and the escaped-separator input in the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "07",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but the boundary comparison is inclusive instead of strict."
+      },
+      "findings": [
+        {
+          "finding_id": "juniper-07-1",
+          "oracle_id": "case-07-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "the expiry instant is incorrectly accepted",
+          "severity": "blocking",
+          "file": "candidate/link.go",
+          "line": 3,
+          "explanation": "ValidAt returns true when now equals expires because !now.After(expires) includes equality. The requirement requires validity strictly before expiry, so a request at the exact expiry instant is incorrectly authorized.",
+          "evidence": "requirement.md requires rejection at the exact timestamp and after it; candidate/link.go:3 uses !now.After(expires), which accepts equality.",
+          "raw_response": {
+            "title": "the expiry instant is incorrectly accepted",
+            "severity": "blocking",
+            "file": "candidate/link.go",
+            "line": 3,
+            "explanation": "ValidAt returns true when now equals expires because !now.After(expires) includes equality. The requirement requires validity strictly before expiry, so a request at the exact expiry instant is incorrectly authorized.",
+            "evidence": "requirement.md requires rejection at the exact timestamp and after it; candidate/link.go:3 uses !now.After(expires), which accepts equality."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies equality being accepted at expiry, violating strict-before validity."
+        }
+      ]
+    },
+    {
+      "case_id": "08",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but its shutdown path abandons the completion guarantee required by the caller before reporting successful shutdown."
+      },
+      "findings": [
+        {
+          "finding_id": "juniper-08-1",
+          "oracle_id": "case-08-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Stop returns before accepted jobs finish",
+          "severity": "blocking",
+          "file": "candidate/queue.go",
+          "line": 8,
+          "explanation": "Stop closes the stop signal and returns without waiting on the worker or draining already accepted input. The select can choose the stop case while buffered jobs remain, and Stop can return while a job is executing, so shutdown can report success before an accepted audit job is observable or handled.",
+          "evidence": "The requirement says Stop must wait until every accepted job has been handled. New creates a buffered input channel and the worker has a WaitGroup, but Stop only calls close(q.stop); it never calls q.wg.Wait or otherwise drains q.input.",
+          "raw_response": {
+            "title": "Stop returns before accepted jobs finish",
+            "severity": "blocking",
+            "file": "candidate/queue.go",
+            "line": 8,
+            "explanation": "Stop closes the stop signal and returns without waiting on the worker or draining already accepted input. The select can choose the stop case while buffered jobs remain, and Stop can return while a job is executing, so shutdown can report success before an accepted audit job is observable or handled.",
+            "evidence": "The requirement says Stop must wait until every accepted job has been handled. New creates a buffered input channel and the worker has a WaitGroup, but Stop only calls close(q.stop); it never calls q.wg.Wait or otherwise drains q.input."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies that Stop returns without waiting for an accepted job to complete."
+        }
+      ]
+    },
+    {
+      "case_id": "09",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate preserves tenant and resource scoping and uses crypto/subtle.ConstantTimeCompare for the token comparison. No requirement violation is supported by the packet."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "10",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No source-supported defect found. Normalize copies the input, sorts it, and removes adjacent duplicates, yielding a stable canonical representation without mutating caller-owned input."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "11",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate independently attempts every input, retains successful values, and aggregates indexed errors for all invalid inputs. No requirement violation is supported by the packet."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "12",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No source-supported defect found. Resolve falls back only when errors.Is identifies ErrNotFound and returns the original workspace value and error for every other lookup error."
+      },
+      "findings": []
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Full-flow benchmark (CE vs Clean Code)
 
-This benchmark runs the same small task through representative Compound Engineering and Clean Code outcomes, then scores them with automated metrics and an independent blind reviewer.
+This command scores checked-in example outcomes with automated metrics and reviewer scores supplied in a manifest. It does not run either agent workflow or invoke an independent reviewer. The bundled outcomes are demonstration fixtures, not a controlled measurement of current agent performance.
 
 ## Task
 
@@ -23,9 +23,9 @@ go run ./cmd/clean-code benchmark-full-flow
 ## Scoring
 
 1. **Automated rubric** — tests pass, function size, decomposition, test breadth, fuzz hardening.
-2. **Independent reviewer** — blind scores on naming, simplicity, test quality, maintainability (Gemini reviewer, stored in manifest).
+2. **Stored reviewer scores** — naming, simplicity, test quality, and maintainability scores read from the manifest. The command does not verify the declared reviewer identity, independence, or blinding.
 
-Latest blind review winner: **Clean Code (Outcome B)** — decomposed functions and comprehensive tests vs monolithic CE-style outcome.
+The bundled scores favor **Clean Code (Outcome B)**. That result describes the supplied examples and scores; it is not evidence that Clean Code outperforms another workflow on new tasks. For actual code-review observations and separate defect oracles, use the [review evaluation pack](../harness/review-evals/README.md).
 
 ## Reproduce a live comparison
 

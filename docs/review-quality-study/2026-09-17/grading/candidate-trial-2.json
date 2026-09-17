@@ -1,0 +1,296 @@
+{
+  "cases": [
+    {
+      "case_id": "01",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The change removes the tenant authorization condition from the invoice lookup. Requirement-to-call-path mapping is Handle -> GetInvoice; the missing and foreign invoice result contract is otherwise preserved, but confidentiality is broken for every existing cross-tenant ID. Dimensions: correctness FAIL; integration FAIL at the handler authorization boundary; tests INCOMPLETE because no candidate tests are supplied; failure_modes FAIL for foreign IDs; security FAIL; maintainability PASS. The finding is supported by a static causal trace and the supplied caller context."
+      },
+      "findings": [
+        {
+          "finding_id": "river-01-1",
+          "oracle_id": "case-01-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "foreign-tenant invoices are returned",
+          "severity": "blocking",
+          "file": "candidate/service.go",
+          "line": 10,
+          "explanation": "GetInvoice checks only whether the ID exists and returns the invoice without comparing inv.TenantID to the request tenantID. An authenticated caller can therefore read an existing invoice belonging to another tenant. Restore the tenant equality check and return ErrNotFound for both missing and foreign invoices so the handler contract stays unchanged.",
+          "evidence": "candidate/service.go:8-10 performs the map lookup and returns inv, nil with no tenant check. context/handler.go passes request Claims.TenantID into GetInvoice, so the omitted check is the authorization boundary; the requirement explicitly requires foreign IDs to have the same not-found result.",
+          "raw_response": {
+            "title": "foreign-tenant invoices are returned",
+            "severity": "blocking",
+            "file": "candidate/service.go",
+            "line": 10,
+            "explanation": "GetInvoice checks only whether the ID exists and returns the invoice without comparing inv.TenantID to the request tenantID. An authenticated caller can therefore read an existing invoice belonging to another tenant. Restore the tenant equality check and return ErrNotFound for both missing and foreign invoices so the handler contract stays unchanged.",
+            "evidence": "candidate/service.go:8-10 performs the map lookup and returns inv, nil with no tenant check. context/handler.go passes request Claims.TenantID into GetInvoice, so the omitted check is the authorization boundary; the requirement explicitly requires foreign IDs to have the same not-found result."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the removed tenant equality check and the foreign-invoice path required by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "02",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 81446bbbb09965af8c296f0a0921bbd9b3e66cccce2bc7bbc8cc79f48f3612a1. Requirement-to-call-path mapping covers Checkout -> CreatePayment and the shared seen/charges state; concurrent idempotency is violated. Dimensions: correctness FAIL; integration FAIL for retry callers; tests PASS for compile/vet only, with no concurrency tests supplied; failure_modes FAIL for concurrent interleaving and concurrent map access; security NOT_APPLICABLE; maintainability FAIL because shared mutable state has no guard. Packet has no separate packet-instructions file; this is recorded as a limitation."
+      },
+      "findings": [
+        {
+          "finding_id": "river-02-1",
+          "oracle_id": "case-02-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Concurrent retries race and can create multiple charges",
+          "severity": "blocking",
+          "file": "candidate/service.go",
+          "line": 16,
+          "explanation": "The mutex protecting the idempotency check and charge creation was removed. Concurrent CreatePayment calls with the same key can both miss seen, compute different or duplicate payment IDs, write the shared map concurrently, and increment charges more than once; concurrent map access can also panic.",
+          "evidence": "The requirement requires concurrent retries with one original payment and one charge. Checkout forwards directly to CreatePayment, and lines 16 and 19-21 perform the check, ID allocation, map write, and charge increment without synchronization. Trigger: two goroutines call Checkout(\"k\", cents) at the same time (the supplied barrier hooks make the pre-write interleaving explicit); both pass line 16 before either writes line 20, so charges can become 2 and the two returned IDs need not match. The bounded fix is to restore a mutex or equivalent atomic critical section covering the check and creation, while retaining Reset for test-store reset.",
+          "raw_response": {
+            "title": "Concurrent retries race and can create multiple charges",
+            "severity": "blocking",
+            "file": "candidate/service.go",
+            "line": 16,
+            "explanation": "The mutex protecting the idempotency check and charge creation was removed. Concurrent CreatePayment calls with the same key can both miss seen, compute different or duplicate payment IDs, write the shared map concurrently, and increment charges more than once; concurrent map access can also panic.",
+            "evidence": "The requirement requires concurrent retries with one original payment and one charge. Checkout forwards directly to CreatePayment, and lines 16 and 19-21 perform the check, ID allocation, map write, and charge increment without synchronization. Trigger: two goroutines call Checkout(\"k\", cents) at the same time (the supplied barrier hooks make the pre-write interleaving explicit); both pass line 16 before either writes line 20, so charges can become 2 and the two returned IDs need not match. The bounded fix is to restore a mutex or equivalent atomic critical section covering the check and creation, while retaining Reset for test-store reset."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the unsynchronized idempotency check and duplicate-charge interleaving exercised by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "03",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The export path masks partial-write failure. Requirement-to-call-path mapping is Run -> WriteBatch -> Destination.Put; no candidate tests exercise a failing destination. Dimensions: correctness FAIL; integration FAIL because Run forwards the false success; tests INCOMPLETE; failure_modes FAIL for any write error and partial batch; security NOT_APPLICABLE; maintainability PASS. The finding is supported by a static causal trace; rollback semantics are not specified and remain an evidence gap."
+      },
+      "findings": [
+        {
+          "finding_id": "river-03-1",
+          "oracle_id": "case-03-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "destination write failures are discarded",
+          "severity": "blocking",
+          "file": "candidate/writer.go",
+          "line": 5,
+          "explanation": "WriteBatch ignores every Destination.Put error and unconditionally returns nil. If any destination write fails, callers are told the batch succeeded, violating the required failure signal after a partial write. Return a non-nil error when a write fails (while retaining already accepted records if that is the destination's behavior).",
+          "evidence": "The changed candidate/writer.go:5 assigns Put's error to _. candidate/context/destination.go explicitly says implementations can fail after accepting an earlier record, and candidate/context/export.go returns WriteBatch directly from Run, so the nil result reaches callers.",
+          "raw_response": {
+            "title": "destination write failures are discarded",
+            "severity": "blocking",
+            "file": "candidate/writer.go",
+            "line": 5,
+            "explanation": "WriteBatch ignores every Destination.Put error and unconditionally returns nil. If any destination write fails, callers are told the batch succeeded, violating the required failure signal after a partial write. Return a non-nil error when a write fails (while retaining already accepted records if that is the destination's behavior).",
+            "evidence": "The changed candidate/writer.go:5 assigns Put's error to _. candidate/context/destination.go explicitly says implementations can fail after accepting an earlier record, and candidate/context/export.go returns WriteBatch directly from Run, so the nil result reaches callers."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies discarded destination errors and the required stop-on-error behavior exercised by the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "04",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 0a5ea06d1e912f7ce348c04828350c97a42ea90a43249a01ad31eadd39f20671. Requirement-to-call-path mapping covers DecodeFlags -> Build and child argument forwarding; comma-delimited input is violated. Dimensions: correctness FAIL; integration FAIL because Build forwards malformed child arguments; tests PASS for compile/vet only, with no decoder behavior tests supplied; failure_modes FAIL for documented comma input and items with internal spaces; security NOT_APPLICABLE; maintainability PASS aside from the wrong delimiter operation. Packet has no separate packet-instructions file; this is recorded as a limitation."
+      },
+      "findings": [
+        {
+          "finding_id": "river-04-1",
+          "oracle_id": "case-04-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Flag decoder no longer uses comma delimiters",
+          "severity": "blocking",
+          "file": "candidate/flags.go",
+          "line": 5,
+          "explanation": "strings.Fields splits on whitespace instead of commas and leaves commas attached to tokens. For the documented input --region=us, --verbose it returns [\"--region=us,\", \"--verbose\"], so the child receives a malformed first argument; an item containing internal spaces is also split into multiple arguments.",
+          "evidence": "The requirement and context/docs.md define a comma-delimited value with surrounding whitespace ignored per item. Line 5 uses strings.Fields, and line 7 only filters already-separated fields, so it cannot remove the delimiter or preserve item boundaries. Trigger: DecodeFlags(\"--region=us, --verbose\") produces a trailing comma in the first argument. The bounded fix is to split on comma, trim each item, and omit empty items.",
+          "raw_response": {
+            "title": "Flag decoder no longer uses comma delimiters",
+            "severity": "blocking",
+            "file": "candidate/flags.go",
+            "line": 5,
+            "explanation": "strings.Fields splits on whitespace instead of commas and leaves commas attached to tokens. For the documented input --region=us, --verbose it returns [\"--region=us,\", \"--verbose\"], so the child receives a malformed first argument; an item containing internal spaces is also split into multiple arguments.",
+            "evidence": "The requirement and context/docs.md define a comma-delimited value with surrounding whitespace ignored per item. Line 5 uses strings.Fields, and line 7 only filters already-separated fields, so it cannot remove the delimiter or preserve item boundaries. Trigger: DecodeFlags(\"--region=us, --verbose\") produces a trailing comma in the first argument. The bounded fix is to split on comma, trim each item, and omit empty items."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies whitespace splitting in place of comma splitting and the documented forwarding input."
+        }
+      ]
+    },
+    {
+      "case_id": "05",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The readiness gate is broadened to serve non-ready states. Requirement-to-call-path mapping is Serveable -> IsReady; the candidate's visible test covers only the happy path and the diff removes the pending negative assertion. Dimensions: correctness FAIL; integration FAIL for the supplied Serveable caller; tests FAIL because required negative coverage was removed; failure_modes FAIL for pending and failed states; security NOT_APPLICABLE; maintainability PASS. The finding is supported by direct boundary evaluation and the supplied caller context."
+      },
+      "findings": [
+        {
+          "finding_id": "river-05-1",
+          "oracle_id": "case-05-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "pending and failed resources are reported ready",
+          "severity": "blocking",
+          "file": "candidate/status.go",
+          "line": 3,
+          "explanation": "IsReady now returns true for every status except disabled. Therefore pending and failed resources pass the readiness gate and can be served, violating the requirement that only ready is serveable. Restore an exact status == \"ready\" check and retain negative tests for pending, failed, and disabled.",
+          "evidence": "The changed candidate/status.go:3 predicate is status != \"disabled\". The supplied caller status.go delegates Serveable to IsReady, and the candidate status_test.go only checks ready; the diff removed the pending negative assertion.",
+          "raw_response": {
+            "title": "pending and failed resources are reported ready",
+            "severity": "blocking",
+            "file": "candidate/status.go",
+            "line": 3,
+            "explanation": "IsReady now returns true for every status except disabled. Therefore pending and failed resources pass the readiness gate and can be served, violating the requirement that only ready is serveable. Restore an exact status == \"ready\" check and retain negative tests for pending, failed, and disabled.",
+            "evidence": "The changed candidate/status.go:3 predicate is status != \"disabled\". The supplied caller status.go delegates Serveable to IsReady, and the candidate status_test.go only checks ready; the diff removed the pending negative assertion."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies the non-ready allowlist violation for pending and failed statuses."
+        }
+      ]
+    },
+    {
+      "case_id": "06",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot 0b65292853a2bad7bd0d864186b5b74a1403fb60c7a22b37df63abf15a75b2a5. Requirement-to-call-path mapping covers Parse -> Loader.Load and the migration format; escaped separators are unsupported. Dimensions: correctness FAIL; integration FAIL for Loader consumers of escaped values; tests PASS for compile/vet only, with no parser behavior tests supplied; failure_modes FAIL for escaped separators, while empty-rule filtering remains present; security NOT_APPLICABLE; maintainability PASS for the small routine but behavior is incomplete. Packet has no separate packet-instructions file; this is recorded as a limitation."
+      },
+      "findings": [
+        {
+          "finding_id": "river-06-1",
+          "oracle_id": "case-06-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Parser discards escaped-separator semantics",
+          "severity": "blocking",
+          "file": "candidate/parser.go",
+          "line": 5,
+          "explanation": "strings.Split(raw, \";\") treats every semicolon as a rule separator, including a backslash-escaped one. The required input name=alpha\\;beta;enabled=true is therefore split into three pieces instead of two, changing the first value and violating the format consumed by the migration loader.",
+          "evidence": "The requirement explicitly says a backslash escapes the following separator, and context/format.md says values may contain literal semicolons. At line 5, Parse splits before line 6 can filter empty rules; no escape state or unescaping/preservation logic exists. Trigger: Parse(\"name=alpha\\\\;beta;enabled=true\") yields [\"name=alpha\\\\\", \"beta\", \"enabled=true\"] rather than [\"name=alpha\\\\;beta\", \"enabled=true\"]. The bounded fix is to scan raw while tracking backslash escape state, splitting only on unescaped semicolons and retaining the escaped separator in the value.",
+          "raw_response": {
+            "title": "Parser discards escaped-separator semantics",
+            "severity": "blocking",
+            "file": "candidate/parser.go",
+            "line": 5,
+            "explanation": "strings.Split(raw, \";\") treats every semicolon as a rule separator, including a backslash-escaped one. The required input name=alpha\\;beta;enabled=true is therefore split into three pieces instead of two, changing the first value and violating the format consumed by the migration loader.",
+            "evidence": "The requirement explicitly says a backslash escapes the following separator, and context/format.md says values may contain literal semicolons. At line 5, Parse splits before line 6 can filter empty rules; no escape state or unescaping/preservation logic exists. Trigger: Parse(\"name=alpha\\\\;beta;enabled=true\") yields [\"name=alpha\\\\\", \"beta\", \"enabled=true\"] rather than [\"name=alpha\\\\;beta\", \"enabled=true\"]. The bounded fix is to scan raw while tracking backslash escape state, splitting only on unescaped semicolons and retaining the escaped separator in the value."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies unconditional semicolon splitting and the escaped-separator input in the oracle."
+        }
+      ]
+    },
+    {
+      "case_id": "07",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate violates the strict expiry invariant at the equality boundary. Requirement-to-call-path mapping is ValidAt -> Authorize; no candidate tests cover equality, before, or after boundaries. Dimensions: correctness FAIL; integration PASS for the supplied Authorize wrapper but behavior is wrong; tests INCOMPLETE; failure_modes FAIL at the expiry boundary; security PASS as a direct access-control concern; maintainability PASS. The finding is supported by a static causal trace; no external runtime evidence was provided."
+      },
+      "findings": [
+        {
+          "finding_id": "river-07-1",
+          "oracle_id": "case-07-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "expiry timestamp is accepted",
+          "severity": "blocking",
+          "file": "candidate/link.go",
+          "line": 3,
+          "explanation": "ValidAt returns true when now and expires are equal because !now.After(expires) is true. The requirement requires strict-before validity, so a request at the exact expiry instant is incorrectly authorized. Replace the predicate with now.Before(expires).",
+          "evidence": "The changed candidate line is candidate/link.go:3. For now := expires, time.Time.After returns false and the negation returns true; context/caller.go states the download handler checks this on every request without rounding.",
+          "raw_response": {
+            "title": "expiry timestamp is accepted",
+            "severity": "blocking",
+            "file": "candidate/link.go",
+            "line": 3,
+            "explanation": "ValidAt returns true when now and expires are equal because !now.After(expires) is true. The requirement requires strict-before validity, so a request at the exact expiry instant is incorrectly authorized. Replace the predicate with now.Before(expires).",
+            "evidence": "The changed candidate line is candidate/link.go:3. For now := expires, time.Time.After returns false and the negation returns true; context/caller.go states the download handler checks this on every request without rounding."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies equality being accepted at expiry, violating strict-before validity."
+        }
+      ]
+    },
+    {
+      "case_id": "08",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, all supplied context, and candidate tree at synthetic snapshot c734669203ff64a8b0fcb060b425d5b175ad851b0fc0bb2528881ac24fed8dbe. Requirement-to-call-path mapping covers Enqueue -> run -> Command.Shutdown/Stop; the shutdown guarantee is violated. Dimensions: correctness FAIL; integration FAIL because Shutdown returns before its documented side effect; tests PASS for compile/vet only, with no shutdown behavior tests supplied; failure_modes FAIL for buffered accepted jobs and concurrent stop selection; security NOT_APPLICABLE; maintainability PASS aside from the missing synchronization. Packet has no separate packet-instructions file; this is recorded as a limitation."
+      },
+      "findings": [
+        {
+          "finding_id": "river-08-1",
+          "oracle_id": "case-08-primary",
+          "supported": true,
+          "blocking": true,
+          "title": "Stop returns before accepted jobs are handled",
+          "severity": "blocking",
+          "file": "candidate/queue.go",
+          "line": 8,
+          "explanation": "Stop only closes stop and never waits on the worker WaitGroup. If Enqueue has accepted a buffered job, the worker can select the closed stop channel and return before reading that job, so Command.Shutdown can report success while the audit job was dropped.",
+          "evidence": "The requirement and usage context require Shutdown to wait for every accepted job. In run at line 6, once stop is closed both stop and input may be ready and select may choose stop; line 8 does not call q.wg.Wait. A concrete trigger is New, Enqueue(func(){record audit}), then Stop immediately: Stop returns without establishing that record ran. The bounded fix is to preserve draining semantics and wait for worker completion before Stop returns (and make repeated Stop behavior explicit if required).",
+          "raw_response": {
+            "title": "Stop returns before accepted jobs are handled",
+            "severity": "blocking",
+            "file": "candidate/queue.go",
+            "line": 8,
+            "explanation": "Stop only closes stop and never waits on the worker WaitGroup. If Enqueue has accepted a buffered job, the worker can select the closed stop channel and return before reading that job, so Command.Shutdown can report success while the audit job was dropped.",
+            "evidence": "The requirement and usage context require Shutdown to wait for every accepted job. In run at line 6, once stop is closed both stop and input may be ready and select may choose stop; line 8 does not call q.wg.Wait. A concrete trigger is New, Enqueue(func(){record audit}), then Stop immediately: Stop returns without establishing that record ran. The bounded fix is to preserve draining semantics and wait for worker completion before Stop returns (and make repeated Stop behavior explicit if required)."
+          },
+          "raw_finding_index": 0,
+          "adjudication": "Supported primary: the finding identifies that Stop returns without waiting for an accepted job to complete."
+        }
+      ]
+    },
+    {
+      "case_id": "09",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No supported defect found in the examined candidate scope. Requirement mapping: tenant and resource equality gate access, and the token uses crypto/subtle.ConstantTimeCompare rather than ordinary token string comparison; the packet supplies no downstream callers. Dimensions: correctness PASS; integration INCOMPLETE because only the capability type is supplied; tests INCOMPLETE because the candidate has no tests; failure_modes PASS for mismatch denial in the visible function, with no runtime boundary tests; security PASS for the stated token-comparison invariant; maintainability PASS. The review is bounded to the synthetic packet and does not establish correctness beyond it."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "10",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, context/current.go, context/labels.go, and candidate tree at synthetic snapshot fe97ac745f1cab25f7665e6e1da0ec515a231abee31cd222073ade4c119532bf. Normalize copies caller input, sorts the copy, and removes adjacent duplicates; Store.Replace therefore gets a stable idempotent representation without mutating the caller slice. Dimensions: correctness PASS; integration PASS (Store.Replace contract is preserved); tests PASS for compile/vet only, with no behavior tests supplied; failure_modes PASS for empty and repeated labels by static trace; security NOT_APPLICABLE; maintainability PASS. Requirement-to-call-path mapping is complete for Normalize -> Store.Replace; behavioral test evidence is limited."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "11",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No supported defect found in the examined candidate scope. Requirement mapping: ParseAll iterates every input, appends each successful conversion, and aggregates indexed failures before returning; no external caller or side effect is present in the packet. Dimensions: correctness PASS; integration PASS for the supplied Decoder wrapper; tests INCOMPLETE because the candidate has no tests; failure_modes PASS for invalid-item continuation as shown by the implementation, with runtime coverage limited; security NOT_APPLICABLE for this pure parser; maintainability PASS. The review is bounded to the synthetic packet and does not establish correctness beyond it."
+      },
+      "findings": []
+    },
+    {
+      "case_id": "12",
+      "review_complete": true,
+      "model_completion": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. Reviewed requirement, complete supplied diff, context/config.go, and candidate tree at synthetic snapshot 3103fd80ba828e460027cf79b1c2d9f0e46498f64424b27eed10f89ac7697915. Resolve calls Workspace first, falls back only when errors.Is(err, ErrNotFound), and returns all other errors unchanged. Dimensions: correctness PASS; integration PASS (Source interface is preserved); tests PASS for compile/vet only, with no behavior tests supplied; failure_modes PASS for the specified lookup-error branches, with concurrency outside scope; security NOT_APPLICABLE; maintainability PASS. Requirement-to-call-path mapping is complete for Resolve; behavioral test evidence is limited."
+      },
+      "findings": []
+    }
+  ]
+}

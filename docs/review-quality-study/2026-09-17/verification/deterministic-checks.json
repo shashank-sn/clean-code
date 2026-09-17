@@ -1,0 +1,92 @@
+[
+  {
+    "name": "go-vet",
+    "command": "go vet ./...",
+    "status": "PASS",
+    "exit_code": 0,
+    "duration_ms": 665,
+    "log": "final-go-vet.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "calibration",
+    "command": "go run ./cmd/clean-code benchmark --manifest harness/calibration/benchmark-manifest.yaml",
+    "status": "PASS",
+    "exit_code": 0,
+    "duration_ms": 545,
+    "log": "final-calibration.log",
+    "sha256": "eca70bf9c97ec601a63912d60e8f8bf1c67396e6b64189fbcd67bc5bcdf43381"
+  },
+  {
+    "name": "workflow-comparison",
+    "command": "go run ./cmd/clean-code compare-workflows",
+    "status": "PASS",
+    "exit_code": 0,
+    "duration_ms": 161,
+    "log": "final-workflow-comparison.log",
+    "sha256": "447b48b58aadc486a102abdbacd0465e6a11e34b8268cffaa5a3817ed55e7280"
+  },
+  {
+    "name": "full-flow-fixture",
+    "command": "go run ./cmd/clean-code benchmark-full-flow",
+    "status": "PASS",
+    "exit_code": 0,
+    "duration_ms": 201,
+    "log": "final-full-flow-fixture.log",
+    "sha256": "82775fe2a210aed8b5f15c64218cce9e52b1c069b62325c6c607b054f29b0882"
+  },
+  {
+    "name": "benchmark-example-race",
+    "command": "go test -race ./examples/benchmark-flow/...",
+    "status": "PASS",
+    "exit_code": 0,
+    "duration_ms": 70,
+    "log": "final-benchmark-example-race.log",
+    "sha256": "56833ec2cfcb642d6e34e17a3e2c6d515f01b625bbe2deb563d2902599f89050"
+  },
+  {
+    "name": "cross-build-linux-amd64",
+    "command": "GOOS=linux GOARCH=amd64 go build -o /Users/shashank/Documents/Codex/2026-09-17/how/work/review-final/cross-build-linux-amd64 ./cmd/clean-code",
+    "status": "PASS",
+    "exit_code": 0,
+    "log": "final-cross-build-linux-amd64.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "cross-build-darwin-arm64",
+    "command": "GOOS=darwin GOARCH=arm64 go build -o /Users/shashank/Documents/Codex/2026-09-17/how/work/review-final/cross-build-darwin-arm64 ./cmd/clean-code",
+    "status": "PASS",
+    "exit_code": 0,
+    "log": "final-cross-build-darwin-arm64.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "cross-build-windows-amd64",
+    "command": "GOOS=windows GOARCH=amd64 go build -o /Users/shashank/Documents/Codex/2026-09-17/how/work/review-final/cross-build-windows-amd64 ./cmd/clean-code",
+    "status": "PASS",
+    "exit_code": 0,
+    "log": "final-cross-build-windows-amd64.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "go-test-race",
+    "command": "go test -race ./...",
+    "status": "PASS",
+    "log": "final-go-test-race.log",
+    "sha256": "f517733dff2a01a2635b8217d159959d53a5ae2b71b2de3d46541783aeacbb2f"
+  },
+  {
+    "name": "review-fixtures",
+    "command": "node harness/review-evals/runner.js",
+    "status": "PASS",
+    "log": "final-fixture-validation.json",
+    "sha256": "a8148112ab32b74d8ea02af9c85bb8c314f3da1044059bf9e7b237d698575741"
+  },
+  {
+    "name": "contract-probes",
+    "command": "python check_contract.py (35 independent CLI/schema/audit probes)",
+    "status": "PASS",
+    "log": "contract-probes-final.json",
+    "sha256": "e964613d129f681eeb7b88fed1aa578a6a126a87606517655cb9ff950fb40105"
+  }
+]

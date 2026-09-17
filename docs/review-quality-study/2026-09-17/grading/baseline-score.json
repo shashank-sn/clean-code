@@ -1,0 +1,103 @@
+{
+  "status": "SCORED",
+  "acceptance": true,
+  "primary_recall": {
+    "found": 8,
+    "total": 8,
+    "ratio": 1
+  },
+  "high_impact_misses": [],
+  "unsupported_findings": 0,
+  "unsupported_blocking_findings": 0,
+  "control_silence": {
+    "silent": 4,
+    "total": 4
+  },
+  "incomplete_cases": 0,
+  "model_completion": [
+    {
+      "case_id": "01",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but the change removes the authorization boundary for invoice lookup."
+      }
+    },
+    {
+      "case_id": "02",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but it removes the synchronization required to make the idempotency check and charge creation atomic under concurrent retries."
+      }
+    },
+    {
+      "case_id": "03",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but it masks every destination failure."
+      }
+    },
+    {
+      "case_id": "04",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but it violates the established comma-delimited forwarding format for both adjacent and whitespace-separated items."
+      }
+    },
+    {
+      "case_id": "05",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles and its visible happy-path test passes, but the readiness predicate admits pending and failed resources."
+      }
+    },
+    {
+      "case_id": "06",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but its parser discards the required escaped-separator semantics used by the config and migration command."
+      }
+    },
+    {
+      "case_id": "07",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but the boundary comparison is inclusive instead of strict."
+      }
+    },
+    {
+      "case_id": "08",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate compiles, but its shutdown path abandons the completion guarantee required by the caller before reporting successful shutdown."
+      }
+    },
+    {
+      "case_id": "09",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate preserves tenant and resource scoping and uses crypto/subtle.ConstantTimeCompare for the token comparison. No requirement violation is supported by the packet."
+      }
+    },
+    {
+      "case_id": "10",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No source-supported defect found. Normalize copies the input, sorts it, and removes adjacent duplicates, yielding a stable canonical representation without mutating caller-owned input."
+      }
+    },
+    {
+      "case_id": "11",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. The candidate independently attempts every input, retains successful values, and aggregates indexed errors for all invalid inputs. No requirement violation is supported by the packet."
+      }
+    },
+    {
+      "case_id": "12",
+      "value": {
+        "completed": true,
+        "rationale": "Raw completion=COMPLETE. No source-supported defect found. Resolve falls back only when errors.Is identifies ErrNotFound and returns the original workspace value and error for every other lookup error."
+      }
+    }
+  ]
+}

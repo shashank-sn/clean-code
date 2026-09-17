@@ -1,0 +1,118 @@
+{
+  "base_revision": "ba97cb950b0cdc390f36706f6ed5c81533673faf",
+  "revision": "sha256:1235e839ebc5b13e4de0d54927819e422640c278d1317ec37913de5be40470d7",
+  "scope": [
+    {
+      "path": "README.md",
+      "sha256": "28773eb83448e0bf324840f147b1eac523983bf6e06dc25a2f7c713fb670e95c"
+    },
+    {
+      "path": "cmd/clean-code/main_test.go",
+      "sha256": "313206620848f3ab790834ffc752748e606f6506c105563dc215369734a807d6"
+    },
+    {
+      "path": "docs/benchmark-method.md",
+      "sha256": "9c8ec427afcac8f4c8e8b5fc14c0005432d606b4ef9f7279e9ef34a402b1ff42"
+    },
+    {
+      "path": "docs/code-review.md",
+      "sha256": "ca748a77c8c4e623e6823d218fa82f9c78b56233994cd20416b87161f7b7d8e2"
+    },
+    {
+      "path": "docs/commands.md",
+      "sha256": "e7d49b9cc34765b0c2b59bfb426f67b613e7209e34120fdde833754acbef3c5a"
+    },
+    {
+      "path": "docs/plans/2026-09-17-001-evidence-driven-review-plan.md",
+      "sha256": "71eee911e6dbdf9b313f74bddc3be46ca76a8418a04471d7b4fe6539ca899e54"
+    },
+    {
+      "path": "harness/examples/review-v2.json",
+      "sha256": "a34b416e73a3d72d644f3752582746658f29505b5f57fa905fd061e625c71225"
+    },
+    {
+      "path": "harness/playbooks/code-review.json",
+      "sha256": "bf79bb12b6231a70693fedcba98d7585b123b38fea5843d99bb14c5027f062b7"
+    },
+    {
+      "path": "harness/review/protocol.md",
+      "sha256": "f12c9dd1f5da49a19882eb937cf58c52e30853cf582a054c7a0c82c6cd3a7206"
+    },
+    {
+      "path": "harness/schemas/review-check.schema.json",
+      "sha256": "cfb32536db76bba303c3c13e70a63a7a3d44ecc0b3b4c4ed277047b1bf209d1e"
+    },
+    {
+      "path": "harness/schemas/review-finding.schema.json",
+      "sha256": "513daa1ba0c91c66573914d3397a964c0173ca00a07f0e466a9ab3e9b62db5b8"
+    },
+    {
+      "path": "harness/schemas/review-input.schema.json",
+      "sha256": "10b74a5d18048eda9e9fd49fafacee275e36423586d829e84bf0218005f5865f"
+    },
+    {
+      "path": "hosts/generic/AGENTS.md",
+      "sha256": "785656969468dbc19346523d7f6dd39fe4e01c96c33f3bbdbbdc59139049c112"
+    },
+    {
+      "path": "internal/adaptive/adaptive_test.go",
+      "sha256": "c6f475e1e7f203fe6537e74a593f5f4940f6a97f10d6098b7800826510eb857f"
+    },
+    {
+      "path": "internal/adaptive/playbook.go",
+      "sha256": "32cc1765b1fb121b2675d506bd98bc6232bffa4b0767361d56444ca1e6b68b22"
+    },
+    {
+      "path": "internal/agents/agents_test.go",
+      "sha256": "6db18ba84c1a2d99ba121bf9f08841f4b635b23d8e4b3a75bda591ab8c8ecfb4"
+    },
+    {
+      "path": "internal/audit/audit.go",
+      "sha256": "37b6741c17221f19cb26e1ce8653f8a194b23d1bbd2ad0404df7739f2ac98777"
+    },
+    {
+      "path": "internal/audit/audit_test.go",
+      "sha256": "0ccdcd7971280cddbc1a8aed442a8635ee140ff146db65136aab74f86d200d8a"
+    },
+    {
+      "path": "internal/hosts/package.go",
+      "sha256": "0fb8978ab4c60cee5cc91962428c301a75e2c4465b91caba135a3b1cea7d8f2d"
+    },
+    {
+      "path": "internal/hosts/package_test.go",
+      "sha256": "ee22928f8f664d200a3bebaef8655fb1573d6eeff87cdcf1a41f3d1d4ccbff62"
+    },
+    {
+      "path": "internal/review/review.go",
+      "sha256": "53ddd87fda9c44cd5cc26d113e32e8c11cff257c91726e31c6f118cc8a8fc8cd"
+    },
+    {
+      "path": "internal/review/review_test.go",
+      "sha256": "248eb3db48154cb8ebf22a0b601cca508213c088b3e9f2d732ff89074770ce55"
+    },
+    {
+      "path": "skills/clean-dispatcher/SKILL.md",
+      "sha256": "e22f7bee1d418bd3d111c4fccc0e92ef37560ab60a8e6a970bdef8487baa55ff"
+    },
+    {
+      "path": "skills/clean-review/SKILL.md",
+      "sha256": "98627f7fc8da7fd535d84bab3841cc83001bc3237415de8a663f7e8b67e4f36b"
+    },
+    {
+      "path": "skills/clean-review/agent.json",
+      "sha256": "f00dd5b0c120560af13094bcff86f807eabe803b36af44c947ba13b8cf687fc5"
+    },
+    {
+      "path": "skills/clean-reviewer/SKILL.md",
+      "sha256": "4352d9a7b0958fb6e5d5f1c502c0af9acd71da5f16198cdcb944dfdf55726b1b"
+    },
+    {
+      "path": "skills/clean-reviewer/agent.json",
+      "sha256": "75f24fdcba56cd8fbfd47718c07b3b091ca4f6a61efc61c0ee716af3dcbb6316"
+    },
+    {
+      "path": "tests/repository_test.go",
+      "sha256": "8bf79c428e44bc5cdb369006fe684911d81f01016d64b492970205fe67b7b7b1"
+    }
+  ]
+}

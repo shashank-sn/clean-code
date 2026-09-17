@@ -25,6 +25,11 @@ jobs:
       - run: go run ./cmd/clean-code compare-workflows
       - run: go run ./cmd/clean-code benchmark-full-flow
       - run: go test -race ./examples/benchmark-flow/...
+      - name: Validate review fixtures and scoring safeguards
+        run: |
+          node harness/review-evals/runner.js
+          node harness/review-evals/runner-tests.js
+          node harness/review-evals/scorer-tests.js
 
   cross-build:
     runs-on: ubuntu-latest

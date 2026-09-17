@@ -18,8 +18,8 @@ Deprecated predecessor: `clean-code-skills` → use `@shashanksn/clean-code`.
 3. Push a tag matching the version:
 
 ```bash
-git tag v0.7.0
-git push origin v0.7.0
+git tag v0.8.0
+git push origin v0.8.0
 ```
 
 4. GitHub Actions:

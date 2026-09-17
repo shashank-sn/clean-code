@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "scope": [
+    "harness/review-evals/runner.js",
+    "harness/review-evals/runner-tests.js",
+    "harness/review-evals/scorer.js",
+    "harness/review-evals/scorer-tests.js",
+    "harness/review-evals/README.md",
+    "harness/review-evals/response-format.md"
+  ],
+  "snapshot": {
+    "path": "work/review-final/eval-final-snapshot.json",
+    "revision": "sha256:bac5d713342fc76052d8ea9a2fb34c5d0676699c9975b2fd6c5ba0ea7da70e3c",
+    "sha256": "5c5239b6d3670431276a8e32669dd6de37ba2b5ece981dfabb5c821bb0d7d551",
+    "scope_count": 154,
+    "missing": 0,
+    "mismatches": 0
+  },
+  "files": {
+    "harness/review-evals/runner.js": "dfb4017c878ce98151d4e2c2e2ecef7b96879f3abe6a77bfb7ffcc54993c6a92",
+    "harness/review-evals/runner-tests.js": "3b7005f575a2800dab3cbd585e5eab9ab1ad54c629d995f8bcee295b90cd1774",
+    "harness/review-evals/scorer.js": "dfc9eb24702d6aa34524fbf0776ac030f2b5b011ea55ece933f9669eba27b625",
+    "harness/review-evals/scorer-tests.js": "b7e998d30f0445589afab5a0f501f42c9c6957411b6819b386ed0776a8aee1fa",
+    "harness/review-evals/README.md": "38870dba8189b6b630ab96a19a61dccafac21420c4d20daea9ba8d17ff329711",
+    "harness/review-evals/response-format.md": "d86233008dec64c667ffd8aff204dc70fc3f186c74c5cd2723dacb02d4de6e72"
+  },
+  "resolved_findings": [
+    {
+      "id": "prior-1-pack-freeze",
+      "status": "resolved",
+      "evidence": "packet plus inventory mutation rejected; oracle manifest removal rejected; oracle test byte mutation rejected"
+    },
+    {
+      "id": "prior-2-oracle-classification",
+      "status": "resolved",
+      "evidence": "t.Fail and t.FailNow both classify as oracle-assertion-fail"
+    },
+    {
+      "id": "prior-3-concrete-primary",
+      "status": "resolved",
+      "evidence": "primary findings without concrete evidence are rejected"
+    }
+  ],
+  "checks": [
+    {"command": "node runner-tests.js", "result": "PASS 13/13"},
+    {"command": "node scorer-tests.js", "result": "PASS 11/11"},
+    {"command": "node runner.js", "result": "PASS 12/12 fixtures"},
+    {"command": "node --check runner.js runner-tests.js scorer.js scorer-tests.js", "result": "PASS"},
+    {"command": "final snapshot scope verification", "result": "PASS 154/154"},
+    {"command": "incomplete review probe", "result": "PASS no primary credit; 7/8; acceptance false"},
+    {"command": "supported extra probe", "result": "PASS accepted; unsupported findings 0"}
+  ],
+  "limitations": [
+    "No raw study/model results or oracle answer contents were opened; fixture execution was used only for status and classification checks.",
+    "No product code was changed."
+  ]
+}

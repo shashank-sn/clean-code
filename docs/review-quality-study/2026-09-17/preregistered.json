@@ -1,0 +1,35 @@
+{
+  "study": "reviewer-investigation-local-v1",
+  "preregistered_at": "2026-09-17T09:39:32.595157+00:00",
+  "baseline_revision": "ba97cb950b0cdc390f36706f6ed5c81533673faf",
+  "baseline_prompt_sha256": "8f228ad67504d93611eba31cb3fe100b2cde592c6db7e3cb4f5c5eb8119c736f",
+  "model": "gpt-5.6-luna",
+  "reasoning_effort": "high",
+  "conditions": [
+    "baseline",
+    "candidate-trial-1",
+    "candidate-trial-2"
+  ],
+  "case_count": 12,
+  "seeded_primary_defects": 8,
+  "clean_controls": 4,
+  "assignment": "Two fresh isolated reviewer contexts per condition, six visible case packets each, alternating neutral case IDs. Same grouping and tool permissions across conditions.",
+  "candidate_trial_2_order": "reverse each group order",
+  "acceptance": {
+    "all_high_impact_defects": true,
+    "minimum_primary_recall_count": 7,
+    "unsupported_blocking_findings": 0,
+    "correct_silent_controls": 4,
+    "candidate_trials_required": 2,
+    "missing_context_must_not_be_approved": true
+  },
+  "grading": "Freeze raw responses before revealing oracle. Match concrete causal findings to oracle, independently assess extras, deduplicate by cause. Score each condition separately. Never change the primary oracle to reward responses.",
+  "scope_limits": [
+    "Synthetic local suite",
+    "Shared filesystem procedural separation, not sealed security",
+    "No latency/token-cost or population-wide performance claim",
+    "Package and local emitted prompts, not native external-host installation"
+  ],
+  "mutation_boundary": "Reviewers can read assigned visible packets, frozen assigned instructions, and execute safe local tests; outputs only in assigned study result files. No product edits, oracle access, other responses, network or external writes.",
+  "repair_policy": "If primary bar fails, retain failed raw trial and score; repair from diagnosis only as explicitly labeled development; require a fresh independent evaluation set or label reused cases as post-hoc, not held-out evidence."
+}

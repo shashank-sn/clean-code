@@ -1,0 +1,86 @@
+{
+  "amber": {
+    "case_id": "protocol-probe",
+    "review_complete": false,
+    "model_completion": {
+      "completed": false,
+      "rationale": "Raw completion=INCOMPLETE. Reliable review is blocked. The requirement explicitly says the packet omits the implementation and caller context, and the packet contains only requirement.md and change.diff. Correctness, integration, failure modes, security, tests, and maintainability cannot be assessed from the supplied evidence; no defect is asserted."
+    },
+    "required_context_identified": true,
+    "approval_withheld": true,
+    "findings": [],
+    "raw_response": {
+      "case_id": "protocol-probe",
+      "findings": [],
+      "questions": [
+        "Provide the candidate implementation and the caller/authorization context needed to trace refresh behavior and verify that authorization and record identity are preserved."
+      ],
+      "summary": "Reliable review is blocked. The requirement explicitly says the packet omits the implementation and caller context, and the packet contains only requirement.md and change.diff. Correctness, integration, failure modes, security, tests, and maintainability cannot be assessed from the supplied evidence; no defect is asserted.",
+      "completion": "INCOMPLETE",
+      "checks": [
+        {
+          "command": "candidate/source and caller checks",
+          "status": "NOT_RUN",
+          "evidence": "The assigned packet contains no candidate/ directory or context/ files."
+        }
+      ]
+    },
+    "adjudication": "The probe correctly identified that implementation and caller context were missing, made no defect claim, and withheld approval; probe observations receive no primary credit."
+  },
+  "juniper": {
+    "case_id": "protocol-probe",
+    "review_complete": false,
+    "model_completion": {
+      "completed": false,
+      "rationale": "Raw completion=INCOMPLETE. Review is blocked by the packet's intentional omission of implementation and caller context; the supplied diff alone cannot establish behavior or conformance."
+    },
+    "required_context_identified": true,
+    "approval_withheld": true,
+    "findings": [],
+    "raw_response": {
+      "case_id": "protocol-probe",
+      "findings": [],
+      "questions": [
+        "The packet omits the implementation and caller context required to assess the change; provide those artifacts for a reliable review."
+      ],
+      "summary": "Review is blocked by the packet's intentional omission of implementation and caller context; the supplied diff alone cannot establish behavior or conformance.",
+      "completion": "INCOMPLETE",
+      "checks": [
+        {
+          "command": "packet inspection",
+          "status": "NOT_RUN",
+          "evidence": "No candidate or context files are present under the protocol-probe packet."
+        }
+      ]
+    },
+    "adjudication": "The probe correctly identified that implementation and caller context were missing, made no defect claim, and withheld approval; probe observations receive no primary credit."
+  },
+  "river": {
+    "case_id": "protocol-probe",
+    "review_complete": false,
+    "model_completion": {
+      "completed": false,
+      "rationale": "Raw completion=INCOMPLETE. Reliable review is blocked by missing evidence. The packet contains only a diff and requirement; it omits the implementation, candidate tree, callers, and tests. Per the requirement, no defect judgment is made."
+    },
+    "required_context_identified": true,
+    "approval_withheld": true,
+    "findings": [],
+    "raw_response": {
+      "case_id": "protocol-probe",
+      "findings": [],
+      "questions": [
+        "Provide the omitted cache-refresh implementation and caller context so authorization preservation and visible-record behavior can be reviewed."
+      ],
+      "summary": "Reliable review is blocked by missing evidence. The packet contains only a diff and requirement; it omits the implementation, candidate tree, callers, and tests. Per the requirement, no defect judgment is made.",
+      "completion": "INCOMPLETE",
+      "checks": [
+        {
+          "command": "go test ./...",
+          "status": "NOT_RUN",
+          "evidence": "candidate implementation and go.mod are absent from the packet, so there is no runnable tree"
+        }
+      ]
+    },
+    "adjudication": "The probe correctly identified that implementation and caller context were missing, made no defect claim, and withheld approval; probe observations receive no primary credit."
+  }
+}
